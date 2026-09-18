@@ -1,0 +1,19 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: ${DATABASE_SOURCE:root:root@tcp(127.0.0.1:3306)/dev?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4}
+    # Development conveniences. Keep both false in production and apply schema
+    # changes as a separate reviewed step.
+    debug: true
+    auto_migrate: true
+  redis:
+    addr: ${REDIS_ADDR:127.0.0.1:6379}
+    read_timeout: 0.2s
+    write_timeout: 0.2s
