@@ -23,12 +23,11 @@ type Data struct {
 
 // NewData opens the database client and returns it with a cleanup function.
 func NewData(c *conf.Data) (*Data, func(), error) {
-	dc := c.GetDatabase()
 	level := logger.Warn
-	if dc.GetDebug() {
+	if c.Database.Debug {
 		level = logger.Info
 	}
-	db, err := gorm.Open(mysql.Open(dc.GetSource()), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(c.Database.Source), &gorm.Config{
 		Logger: logger.Default.LogMode(level),
 	})
 	if err != nil {
@@ -44,7 +43,7 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	// Auto migration is a convenience for local development. In production,
 	// apply schema changes as a separate reviewed step instead.
 	// TODO: register one model list per resource as the domain grows.
-	if dc.GetAutoMigrate() {
+	if c.Database.AutoMigrate {
 		if err := db.AutoMigrate(&TodoPO{}); err != nil {
 			sqlDB.Close()
 			return nil, nil, err

@@ -1,7 +1,0 @@
-version: v2
-inputs:
-  - directory: app/user/internal
-plugins:
-  - local: ["go", "run", "google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11"]
-    out: app/user/internal
-    opt: paths=source_relative

@@ -1,10 +1,10 @@
 server:
   http:
     addr: 0.0.0.0:8000
-    timeout: 1s
+    timeout_ms: 1000
   grpc:
     addr: 0.0.0.0:9000
-    timeout: 1s
+    timeout_ms: 1000
 data:
   database:
     driver: mysql
@@ -15,5 +15,5 @@ data:
     auto_migrate: true
   redis:
     addr: ${REDIS_ADDR:127.0.0.1:6379}
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    read_timeout_ms: 200
+    write_timeout_ms: 200

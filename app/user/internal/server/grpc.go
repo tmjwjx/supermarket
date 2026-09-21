@@ -16,14 +16,14 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService) *grpc.Server {
 			recovery.Recovery(),
 		),
 	}
-	if c.Grpc.Network != "" {
-		opts = append(opts, grpc.Network(c.Grpc.Network))
+	if c.GRPC.Network != "" {
+		opts = append(opts, grpc.Network(c.GRPC.Network))
 	}
-	if c.Grpc.Addr != "" {
-		opts = append(opts, grpc.Address(c.Grpc.Addr))
+	if c.GRPC.Addr != "" {
+		opts = append(opts, grpc.Address(c.GRPC.Addr))
 	}
-	if c.Grpc.Timeout != nil {
-		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
+	if d := c.GRPC.Timeout(); d != 0 {
+		opts = append(opts, grpc.Timeout(d))
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterTodoServiceServer(srv, todo)
