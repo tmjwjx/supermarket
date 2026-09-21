@@ -3,11 +3,7 @@
 
 openapi: 3.0.3
 info:
-    title: TodoService API
-    description: |-
-        TodoService provides a simple CRUD example for managing todo items.
-         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
-         together with AIP-style list filtering, ordering, and pagination.
+    title: ""
     version: 0.0.1
 paths:
     /v1/todos/create:
@@ -225,6 +221,60 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /v1/users/login:
+        post:
+            tags:
+                - UserService
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.LoginResponse'
+    /v1/users/register:
+        post:
+            tags:
+                - UserService
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.RegisterResponse'
+    /v1/users/{id}:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserResponse'
 components:
     schemas:
         todo.v1.SyncTodoRequest:
@@ -312,5 +362,75 @@ components:
                         Token used to retrieve the next page via ListTodosRequest.page_token.
                          Empty when there are no more results.
             description: TodoSet is a paginated collection of todo items returned by ListTodos.
+        user.v1.GetUserResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/user.v1.User'
+        user.v1.LoginRequest:
+            required:
+                - phone
+                - password
+            type: object
+            properties:
+                phone:
+                    type: string
+                password:
+                    type: string
+        user.v1.LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                expiresInMs:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/user.v1.User'
+        user.v1.RegisterRequest:
+            required:
+                - phone
+                - password
+            type: object
+            properties:
+                phone:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+        user.v1.RegisterResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                expiresInMs:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/user.v1.User'
+        user.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                phone:
+                    type: string
+                nickname:
+                    type: string
+                avatarUrl:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
 tags:
     - name: TodoService
+      description: |-
+        TodoService provides a simple CRUD example for managing todo items.
+         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
+         together with AIP-style list filtering, ordering, and pagination.
+    - name: UserService

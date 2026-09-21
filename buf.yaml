@@ -3,3 +3,6 @@ modules:
   - path: api
 deps:
   - buf.build/googleapis/googleapis
+lint:
+  use:
+    - STANDARD

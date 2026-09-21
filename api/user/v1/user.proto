@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/user/v1;v1";
+
+service UserService {
+  rpc Register (RegisterRequest) returns (RegisterResponse) {
+    option (google.api.http) = {
+      post: "/v1/users/register"
+      body: "*"
+    };
+  }
+
+  rpc Login (LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/users/login"
+      body: "*"
+    };
+  }
+
+  rpc GetUser (GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  }
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_DISABLED = 2;
+}
+
+message User {
+  string id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar_url = 4;
+  UserStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message RegisterRequest {
+  string phone = 1 [(google.api.field_behavior) = REQUIRED];
+  string password = 2 [(google.api.field_behavior) = REQUIRED];
+  string nickname = 3;
+}
+
+message LoginRequest {
+  string phone = 1 [(google.api.field_behavior) = REQUIRED];
+  string password = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RegisterResponse {
+  string access_token = 1;
+  int64 expires_in_ms = 2;
+  User user = 3;
+}
+
+message LoginResponse {
+  string access_token = 1;
+  int64 expires_in_ms = 2;
+  User user = 3;
+}
+
+message GetUserRequest {
+  string id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetUserResponse {
+  User user = 1;
+}

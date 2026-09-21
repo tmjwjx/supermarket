@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/user/v1;v1";
+
+enum ErrorReason {
+  USER_UNSPECIFIED = 0;
+  USER_NOT_FOUND = 1;
+  USER_INVALID_ARGUMENT = 2;
+  USER_PHONE_ALREADY_EXISTS = 3;
+  USER_INVALID_CREDENTIALS = 4;
+  USER_DISABLED = 5;
+}
