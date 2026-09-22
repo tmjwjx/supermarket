@@ -1,16 +1,16 @@
 package server
 
 import (
-	v1 "github.com/tmjwjx/supermarket/api/todo/v1"
+	userv1 "github.com/tmjwjx/supermarket/api/user/v1"
 	"github.com/tmjwjx/supermarket/app/user/internal/conf"
-	"github.com/tmjwjx/supermarket/app/user/internal/service"
+	usersvc "github.com/tmjwjx/supermarket/app/user/internal/service/user"
 
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/transport/grpc"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, todo *service.TodoService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, user *usersvc.UserService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -26,6 +26,6 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService) *grpc.Server {
 		opts = append(opts, grpc.Timeout(d))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterTodoServiceServer(srv, todo)
+	userv1.RegisterUserServiceServer(srv, user)
 	return srv
 }

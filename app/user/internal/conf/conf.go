@@ -2,10 +2,13 @@ package conf
 
 import "time"
 
+const defaultTokenExpire = 7 * 24 * time.Hour
+
 // Bootstrap is the top-level config shape of configs/config.yaml.
 type Bootstrap struct {
 	Server Server `json:"server"`
 	Data   Data   `json:"data"`
+	Auth   Auth   `json:"auth"`
 }
 
 type Server struct {
@@ -58,4 +61,23 @@ func (r Redis) ReadTimeout() time.Duration {
 
 func (r Redis) WriteTimeout() time.Duration {
 	return time.Duration(r.WriteTimeoutMs) * time.Millisecond
+}
+
+type Auth struct {
+	JWTSecret     string `json:"jwt_secret"`
+	TokenExpireMs int64  `json:"token_expire_ms"`
+}
+
+func (a Auth) TokenExpire() time.Duration {
+	if a.TokenExpireMs <= 0 {
+		return defaultTokenExpire
+	}
+	return time.Duration(a.TokenExpireMs) * time.Millisecond
+}
+
+func (a Auth) TokenExpireMilliseconds() int64 {
+	if a.TokenExpireMs <= 0 {
+		return defaultTokenExpire.Milliseconds()
+	}
+	return a.TokenExpireMs
 }

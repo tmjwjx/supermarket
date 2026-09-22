@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>身份三条 RPC 落地 · 实现变更</title>
+  <style>
+    :root {
+      --bg: #f3eee6;
+      --paper: #fffaf3;
+      --ink: #1f1a14;
+      --muted: #6d6458;
+      --line: #e4d9c8;
+      --accent: #b5441f;
+      --accent-soft: #f6e4d8;
+      --teal: #2a6b5a;
+      --teal-soft: #dceae4;
+      --amber: #8a5a12;
+      --amber-soft: #f4e6c8;
+      --rose: #8a2f2f;
+      --rose-soft: #f5dede;
+      --chip: #efe6d8;
+      --shadow: 0 10px 28px rgba(31, 26, 20, 0.06);
+      --radius: 16px;
+      --max: 1080px;
+      --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161310;
+        --paper: #221d18;
+        --ink: #f4ece3;
+        --muted: #b3a89a;
+        --line: #3b342c;
+        --accent: #e07a45;
+        --accent-soft: #3a2418;
+        --teal: #7dbea8;
+        --teal-soft: #1d302b;
+        --amber: #e0b15a;
+        --amber-soft: #3a2d16;
+        --rose: #e08a8a;
+        --rose-soft: #3a1f1f;
+        --chip: #2c261f;
+        --shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0 auto;
+      max-width: var(--max);
+      padding: 36px 20px 72px;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 420px at 8% -10%, rgba(181, 68, 31, 0.08), transparent 55%),
+        var(--bg);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .wrap { width: 100%; }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      background: var(--chip);
+      padding: 0.08em 0.38em;
+      border-radius: 6px;
+    }
+
+    .mast {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      background: var(--chip);
+      color: var(--muted);
+    }
+
+    .badge.hot { background: var(--accent-soft); color: var(--accent); }
+    .badge.ok { background: var(--teal-soft); color: var(--teal); }
+    .badge.warn { background: var(--amber-soft); color: var(--amber); }
+
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(32px, 5vw, 46px);
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      font-weight: 600;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 40em;
+      color: var(--muted);
+    }
+
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 22px 0 28px;
+    }
+
+    .metric {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 16px 16px;
+    }
+
+    .metric b {
+      display: block;
+      font-family: var(--serif);
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .callout {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 36px;
+    }
+
+    .callout strong { color: var(--accent); }
+
+    section {
+      margin: 0 0 42px;
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 0 0 16px;
+    }
+
+    .sec-head .no {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+
+    .sec-head h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .grid-3, .grid-2 {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px 18px;
+      min-width: 0;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card .tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 0;
+      margin: 14px 0 0;
+      padding: 16px 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .node {
+      background: var(--chip);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+
+    .arrow {
+      color: var(--muted);
+      padding: 0 8px;
+      font-size: 14px;
+    }
+
+    .node small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--chip);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    tbody tr:nth-child(even) { background: color-mix(in srgb, var(--chip) 55%, transparent); }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 9.5em 1fr;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .fields dt, .fields dd {
+      margin: 0;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .fields dt {
+      background: var(--chip);
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .fields dd:last-child,
+    .fields dt:nth-last-child(2) { border-bottom: 0; }
+
+    .note {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .note .mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .note.warn { border-left: 4px solid var(--amber); }
+    .note.warn .mark { background: var(--amber-soft); color: var(--amber); }
+    .note.risk { border-left: 4px solid var(--rose); }
+    .note.risk .mark { background: var(--rose-soft); color: var(--rose); }
+    .note.info { border-left: 4px solid var(--teal); }
+    .note.info .mark { background: var(--teal-soft); color: var(--teal); }
+
+    .note p { margin: 0; font-size: 14px; }
+    .note b { display: block; margin-bottom: 2px; }
+
+    .checks {
+      display: grid;
+      gap: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .checks label {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 14px;
+    }
+
+    .checks input { margin-top: 5px; accent-color: var(--teal); }
+
+    .gap { margin-top: 12px; }
+
+    @media (max-width: 860px) {
+      .overview, .grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .wrap { width: min(var(--max), calc(100% - 24px)); }
+      .overview, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .fields { grid-template-columns: 1fr; }
+      .fields dt { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="mast">
+      <div class="eyebrow">
+        <span class="badge hot">相对已提交契约</span>
+        <span class="badge ok">四层实现补齐</span>
+        <span class="badge warn">工作区未提交</span>
+      </div>
+      <h1>身份三条 RPC 落地</h1>
+      <p class="lead">契约已经在库里。这次补的是注册、登录、查资料从空桩到可调，Token 形状两边一致，Todo 仍挂着。</p>
+    </header>
+
+    <div class="overview">
+      <article class="metric">
+        <b>3</b>
+        <span>RPC 可调：注册 / 登录 / 查资料</span>
+      </article>
+      <article class="metric">
+        <b>4</b>
+        <span>层补齐：校验、用例、落库、挂载</span>
+      </article>
+      <article class="metric">
+        <b>1</b>
+        <span>既有 Todo 仍同时挂在服务上</span>
+      </article>
+      <article class="metric">
+        <b>0</b>
+        <span>尚未提交，仍是工作区改动</span>
+      </article>
+    </div>
+
+    <aside class="callout">
+      一句话：<strong>契约没改，实现补齐。</strong>HTTP 与 gRPC 都能走完注册、登录、按 id 取公开资料；签发的 token 形状相同。
+    </aside>
+
+    <section id="s01">
+      <div class="sec-head">
+        <span class="no">01</span>
+        <h2>落地了哪三条能力</h2>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <span class="tag">REGISTER</span>
+          <h3>创建即活跃</h3>
+          <p>写入 <code>ACTIVE</code> 用户，立刻签发 token，回包带公开资料。</p>
+        </article>
+        <article class="card">
+          <span class="tag">LOGIN</span>
+          <h3>校验后同形签发</h3>
+          <p>验号验密通过后，token 字段与注册完全同一套形状。</p>
+        </article>
+        <article class="card">
+          <span class="tag">GET USER</span>
+          <h3>按 id 取公开资料</h3>
+          <p>只回 <code>User</code>，不含密码，也不靠 token 认“我”。</p>
+        </article>
+      </div>
+      <div class="flow">
+        <span class="node">进请求</span>
+        <span class="arrow">→</span>
+        <span class="node">边界校验</span>
+        <span class="arrow">→</span>
+        <span class="node">用例判定</span>
+        <span class="arrow">→</span>
+        <span class="node">仓库读写</span>
+        <span class="arrow">→</span>
+        <span class="node">回 token / User</span>
+      </div>
+      <div class="scroll gap">
+        <table>
+          <thead>
+            <tr>
+              <th>动作</th>
+              <th>方法</th>
+              <th>路径</th>
+              <th>回什么</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>注册</td>
+              <td>POST</td>
+              <td><code>/v1/users/register</code></td>
+              <td>token + User</td>
+            </tr>
+            <tr>
+              <td>登录</td>
+              <td>POST</td>
+              <td><code>/v1/users/login</code></td>
+              <td>同样形状的 token</td>
+            </tr>
+            <tr>
+              <td>查资料</td>
+              <td>GET</td>
+              <td><code>/v1/users/{id}</code></td>
+              <td>公开 User</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="s02">
+      <div class="sec-head">
+        <span class="no">02</span>
+        <h2>身份规则怎么卡</h2>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>规则</th>
+              <th>约束</th>
+              <th>落点</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>手机号形态</td>
+              <td>大陆 11 位，1 开头</td>
+              <td>边界先拒，用例再拒</td>
+            </tr>
+            <tr>
+              <td>手机号唯一</td>
+              <td>库唯一索引，冲突即占用</td>
+              <td>写入时映射冲突</td>
+            </tr>
+            <tr>
+              <td>密码存储</td>
+              <td>bcrypt，明文不落库</td>
+              <td>只留在持久化对象</td>
+            </tr>
+            <tr>
+              <td>对外 User</td>
+              <td>永不带密码或哈希</td>
+              <td>回包当场拼公开字段</td>
+            </tr>
+            <tr>
+              <td>停用账号</td>
+              <td>登录直接拒绝</td>
+              <td>验密之前先看状态</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <dl class="fields gap">
+        <dt>注册初始态</dt>
+        <dd>一律写成 <code>ACTIVE</code>，没有“待激活”。</dd>
+        <dt>空密码</dt>
+        <dd>注册、登录都按参数非法拦下。</dd>
+        <dt>非法 id</dt>
+        <dd>空 UUID 或解不出，按参数非法。</dd>
+      </dl>
+      <aside class="note warn">
+        <div class="mark">!</div>
+        <p><b>登录不暴露号是否存在</b>查不到用户也回无效凭证，不走“用户不存在”，避免用登录接口枚举手机号。</p>
+      </aside>
+    </section>
+
+    <section id="s03">
+      <div class="sec-head">
+        <span class="no">03</span>
+        <h2>失败分别回什么</h2>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>原因码</th>
+              <th>语义</th>
+              <th>谁触发</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>手机号已占用</td>
+              <td><code>PHONE_ALREADY_EXISTS</code></td>
+              <td>冲突</td>
+              <td>注册写入撞唯一</td>
+            </tr>
+            <tr>
+              <td>密码不对 / 号不在</td>
+              <td><code>INVALID_CREDENTIALS</code></td>
+              <td>未授权</td>
+              <td>登录验密失败</td>
+            </tr>
+            <tr>
+              <td>资料不存在</td>
+              <td><code>NOT_FOUND</code></td>
+              <td>找不到</td>
+              <td>按 id 查询落空</td>
+            </tr>
+            <tr>
+              <td>账号已停用</td>
+              <td><code>DISABLED</code></td>
+              <td>禁止</td>
+              <td>登录看到停用态</td>
+            </tr>
+            <tr>
+              <td>参数不合法</td>
+              <td><code>INVALID_ARGUMENT</code></td>
+              <td>坏请求</td>
+              <td>号、密、id 不合格</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="note info">
+        <div class="mark">i</div>
+        <p><b>对外原因码带 USER_ 前缀</b>契约枚举是 <code>USER_PHONE_ALREADY_EXISTS</code> 这一族；上表写短名只为扫读。</p>
+      </aside>
+    </section>
+
+    <section id="s04">
+      <div class="sec-head">
+        <span class="no">04</span>
+        <h2>Token 长什么样</h2>
+      </div>
+      <dl class="fields">
+        <dt>算法</dt>
+        <dd>HS256 JWT，密钥来自配置。</dd>
+        <dt>subject</dt>
+        <dd><code>sub</code> 只放用户 id，不塞角色。</dd>
+        <dt>有效期字段</dt>
+        <dd>回包 <code>expires_in_ms</code>，默认 7 天。</dd>
+        <dt>默认毫秒</dt>
+        <dd><code>604800000</code>（未配或 ≤0 时）。</dd>
+        <dt>注册与登录</dt>
+        <dd>同一签发函数，形状不允许分叉。</dd>
+      </dl>
+      <div class="grid-2 gap">
+        <article class="card">
+          <span class="tag">AUTH.JWT_SECRET</span>
+          <h3>签名密钥</h3>
+          <p>配置键 <code>auth.jwt_secret</code>，环境变量 <code>AUTH_JWT_SECRET</code>。本地是占位，禁止提交真密钥。</p>
+        </article>
+        <article class="card">
+          <span class="tag">AUTH.TOKEN_EXPIRE_MS</span>
+          <h3>过期毫秒</h3>
+          <p>配置键 <code>auth.token_expire_ms</code>。改这个数，注册和登录的 <code>expires_in_ms</code> 一起变。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="s05">
+      <div class="sec-head">
+        <span class="no">05</span>
+        <h2>四层各补了一刀</h2>
+      </div>
+      <div class="flow">
+        <span class="node">service<small>DTO ↔ DO</small></span>
+        <span class="arrow">→</span>
+        <span class="node">biz<small>用例 + JWT</small></span>
+        <span class="arrow">→</span>
+        <span class="node">data<small>Gorm + 冲突</small></span>
+        <span class="arrow">→</span>
+        <span class="node">server<small>双协议挂载</small></span>
+      </div>
+      <div class="scroll gap">
+        <table>
+          <thead>
+            <tr>
+              <th>层</th>
+              <th>这刀补什么</th>
+              <th>不许越界</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>service</td>
+              <td>DTO↔DO，先校验再交</td>
+              <td>不碰存储、不写规则</td>
+            </tr>
+            <tr>
+              <td>biz</td>
+              <td>用例、仓库接口、签发 JWT</td>
+              <td>不认 proto 体、不认表</td>
+            </tr>
+            <tr>
+              <td>data</td>
+              <td>Gorm 落库，唯一冲突映射</td>
+              <td>不拼对外回包</td>
+            </tr>
+            <tr>
+              <td>server</td>
+              <td>HTTP/gRPC 同时挂 User</td>
+              <td>不翻译字段、不写业务</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="note info">
+        <div class="mark">i</div>
+        <p><b>Todo 没有拆掉</b>服务端同时挂 User 与既有 Todo。这次是加身份面，不是换掉演示资源。</p>
+      </aside>
+    </section>
+
+    <section id="s06">
+      <div class="sec-head">
+        <span class="no">06</span>
+        <h2>测试护住哪些点</h2>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <span class="tag">BIZ</span>
+          <h3>假仓库测用例</h3>
+          <p>不连库。成功签发、占用、错密、停用、参数非法都在用例层钉死。</p>
+        </article>
+        <article class="card">
+          <span class="tag">SERVICE</span>
+          <h3>假用例测边界</h3>
+          <p>不进领域实现。只证明 DTO 收得对、非法入参回类型错误。</p>
+        </article>
+      </div>
+      <div class="checks gap">
+        <label><input type="checkbox" checked disabled> 注册成功：ACTIVE + token</label>
+        <label><input type="checkbox" checked disabled> 手机号占用：冲突原因码</label>
+        <label><input type="checkbox" checked disabled> 错密：无效凭证</label>
+        <label><input type="checkbox" checked disabled> 按 id 不存在：找不到</label>
+        <label><input type="checkbox" checked disabled> 停用账号登录：禁止</label>
+      </div>
+    </section>
+
+    <section id="s07">
+      <div class="sec-head">
+        <span class="no">07</span>
+        <h2>这轮明确没做</h2>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <span class="tag">OUT</span>
+          <h3>地址簿</h3>
+          <p>没有收货地址的增删改查，身份面到账号本身为止。</p>
+        </article>
+        <article class="card">
+          <span class="tag">OUT</span>
+          <h3>改密</h3>
+          <p>没有旧密换新密，也没有重置通道。</p>
+        </article>
+        <article class="card">
+          <span class="tag">OUT</span>
+          <h3>用 token 查自己</h3>
+          <p>GetUser 只认路径里的 id，没有“当前用户”入口。</p>
+        </article>
+      </div>
+      <aside class="note risk">
+        <div class="mark">×</div>
+        <p><b>Todo 演示资源未删</b>身份挂上去了，示例 Todo 仍在同一服务里，不是这次的清理范围。</p>
+      </aside>
+    </section>
+  </div>
+</body>
+</html>

@@ -10,9 +10,9 @@ app/<svc>/cmd/<app>/        入口、Wire、main.go。
 app/<svc>/configs/          运行时配置（config.yaml）。禁止提交真实密钥。
 app/<svc>/internal/conf/    手写配置结构体（conf.go）。不要再为配置写 proto。
 app/<svc>/internal/server/  HTTP / gRPC 服务器装配。
-app/<svc>/internal/service/ 传输适配；一个资源一个文件。
-app/<svc>/internal/biz/     领域模型、用例、仓库接口、错误。
-app/<svc>/internal/data/    仓库实现和存储客户端。
+app/<svc>/internal/service/ 传输适配；一个资源一个目录（`<resource>/`）。
+app/<svc>/internal/biz/     领域模型、用例、仓库接口、错误；一个资源一个目录（`<resource>/`）。
+app/<svc>/internal/data/    仓库实现和存储客户端；一个资源一个目录（`<resource>/`）。
 ```
 
 ## 分层与依赖

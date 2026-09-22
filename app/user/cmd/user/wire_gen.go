@@ -7,12 +7,13 @@
 package main
 
 import (
-	"github.com/tmjwjx/supermarket/app/user/internal/biz"
+	"github.com/go-kratos/kratos/v3"
+	user2 "github.com/tmjwjx/supermarket/app/user/internal/biz/user"
 	"github.com/tmjwjx/supermarket/app/user/internal/conf"
 	"github.com/tmjwjx/supermarket/app/user/internal/data"
+	"github.com/tmjwjx/supermarket/app/user/internal/data/user"
 	"github.com/tmjwjx/supermarket/app/user/internal/server"
-	"github.com/tmjwjx/supermarket/app/user/internal/service"
-	"github.com/go-kratos/kratos/v3"
+	user3 "github.com/tmjwjx/supermarket/app/user/internal/service/user"
 	"log/slog"
 )
 
@@ -23,16 +24,17 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData)
 	if err != nil {
 		return nil, nil, err
 	}
-	todoRepo := data.NewTodoRepo(dataData)
-	todoUsecase := biz.NewTodoUsecase(todoRepo)
-	todoService := service.NewTodoService(todoUsecase)
-	grpcServer := server.NewGRPCServer(confServer, todoService)
-	httpServer := server.NewHTTPServer(confServer, todoService)
+	db := data.NewDB(dataData)
+	userRepo := user.NewUserRepo(db)
+	userUsecase := user2.NewUserUsecase(userRepo, auth)
+	userService := user3.NewUserService(userUsecase)
+	grpcServer := server.NewGRPCServer(confServer, userService)
+	httpServer := server.NewHTTPServer(confServer, userService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

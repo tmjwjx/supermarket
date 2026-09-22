@@ -17,3 +17,6 @@ data:
     addr: ${REDIS_ADDR:127.0.0.1:6379}
     read_timeout_ms: 200
     write_timeout_ms: 200
+auth:
+  jwt_secret: ${AUTH_JWT_SECRET:change-me-local-jwt-secret}
+  token_expire_ms: 604800000

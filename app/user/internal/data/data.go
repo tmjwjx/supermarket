@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/tmjwjx/supermarket/app/user/internal/conf"
+	datauser "github.com/tmjwjx/supermarket/app/user/internal/data/user"
 
 	"github.com/go-kratos/kratos/v3/log"
 	_ "github.com/go-sql-driver/mysql"
@@ -14,7 +15,10 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewTodoRepo)
+var ProviderSet = wire.NewSet(NewData, NewDB, datauser.NewUserRepo)
+
+// NewDB 把共享连接交给资源仓库；仓库包不能引回 data，否则和 ProviderSet 循环引用。
+func NewDB(d *Data) *gorm.DB { return d.db }
 
 // Data holds the long-lived storage clients shared by repos.
 type Data struct {
@@ -44,7 +48,7 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	// apply schema changes as a separate reviewed step instead.
 	// TODO: register one model list per resource as the domain grows.
 	if c.Database.AutoMigrate {
-		if err := db.AutoMigrate(&TodoPO{}); err != nil {
+		if err := db.AutoMigrate(&datauser.User{}); err != nil {
 			sqlDB.Close()
 			return nil, nil, err
 		}
