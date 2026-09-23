@@ -100,17 +100,4 @@ make e2e               # 全部服务启动并跑过种子后，经 http://127.0
 
 ## CI
 
-推送和 Pull Request 都会跑 Go 检查、MySQL 集成测试，以及 web、admin-web 的测试和构建，并构建上面 10 个业务镜像。Pull Request 只构建，不推送。CI 只构建镜像，不把 yaml 打进镜像。本地和线上用同一份 `deploy/compose.yaml`，配置在旁边的 `config/`。
-
-推到默认分支后，用 `GITHUB_TOKEN` 推到 GHCR，标签为提交 SHA 和 `latest`：
-
-- `ghcr.io/tmjwjx/supermarket-gateway`
-- `ghcr.io/tmjwjx/supermarket-user`
-- `ghcr.io/tmjwjx/supermarket-product`
-- `ghcr.io/tmjwjx/supermarket-inventory`
-- `ghcr.io/tmjwjx/supermarket-order`
-- `ghcr.io/tmjwjx/supermarket-payment`
-- `ghcr.io/tmjwjx/supermarket-notification`
-- `ghcr.io/tmjwjx/supermarket-admin`
-- `ghcr.io/tmjwjx/supermarket-web`
-- `ghcr.io/tmjwjx/supermarket-admin-web`
+分支推送和 Pull Request 只跑 Go 检查、MySQL 集成测试，以及 web、admin-web 的测试和构建。推送版本标签（`v*`，如 `v1.2.3`）时这些检查也会跑，通过后用 `GITHUB_TOKEN` 把 10 个镜像推到 GHCR，标签为该 git 标签和 `latest`。在 Actions 页手动运行时同样推送，标签只有完整提交 SHA。镜像名是 `ghcr.io/<owner>/supermarket-<名称>`。不把 yaml 打进镜像。
