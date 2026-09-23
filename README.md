@@ -13,7 +13,7 @@
 
 > 架构图待补（Excalidraw），当前为规划形态。
 
-调用关系：客户端（storefront H5 / admin-web）→ gateway → 各业务服务；服务间同步调用走 gRPC，异步事件走 Kafka；MySQL 按服务分库，Redis 做缓存与预扣库存。
+调用关系：客户端（web H5 / admin-web）→ gateway → 各业务服务；服务间同步调用走 gRPC，异步事件走 Kafka；MySQL 按服务分库，Redis 做缓存与预扣库存。
 
 ## 服务
 
@@ -27,19 +27,19 @@
 | payment | 支付（mock）：幂等、对账 | 未开始 |
 | notification | 通知：Kafka 消费、多渠道下发 | 未开始 |
 | admin-web | 管理台（React + TS） | 未开始 |
-| storefront | 用户端 H5：商品浏览、购物车、下单 | 未开始 |
+| web | 用户端 H5：商品浏览、购物车、下单 | 未开始 |
 
 ## 技术栈
 
 - 后端：Go · [kratos](https://github.com/go-kratos/kratos) · MySQL · Redis · Kafka
-- 前端：TypeScript · React · Vite（admin-web 与 storefront 同栈）
+- 前端：TypeScript · React · Vite（admin-web 与 web 同栈）
 - 基建：Docker · Kubernetes · GitHub Actions
 
 ## 路线
 
 | 阶段 | 内容 | 周期 |
 |---|---|---|
-| 1 · 项目开发 | 仓库/CI/compose，下单全链路本地跑通（storefront 简版：浏览+下单，随 admin-web） | 约 8 周（当前） |
+| 1 · 项目开发 | 仓库/CI/compose，下单全链路本地跑通（web 简版：浏览+下单，随 admin-web） | 约 8 周（当前） |
 | 2 · 运维与上线 | CI/CD、K8s 集群、线上排查 | 约 4 周 |
 | 3 · 数据库深入 | EXPLAIN 实战、索引与慢查询优化 | 约 2 周 |
 | 4 · 高可用与性能 | 缓存三大问题、限流熔断、压测 | 约 2 周 |

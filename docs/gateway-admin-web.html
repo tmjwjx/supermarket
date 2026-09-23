@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>网关与管理台架子</title>
+  <style>
+    :root {
+      --bg: #e7eef0;
+      --paper: #f7fbfb;
+      --ink: #142126;
+      --muted: #5c6d74;
+      --line: #d3e0e4;
+      --accent: #0c6b62;
+      --accent-soft: #d7efec;
+      --clay: #a24b28;
+      --clay-soft: #f6e4d8;
+      --ink-soft: #e8eef1;
+      --warn: #8a5a12;
+      --warn-soft: #f6ead0;
+      --bad: #8d2f3a;
+      --bad-soft: #f8e2e4;
+      --ok: #1d6b45;
+      --ok-soft: #dceee4;
+      --chip: #e4eef1;
+      --shadow: 0 14px 36px rgba(20, 33, 38, 0.07);
+      --radius: 18px;
+      --read: 740px;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --toc: 232px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101618;
+        --paper: #182226;
+        --ink: #eef5f6;
+        --muted: #a9bcc2;
+        --line: #2d3c42;
+        --accent: #7dcec4;
+        --accent-soft: #1a3332;
+        --clay: #e39a74;
+        --clay-soft: #3a281e;
+        --ink-soft: #222e33;
+        --warn: #e2c07a;
+        --warn-soft: #3a3018;
+        --bad: #f0a3ab;
+        --bad-soft: #3a2226;
+        --ok: #8dceb0;
+        --ok-soft: #1a3026;
+        --chip: #243136;
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 420px at 0% -8%, rgba(12, 107, 98, 0.14), transparent 60%),
+        var(--bg);
+      font-family: var(--sans);
+      font-size: 16.5px;
+      line-height: 1.75;
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 20;
+      height: 2px;
+      width: 0;
+      background: var(--accent);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: var(--toc) minmax(0, 1fr);
+      gap: 36px;
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 80px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      padding: 8px 0 0;
+    }
+
+    .toc-brand {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .toc ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc a {
+      display: block;
+      margin: 2px 0;
+      padding: 7px 12px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .toc a.active {
+      border-left-color: var(--accent);
+      color: var(--ink);
+      background: linear-gradient(90deg, var(--accent-soft), transparent 80%);
+    }
+
+    .toc .top {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--accent);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .toc-fold { display: none; }
+
+    .page { min-width: 0; max-width: var(--read); }
+
+    header.cover { margin-bottom: 28px; }
+
+    .kicker {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-family: var(--serif);
+      font-size: 42px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 38em;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .summary {
+      margin: 22px 0 0;
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+
+    .summary strong { font-weight: 650; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 8px;
+    }
+
+    .metric {
+      padding: 14px 14px 12px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .metric b {
+      display: block;
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    section { margin-top: 42px; scroll-margin-top: 28px; }
+
+    .sec-no {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+    }
+
+    h2 {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0 0 14px;
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    h2 .hash {
+      color: var(--line);
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    h2 .hash:hover { color: var(--accent); }
+
+    .prose {
+      margin: 0 0 16px;
+      max-width: 40em;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      padding: 16px 16px 14px;
+      border-radius: var(--radius);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .card .badge {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .card.clay .badge {
+      background: var(--clay-soft);
+      color: var(--clay);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+    .scroll {
+      overflow-x: auto;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14.5px;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      background: var(--ink-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    tbody tr:nth-child(even) td { background: rgba(12, 107, 98, 0.04); }
+
+    td:first-child {
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      padding: 0.08em 0.38em;
+      border-radius: 6px;
+      background: var(--chip);
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .flow li {
+      position: relative;
+      flex: 1 1 140px;
+      min-width: 140px;
+      padding: 12px 14px 12px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .flow li strong { display: block; font-size: 15px; }
+    .flow li span { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+
+    .flow li:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .pages {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .page-card {
+      padding: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .page-card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--ink-soft);
+    }
+
+    .page-card header h3 { margin: 0; font-size: 16px; }
+
+    .page-card header code { background: var(--paper); }
+
+    .page-card dl {
+      margin: 0;
+      padding: 12px 14px 14px;
+    }
+
+    .page-card div {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 6px 10px;
+      margin-top: 8px;
+      font-size: 13.5px;
+    }
+
+    .page-card dt { color: var(--muted); }
+    .page-card dd { margin: 0; }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stack li {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      font-size: 13.5px;
+    }
+
+    .note {
+      display: grid;
+      grid-template-columns: 4px 1fr;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--warn-soft);
+    }
+
+    .note i {
+      display: block;
+      border-radius: 4px;
+      background: var(--warn);
+    }
+
+    .note strong { display: block; font-size: 14px; }
+    .note p { margin: 2px 0 0; color: var(--ink); font-size: 14.5px; }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--paper);
+    }
+
+    .fields div {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14.5px;
+    }
+
+    .fields div:nth-child(odd) {
+      color: var(--muted);
+      background: var(--ink-soft);
+      font-size: 13px;
+    }
+
+    .fields div:nth-last-child(-n + 2) { border-bottom: 0; }
+
+    .checks {
+      margin: 0;
+      padding: 6px 8px;
+      list-style: none;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+    }
+
+    .checks li {
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .checks label {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 8px;
+      cursor: pointer;
+    }
+
+    .checks li:last-child { border-bottom: 0; }
+
+    .checks input { margin-top: 6px; accent-color: var(--accent); }
+
+    .tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .tag.ok { background: var(--ok-soft); color: var(--ok); }
+    .tag.bad { background: var(--bad-soft); color: var(--bad); }
+
+    @media (max-width: 960px) {
+      .shell {
+        grid-template-columns: 1fr;
+        width: min(100% - 28px, var(--read));
+        padding-top: 22px;
+      }
+
+      .toc { display: none; }
+
+      .toc-fold {
+        display: block;
+        margin-bottom: 18px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+      }
+
+      .toc-fold summary { cursor: pointer; font-weight: 650; }
+      .toc-fold a { display: block; margin-top: 8px; color: var(--accent); text-decoration: none; }
+
+      .metrics, .pages, .split { grid-template-columns: 1fr; }
+      .flow li:not(:last-child)::after { content: none; }
+      h1 { font-size: 34px; }
+    }
+
+    @media (max-width: 640px) {
+      .fields { grid-template-columns: 1fr; }
+      .fields div:nth-child(odd) { border-bottom: 0; padding-bottom: 0; }
+      .fields div:nth-last-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      .fields div:last-child { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="shell">
+    <nav class="toc" aria-label="目录">
+      <p class="toc-brand">目录</p>
+      <ol>
+        <li><a href="#roles">01 两块架子</a></li>
+        <li><a href="#routes">02 三条路由</a></li>
+        <li><a href="#verify">03 本地验签</a></li>
+        <li><a href="#console">04 管理台</a></li>
+        <li><a href="#token">05 请求与令牌</a></li>
+        <li><a href="#check">06 可核对</a></li>
+      </ol>
+      <a class="top" href="#top">回到顶部</a>
+    </nav>
+
+    <article class="page" id="top">
+      <details class="toc-fold">
+        <summary>目录</summary>
+        <a href="#roles">01 两块架子</a>
+        <a href="#routes">02 三条路由</a>
+        <a href="#verify">03 本地验签</a>
+        <a href="#console">04 管理台</a>
+        <a href="#token">05 请求与令牌</a>
+        <a href="#check">06 可核对</a>
+      </details>
+
+      <header class="cover">
+        <p class="kicker">本次新增 · 两块架子</p>
+        <h1>网关与管理台架子</h1>
+        <p class="lead">浏览器只跟网关说话。注册和登录公开转到 user；按 id 查用户必须先在网关用 HS256 验过签，失败直接拒绝，不再往下转发。</p>
+        <div class="summary">
+          <strong>对外只有 HTTP 8080。</strong>
+          网关把公开的注册、登录原样交给 user 的 gRPC 9000；查用户先做本地验签。管理台目录是 <code>admin-web</code>，令牌放在当次会话的 <code>sessionStorage</code>。
+        </div>
+      </header>
+
+      <div class="metrics" aria-label="关键数字">
+        <div class="metric"><b>8080</b><span>网关 HTTP 监听</span></div>
+        <div class="metric"><b>9000</b><span>user gRPC 地址</span></div>
+        <div class="metric"><b>3</b><span>管理台页面</span></div>
+        <div class="metric"><b>HS256</b><span>查用户的验签算法</span></div>
+      </div>
+
+      <section id="roles">
+        <span class="sec-no">01</span>
+        <h2>两块架子 <a class="hash" href="#roles">#</a></h2>
+        <p class="prose">网关是唯一对外入口，管理台是调用它的页面。两边都不自己保存用户资料。</p>
+        <div class="split">
+          <article class="card">
+            <span class="badge">网关</span>
+            <h3>只做入口和验签</h3>
+            <p>进程只装配 HTTP 服务、user 客户端和验签器。配置里只有监听地址、上游地址和 JWT 密钥。</p>
+          </article>
+          <article class="card clay">
+            <span class="badge">管理台</span>
+            <h3>只做三个表单</h3>
+            <p>目录名 <code>admin-web</code>，页面标题「管理台」。注册、登录、按 id 查资料，请求都走网关。</p>
+          </article>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>边界</th><th>现在的规则</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>入口</td><td>只监听 HTTP <code>0.0.0.0:8080</code></td></tr>
+              <tr><td>上游</td><td>只拨 <code>127.0.0.1:9000</code></td></tr>
+              <tr><td>存储</td><td>不连 MySQL，配置里没有数据库</td></tr>
+              <tr><td>分层</td><td>不自建契约、领域和仓库</td></tr>
+              <tr><td>超时</td><td>HTTP 与上游各 1 秒</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="routes">
+        <span class="sec-no">02</span>
+        <h2>三条路由 <a class="hash" href="#routes">#</a></h2>
+        <p class="prose">公开的两条把请求体原样交给上游。查用户先过验签，通过后才按路径里的 id 转发。</p>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>路由</th><th>谁能进</th><th>通过之后</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>POST /v1/users/register</code></td>
+                <td><span class="tag ok">公开</span></td>
+                <td>转发 Register，回 200</td>
+              </tr>
+              <tr>
+                <td><code>POST /v1/users/login</code></td>
+                <td><span class="tag ok">公开</span></td>
+                <td>转发 Login，回 200</td>
+              </tr>
+              <tr>
+                <td><code>GET /v1/users/{id}</code></td>
+                <td><span class="tag bad">先验签</span></td>
+                <td>转发 GetUser，回 200</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ol class="flow">
+          <li><strong>HTTP 8080</strong><span>接住三条路由</span></li>
+          <li><strong>注册 / 登录</strong><span>不验签</span></li>
+          <li><strong>查用户</strong><span>先验过才继续</span></li>
+          <li><strong>user :9000</strong><span>只收放行的请求</span></li>
+        </ol>
+      </section>
+
+      <section id="verify">
+        <span class="sec-no">03</span>
+        <h2>本地验签 <a class="hash" href="#verify">#</a></h2>
+        <p class="prose">验签发生在转发之前。任一条不满足，都返回未授权，后面的 GetUser 不会被调用。</p>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>条件</th><th>结果</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>不是 Bearer</td><td>401，不转发</td></tr>
+              <tr><td>密钥为空</td><td>401，不转发</td></tr>
+              <tr><td>算法不是 HS256</td><td>401，不转发</td></tr>
+              <tr><td>解析失败或声明无效</td><td>401，不转发</td></tr>
+              <tr><td><code>sub</code> 为空</td><td>401，不转发</td></tr>
+              <tr><td>以上都过</td><td>才转发 GetUser</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>拒绝时的错误</strong>
+            <p>原因码 <code>GATEWAY_UNAUTHORIZED</code>，正文 <code>unauthorized</code>。密钥读 <code>AUTH_JWT_SECRET</code>，与 user 同一变量；未设置时用本地占位 <code>change-me-local-jwt-secret</code>。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="console">
+        <span class="sec-no">04</span>
+        <h2>管理台 <a class="hash" href="#console">#</a></h2>
+        <p class="prose">根路径会替换到登录页。三个页面共用顶栏：注册、登录、查资料。</p>
+        <ul class="stack">
+          <li>目录 <code>admin-web</code></li>
+          <li>React 19</li>
+          <li>React Router 7</li>
+          <li>Vite 8</li>
+          <li>TypeScript 6</li>
+        </ul>
+        <div class="pages">
+          <article class="page-card">
+            <header>
+              <h3>注册</h3>
+              <code>/register</code>
+            </header>
+            <dl>
+              <div><dt>必填</dt><dd>手机号、密码</dd></div>
+              <div><dt>选填</dt><dd>昵称，空则不传</dd></div>
+              <div><dt>成功</dt><dd>有令牌就写入会话</dd></div>
+            </dl>
+          </article>
+          <article class="page-card">
+            <header>
+              <h3>登录</h3>
+              <code>/login</code>
+            </header>
+            <dl>
+              <div><dt>必填</dt><dd>手机号、密码</dd></div>
+              <div><dt>入口</dt><dd><code>/</code> 进到这里</dd></div>
+              <div><dt>成功</dt><dd>有令牌就写入会话</dd></div>
+            </dl>
+          </article>
+          <article class="page-card">
+            <header>
+              <h3>查资料</h3>
+              <code>/users</code>
+            </header>
+            <dl>
+              <div><dt>必填</dt><dd>用户 id</dd></div>
+              <div><dt>提示</dt><dd>是否已持有令牌</dd></div>
+              <div><dt>请求</dt><dd>无令牌则不带头</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section id="token">
+        <span class="sec-no">05</span>
+        <h2>请求与令牌 <a class="hash" href="#token">#</a></h2>
+        <p class="prose">页面用相对路径调用 <code>/v1</code>。开发时这段路径被转到网关 8080，不另连别的服务。</p>
+        <ol class="flow">
+          <li><strong>页面</strong><span><code>fetch</code> 相对 <code>/v1</code></span></li>
+          <li><strong>开发代理</strong><span>只转发此前缀</span></li>
+          <li><strong>网关</strong><span><code>127.0.0.1:8080</code></span></li>
+        </ol>
+        <div class="fields">
+          <div>存放</div>
+          <div><code>sessionStorage</code> 键名 <code>access_token</code></div>
+          <div>写入</div>
+          <div>注册或登录响应里的 <code>access_token</code>，也认 <code>accessToken</code></div>
+          <div>读取</div>
+          <div>查资料提交时再读一次</div>
+          <div>请求头</div>
+          <div>有令牌才加 <code>Authorization: Bearer</code></div>
+          <div>基址</div>
+          <div>默认空字符串；设了 <code>VITE_API_BASE</code> 才改前缀</div>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>没登录也能发出查询</strong>
+            <p>查资料页会标明尚未登录。这种请求不带 Authorization，由网关回 401。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="check">
+        <span class="sec-no">06</span>
+        <h2>可核对 <a class="hash" href="#check">#</a></h2>
+        <ul class="checks">
+          <li><label><input type="checkbox"> 注册、登录不验签，请求体转到 user:9000</label></li>
+          <li><label><input type="checkbox"> 坏令牌或空令牌查用户，得到 401，且不转发</label></li>
+          <li><label><input type="checkbox"> 合法 HS256、且 <code>sub</code> 非空，才按 id 查用户</label></li>
+          <li><label><input type="checkbox"> 登录成功后，令牌在 <code>sessionStorage.access_token</code></label></li>
+          <li><label><input type="checkbox"> 开发时代理目标是 <code>http://127.0.0.1:8080</code></label></li>
+        </ul>
+      </section>
+    </article>
+  </div>
+  <script>
+    const bar = document.getElementById('progress')
+    const links = Array.from(document.querySelectorAll('.toc a[href^="#"]')).filter((a) => a.getAttribute('href') !== '#top')
+    const sections = links.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean)
+
+    function onScroll() {
+      const root = document.documentElement
+      const height = root.scrollHeight - root.clientHeight
+      bar.style.width = (height > 0 ? (root.scrollTop / height) * 100 : 0) + '%'
+      let current = sections[0]
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 96) current = section
+      }
+      const id = current ? '#' + current.id : ''
+      for (const link of links) link.classList.toggle('active', link.getAttribute('href') === id)
+    }
+
+    document.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+  </script>
+</body>
+</html>

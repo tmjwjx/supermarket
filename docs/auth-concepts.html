@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>密码与票据</title>
+  <style>
+    :root {
+      --bg: #e7e1d6;
+      --ink: #1c1712;
+      --muted: #6f665d;
+      --card: #fffdf9;
+      --line: #e3d8c9;
+      --paper: #f6f1e8;
+      --amber: #b54708;
+      --amber-bg: #fff1e4;
+      --amber-line: #f0c4a4;
+      --teal: #0e6b66;
+      --teal-bg: #e5f4f2;
+      --teal-line: #b7dfda;
+      --red: #b42318;
+      --red-bg: #fdeceb;
+      --ok: #187944;
+      --ok-bg: #e7f6ee;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { overflow-x: hidden; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    .split {
+      height: 8px;
+      background: linear-gradient(90deg, var(--amber) 0 50%, var(--teal) 50% 100%);
+    }
+
+    main {
+      width: min(640px, 100%);
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.7rem, 5vw, 2.15rem);
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      margin: 14px 0 0;
+      max-width: 28em;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    section { margin-top: 40px; }
+
+    .sheet-h {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 12px;
+    }
+
+    .num {
+      color: var(--muted);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .stage {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-width: 320px;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    .cap {
+      margin: 12px 2px 0;
+      font-size: 15px;
+      line-break: strict;
+      word-break: keep-all;
+      text-wrap: pretty;
+    }
+
+    .jwt {
+      padding-left: 12px;
+      border-left: 3px solid var(--teal);
+    }
+  </style>
+</head>
+<body>
+  <div class="split" aria-hidden="true"></div>
+  <main>
+    <header>
+      <p class="eyebrow">SUPERMARKET · 认证</p>
+      <h1>密码一条线，票据一条线</h1>
+      <p class="lead">明文只在注册和登录时出现，库里留下哈希；进门之后靠 JWT。</p>
+    </header>
+
+    <section id="lanes">
+      <div class="sheet-h">
+        <span class="num">01</span>
+        <h2>两条线</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 548" role="img" aria-label="注册哈希，登录比对，成功后签名，查资料验签">
+          <rect x="8" y="10" width="166" height="30" rx="8" fill="#fff1e4"/>
+          <text x="91" y="30" text-anchor="middle" font-size="13" font-weight="600" fill="#b54708">密码 · bcrypt</text>
+          <rect x="186" y="10" width="166" height="30" rx="8" fill="#e5f4f2"/>
+          <text x="269" y="30" text-anchor="middle" font-size="13" font-weight="600" fill="#0e6b66">票据 · JWT</text>
+
+          <rect x="8" y="52" width="166" height="148" rx="14" fill="#fffdf9" stroke="#f0c4a4"/>
+          <text x="22" y="76" font-size="13" font-weight="600" fill="#b54708">注册</text>
+          <rect x="33" y="90" width="116" height="32" rx="8" fill="#fff" stroke="#1c1712"/>
+          <text x="91" y="111" text-anchor="middle" font-size="13">明文</text>
+          <line x1="91" y1="122" x2="91" y2="140" stroke="#b54708" stroke-width="1.5" marker-end="url(#am1)"/>
+          <text x="100" y="136" font-size="11" fill="#b54708">哈希</text>
+          <rect x="22" y="146" width="138" height="38" rx="8" fill="#fff1e4" stroke="#b54708"/>
+          <text x="91" y="170" text-anchor="middle" font-size="13" font-weight="600">password_hash</text>
+
+          <rect x="186" y="52" width="166" height="148" rx="14" fill="#fffdf9" stroke="#b7dfda"/>
+          <text x="200" y="76" font-size="13" font-weight="600" fill="#0e6b66">注册</text>
+          <text x="269" y="104" text-anchor="middle" font-size="12" fill="#6f665d">建号成功后</text>
+          <g transform="translate(214 118)">
+            <rect width="26" height="18" rx="3" fill="#1c1712"/>
+            <rect x="32" width="40" height="18" rx="3" fill="#0e6b66"/>
+            <rect x="78" width="26" height="18" rx="3" fill="#1c1712"/>
+          </g>
+          <text x="269" y="168" text-anchor="middle" font-size="13" font-weight="600">签发</text>
+
+          <rect x="8" y="214" width="166" height="156" rx="14" fill="#fffdf9" stroke="#f0c4a4"/>
+          <text x="22" y="238" font-size="13" font-weight="600" fill="#b54708">登录</text>
+          <rect x="33" y="250" width="116" height="32" rx="8" fill="#fff" stroke="#1c1712"/>
+          <text x="91" y="271" text-anchor="middle" font-size="13">明文</text>
+          <line x1="91" y1="282" x2="91" y2="300" stroke="#b54708" stroke-width="1.5" marker-end="url(#am1)"/>
+          <text x="100" y="296" font-size="11" fill="#b54708">比对</text>
+          <rect x="18" y="312" width="68" height="40" rx="8" fill="#e7f6ee" stroke="#187944"/>
+          <text x="52" y="337" text-anchor="middle" font-size="13" fill="#187944">通过</text>
+          <rect x="96" y="312" width="68" height="40" rx="8" fill="#fdeceb" stroke="#b42318"/>
+          <text x="130" y="337" text-anchor="middle" font-size="13" font-weight="600" fill="#b42318">401</text>
+
+          <rect x="186" y="214" width="166" height="156" rx="14" fill="#fffdf9" stroke="#b7dfda"/>
+          <text x="200" y="238" font-size="13" font-weight="600" fill="#0e6b66">登录</text>
+          <text x="269" y="268" text-anchor="middle" font-size="12" fill="#6f665d">比对通过后</text>
+          <g transform="translate(214 286)">
+            <rect width="26" height="18" rx="3" fill="#1c1712"/>
+            <rect x="32" width="40" height="18" rx="3" fill="#0e6b66"/>
+            <rect x="78" width="26" height="18" rx="3" fill="#1c1712"/>
+          </g>
+          <text x="269" y="336" text-anchor="middle" font-size="13" font-weight="600">签发</text>
+
+          <rect x="8" y="384" width="166" height="148" rx="14" fill="#fffdf9" stroke="#f0c4a4" stroke-dasharray="5 4"/>
+          <text x="22" y="408" font-size="13" font-weight="600" fill="#b54708">查资料</text>
+          <text x="91" y="466" text-anchor="middle" font-size="15" fill="#6f665d">不经过</text>
+
+          <rect x="186" y="384" width="166" height="148" rx="14" fill="#fffdf9" stroke="#b7dfda"/>
+          <text x="200" y="408" font-size="13" font-weight="600" fill="#0e6b66">查资料</text>
+          <rect x="214" y="422" width="110" height="28" rx="8" fill="#fff" stroke="#1c1712"/>
+          <text x="269" y="441" text-anchor="middle" font-size="13">Bearer</text>
+          <line x1="269" y1="450" x2="269" y2="466" stroke="#0e6b66" stroke-width="1.5" marker-end="url(#tm1)"/>
+          <rect x="214" y="470" width="110" height="28" rx="8" fill="#e5f4f2" stroke="#0e6b66"/>
+          <text x="269" y="489" text-anchor="middle" font-size="13" font-weight="600" fill="#0e6b66">验签</text>
+          <text x="269" y="516" text-anchor="middle" font-size="12" fill="#6f665d">放行或 401</text>
+
+          <defs>
+            <marker id="am1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b54708"/>
+            </marker>
+            <marker id="tm1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#0e6b66"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">注册时哈希，登录时比对，成功后签名，查资料时验签。</p>
+    </section>
+
+    <section id="bcrypt">
+      <div class="sheet-h">
+        <span class="num">02</span>
+        <h2>bcrypt</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 520" role="img" aria-label="明文哈希入库，不能倒推；登录再哈希比对，对不上 401">
+          <text x="128" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="#b54708">注册 · 只留哈希</text>
+          <rect x="58" y="38" width="140" height="40" rx="10" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="128" y="63" text-anchor="middle" font-size="14">明文</text>
+          <line x1="128" y1="78" x2="128" y2="108" stroke="#b54708" stroke-width="1.5" marker-end="url(#am2)"/>
+          <text x="140" y="98" font-size="12" fill="#b54708">bcrypt</text>
+          <rect x="28" y="116" width="200" height="62" rx="12" fill="#fff1e4" stroke="#b54708"/>
+          <text x="128" y="142" text-anchor="middle" font-size="15" font-weight="600">password_hash</text>
+          <text x="128" y="162" text-anchor="middle" font-size="12" fill="#6f665d">库里只有这一列</text>
+
+          <line x1="268" y1="146" x2="268" y2="52" stroke="#b42318" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle cx="268" cy="96" r="12" fill="#fdeceb" stroke="#b42318"/>
+          <path d="M262 90 L274 102 M274 90 L262 102" stroke="#b42318" stroke-width="1.6"/>
+          <text x="286" y="100" font-size="12" fill="#b42318">不能倒推</text>
+
+          <line x1="24" y1="210" x2="336" y2="210" stroke="#e3d8c9"/>
+          <text x="180" y="236" text-anchor="middle" font-size="12" font-weight="600" fill="#b54708">登录 · 再哈希比对</text>
+
+          <rect x="110" y="252" width="140" height="40" rx="10" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="180" y="277" text-anchor="middle" font-size="14">明文</text>
+          <line x1="180" y1="292" x2="180" y2="328" stroke="#b54708" stroke-width="1.5" marker-end="url(#am2)"/>
+          <text x="192" y="312" font-size="12" fill="#b54708">再哈希</text>
+          <text x="248" y="312" font-size="12" fill="#b42318">解密</text>
+          <line x1="246" y1="308" x2="274" y2="308" stroke="#b42318" stroke-width="1.5"/>
+
+          <rect x="70" y="336" width="220" height="44" rx="10" fill="#fffdf9" stroke="#b54708"/>
+          <text x="180" y="363" text-anchor="middle" font-size="14">和库里的串比</text>
+
+          <line x1="130" y1="380" x2="96" y2="418" stroke="#187944" stroke-width="1.5" marker-end="url(#ok2)"/>
+          <rect x="16" y="422" width="148" height="44" rx="10" fill="#e7f6ee" stroke="#187944"/>
+          <text x="90" y="449" text-anchor="middle" font-size="14" fill="#187944">一致 · 去签发</text>
+
+          <line x1="230" y1="380" x2="264" y2="418" stroke="#b42318" stroke-width="1.5" marker-end="url(#bad2)"/>
+          <rect x="196" y="422" width="148" height="44" rx="10" fill="#fdeceb" stroke="#b42318"/>
+          <text x="270" y="449" text-anchor="middle" font-size="14" font-weight="600" fill="#b42318">对不上 · 401</text>
+
+          <defs>
+            <marker id="am2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b54708"/>
+            </marker>
+            <marker id="ok2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#187944"/>
+            </marker>
+            <marker id="bad2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b42318"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">明文进、哈希出，不能倒推；登录是再哈希比对，对不上返回 401。</p>
+    </section>
+
+    <section class="jwt" id="jwt">
+      <div class="sheet-h">
+        <span class="num">03</span>
+        <h2>三段</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 360" role="img" aria-label="header、payload、signature；载荷含 sub、iat、exp，没有角色">
+          <rect x="8" y="12" width="104" height="78" rx="10" fill="#1c1712"/>
+          <text x="60" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#fffdf9">头</text>
+          <text x="60" y="56" text-anchor="middle" font-size="11" fill="#f0c4a4">header</text>
+          <text x="60" y="74" text-anchor="middle" font-size="12" fill="#f0c4a4">HS256</text>
+          <text x="122" y="56" text-anchor="middle" font-size="20" fill="#6f665d">.</text>
+          <rect x="132" y="12" width="104" height="78" rx="10" fill="#0e6b66"/>
+          <text x="184" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#fffdf9">载荷</text>
+          <text x="184" y="56" text-anchor="middle" font-size="11" fill="#d7f3ef">payload</text>
+          <text x="184" y="74" text-anchor="middle" font-size="12" fill="#d7f3ef">Base64</text>
+          <text x="246" y="56" text-anchor="middle" font-size="20" fill="#6f665d">.</text>
+          <rect x="256" y="12" width="96" height="78" rx="10" fill="#1c1712"/>
+          <text x="304" y="38" text-anchor="middle" font-size="15" font-weight="600" fill="#fffdf9">签名</text>
+          <text x="304" y="56" text-anchor="middle" font-size="11" fill="#d7f3ef">signature</text>
+          <text x="304" y="74" text-anchor="middle" font-size="12" fill="#d7f3ef">密钥算出</text>
+
+          <line x1="184" y1="90" x2="184" y2="118" stroke="#0e6b66" stroke-width="1.5" marker-end="url(#tm3)"/>
+          <text x="196" y="110" font-size="12" fill="#0e6b66">打开</text>
+
+          <rect x="12" y="126" width="220" height="210" rx="14" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="28" y="154" font-size="12" fill="#0e6b66">中间这段能读</text>
+          <text x="28" y="192" font-size="16" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">sub</text>
+          <text x="92" y="192" font-size="15">用户 id</text>
+          <text x="28" y="226" font-size="16" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">iat</text>
+          <text x="92" y="226" font-size="15">签发时刻</text>
+          <text x="28" y="260" font-size="16" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">exp</text>
+          <text x="92" y="260" font-size="15">过期时刻</text>
+          <g transform="rotate(-6 118 302)">
+            <rect x="72" y="286" width="92" height="30" rx="6" fill="#fffdf9" stroke="#b42318" stroke-width="1.5"/>
+            <text x="118" y="306" text-anchor="middle" font-size="13" fill="#b42318">没有角色</text>
+          </g>
+
+          <line x1="304" y1="90" x2="304" y2="126" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink3)"/>
+          <rect x="248" y="134" width="100" height="88" rx="12" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="298" y="168" text-anchor="middle" font-size="14" font-weight="600">防篡改</text>
+          <text x="298" y="192" text-anchor="middle" font-size="12" fill="#6f665d">改了就对不上</text>
+
+          <defs>
+            <marker id="tm3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#0e6b66"/>
+            </marker>
+            <marker id="ink3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#1c1712"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">载荷能读出 sub、iat、exp，没有角色；签名用来发现篡改。</p>
+    </section>
+
+    <section class="jwt" id="issue">
+      <div class="sheet-h">
+        <span class="num">04</span>
+        <h2>签发</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 556" role="img" aria-label="注册或登录成功后，issueToken 用 AUTH_JWT_SECRET 做 HS256，拼出 access_token">
+          <rect x="16" y="12" width="156" height="36" rx="18" fill="#fff1e4" stroke="#f0c4a4"/>
+          <text x="94" y="35" text-anchor="middle" font-size="13">注册成功</text>
+          <rect x="188" y="12" width="156" height="36" rx="18" fill="#fff1e4" stroke="#f0c4a4"/>
+          <text x="266" y="35" text-anchor="middle" font-size="13">登录成功</text>
+          <path d="M94 48 V62 H180" fill="none" stroke="#b54708" stroke-width="1.5"/>
+          <path d="M266 48 V62 H180" fill="none" stroke="#b54708" stroke-width="1.5"/>
+          <line x1="180" y1="62" x2="180" y2="78" stroke="#b54708" stroke-width="1.5" marker-end="url(#am4)"/>
+
+          <rect x="70" y="82" width="220" height="44" rx="12" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="180" y="101" text-anchor="middle" font-size="12" fill="#6f665d">user</text>
+          <text x="180" y="118" text-anchor="middle" font-size="14" font-weight="600">issueToken</text>
+
+          <line x1="180" y1="126" x2="180" y2="146" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink4)"/>
+          <text x="188" y="142" font-size="11" fill="#6f665d">先写两段</text>
+
+          <rect x="16" y="154" width="156" height="100" rx="12" fill="#1c1712"/>
+          <text x="94" y="196" text-anchor="middle" font-size="16" font-weight="600" fill="#fffdf9">header</text>
+          <text x="94" y="222" text-anchor="middle" font-size="13" fill="#f0c4a4">HS256</text>
+          <rect x="188" y="154" width="156" height="100" rx="12" fill="#0e6b66"/>
+          <text x="266" y="186" text-anchor="middle" font-size="16" font-weight="600" fill="#fffdf9">payload</text>
+          <text x="266" y="210" text-anchor="middle" font-size="13" fill="#d7f3ef">sub · iat · exp</text>
+          <text x="266" y="232" text-anchor="middle" font-size="13" fill="#fffdf9">exp 默认 7 天</text>
+
+          <line x1="180" y1="254" x2="180" y2="276" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink4)"/>
+          <text x="188" y="270" font-size="11" fill="#6f665d">再用密钥</text>
+          <rect x="30" y="282" width="300" height="40" rx="10" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="180" y="307" text-anchor="middle" font-size="14" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">AUTH_JWT_SECRET</text>
+
+          <line x1="180" y1="322" x2="180" y2="344" stroke="#b54708" stroke-width="1.5" marker-end="url(#am4)"/>
+          <text x="188" y="338" font-size="11" fill="#b54708">HS256</text>
+          <rect x="100" y="350" width="160" height="40" rx="10" fill="#1c1712"/>
+          <text x="180" y="375" text-anchor="middle" font-size="15" font-weight="600" fill="#fffdf9">signature</text>
+
+          <line x1="180" y1="390" x2="180" y2="412" stroke="#0e6b66" stroke-width="1.5" marker-end="url(#tm4)"/>
+          <text x="188" y="406" font-size="11" fill="#0e6b66">拼上</text>
+          <rect x="16" y="418" width="328" height="52" rx="12" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="180" y="440" text-anchor="middle" font-size="12" fill="#6f665d">header.payload.signature</text>
+          <text x="180" y="458" text-anchor="middle" font-size="14" font-weight="600">access_token</text>
+
+          <rect x="16" y="484" width="328" height="56" rx="12" fill="#fff1e4" stroke="#f0c4a4"/>
+          <text x="180" y="506" text-anchor="middle" font-size="12" fill="#6f665d">响应 expires_in_ms</text>
+          <text x="180" y="526" text-anchor="middle" font-size="14" font-weight="600">604800000 · 7 天</text>
+
+          <defs>
+            <marker id="am4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b54708"/>
+            </marker>
+            <marker id="ink4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#1c1712"/>
+            </marker>
+            <marker id="tm4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#0e6b66"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">成功后 issueToken 先写两段，再用密钥算出签名，拼成 access_token。</p>
+    </section>
+
+    <section class="jwt" id="browser">
+      <div class="sheet-h">
+        <span class="num">05</span>
+        <h2>前端收下</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 348" role="img" aria-label="整串 access_token 放进 sessionStorage，不拆开不解析；查资料时放进 Authorization Bearer">
+          <rect x="70" y="12" width="220" height="40" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="180" y="37" text-anchor="middle" font-size="14" font-weight="600">access_token 整串</text>
+          <line x1="180" y1="52" x2="180" y2="72" stroke="#0e6b66" stroke-width="1.5" marker-end="url(#tm5)"/>
+          <text x="188" y="68" font-size="11" fill="#0e6b66">原样存</text>
+
+          <rect x="40" y="78" width="280" height="84" rx="14" fill="#e5f4f2" stroke="#0e6b66"/>
+          <text x="180" y="112" text-anchor="middle" font-size="16" font-weight="600">sessionStorage</text>
+          <text x="180" y="138" text-anchor="middle" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">access_token</text>
+
+          <rect x="36" y="176" width="120" height="32" rx="16" fill="#fdeceb" stroke="#b42318"/>
+          <text x="96" y="197" text-anchor="middle" font-size="13" fill="#b42318">不拆开</text>
+          <rect x="204" y="176" width="120" height="32" rx="16" fill="#fdeceb" stroke="#b42318"/>
+          <text x="264" y="197" text-anchor="middle" font-size="13" fill="#b42318">不解析</text>
+
+          <line x1="180" y1="208" x2="180" y2="236" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink5)"/>
+          <text x="188" y="228" font-size="11" fill="#6f665d">查资料</text>
+          <rect x="24" y="242" width="312" height="72" rx="12" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="180" y="272" text-anchor="middle" font-size="14" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">Authorization: Bearer</text>
+          <text x="180" y="296" text-anchor="middle" font-size="13">后面接整串</text>
+
+          <defs>
+            <marker id="tm5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#0e6b66"/>
+            </marker>
+            <marker id="ink5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#1c1712"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">整串放进 sessionStorage，查资料时原样放进 Bearer。</p>
+    </section>
+
+    <section class="jwt" id="verify">
+      <div class="sheet-h">
+        <span class="num">06</span>
+        <h2>校验顺序</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 530" role="img" aria-label="gateway 只在 GET /v1/users/{id} 依次验 Bearer、HS256、签名、exp、sub，失败则 401 且不转发">
+          <rect x="12" y="10" width="336" height="52" rx="12" fill="#1c1712"/>
+          <text x="180" y="32" text-anchor="middle" font-size="14" font-weight="600" fill="#fffdf9">GET /v1/users/{id}</text>
+          <text x="180" y="50" text-anchor="middle" font-size="12" fill="#f0c4a4">只有 gateway :8080 验</text>
+          <rect x="12" y="72" width="336" height="32" rx="16" fill="#fffdf9" stroke="#e3d8c9"/>
+          <text x="180" y="93" text-anchor="middle" font-size="12" fill="#6f665d">POST 注册 / 登录 · 不验票</text>
+
+          <line x1="28" y1="140" x2="28" y2="412" stroke="#b7dfda" stroke-width="2"/>
+          <line x1="232" y1="144" x2="232" y2="400" stroke="#b42318" stroke-width="1.5"/>
+          <line x1="232" y1="280" x2="244" y2="280" stroke="#b42318" stroke-width="1.5" marker-end="url(#bad6)"/>
+
+          <circle cx="28" cy="144" r="12" fill="#0e6b66"/>
+          <text x="28" y="148" text-anchor="middle" font-size="12" fill="#fffdf9">1</text>
+          <rect x="48" y="120" width="168" height="48" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="132" y="149" text-anchor="middle" font-size="14">是不是 Bearer</text>
+          <line x1="216" y1="144" x2="232" y2="144" stroke="#b42318" stroke-width="1.5"/>
+
+          <circle cx="28" cy="208" r="12" fill="#0e6b66"/>
+          <text x="28" y="212" text-anchor="middle" font-size="12" fill="#fffdf9">2</text>
+          <rect x="48" y="184" width="168" height="48" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="132" y="213" text-anchor="middle" font-size="14">是不是 HS256</text>
+          <line x1="216" y1="208" x2="232" y2="208" stroke="#b42318" stroke-width="1.5"/>
+
+          <circle cx="28" cy="272" r="12" fill="#0e6b66"/>
+          <text x="28" y="276" text-anchor="middle" font-size="12" fill="#fffdf9">3</text>
+          <rect x="48" y="248" width="168" height="48" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="132" y="268" text-anchor="middle" font-size="14">重算签名</text>
+          <text x="132" y="286" text-anchor="middle" font-size="11" fill="#6f665d">同一把密钥</text>
+          <line x1="216" y1="272" x2="232" y2="272" stroke="#b42318" stroke-width="1.5"/>
+
+          <circle cx="28" cy="336" r="12" fill="#0e6b66"/>
+          <text x="28" y="340" text-anchor="middle" font-size="12" fill="#fffdf9">4</text>
+          <rect x="48" y="312" width="168" height="48" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="132" y="341" text-anchor="middle" font-size="14">exp 过了没</text>
+          <line x1="216" y1="336" x2="232" y2="336" stroke="#b42318" stroke-width="1.5"/>
+
+          <circle cx="28" cy="400" r="12" fill="#0e6b66"/>
+          <text x="28" y="404" text-anchor="middle" font-size="12" fill="#fffdf9">5</text>
+          <rect x="48" y="376" width="168" height="48" rx="10" fill="#fffdf9" stroke="#0e6b66"/>
+          <text x="132" y="405" text-anchor="middle" font-size="14">sub 是不是空</text>
+          <line x1="216" y1="400" x2="232" y2="400" stroke="#b42318" stroke-width="1.5"/>
+
+          <rect x="244" y="248" width="104" height="64" rx="12" fill="#fdeceb" stroke="#b42318"/>
+          <text x="296" y="274" text-anchor="middle" font-size="16" font-weight="600" fill="#b42318">401</text>
+          <text x="296" y="294" text-anchor="middle" font-size="12" fill="#b42318">不转发</text>
+
+          <line x1="132" y1="424" x2="132" y2="452" stroke="#187944" stroke-width="1.5" marker-end="url(#ok6)"/>
+          <rect x="48" y="456" width="168" height="48" rx="10" fill="#e7f6ee" stroke="#187944"/>
+          <text x="132" y="485" text-anchor="middle" font-size="14" fill="#187944">都过才转发</text>
+
+          <defs>
+            <marker id="ok6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#187944"/>
+            </marker>
+            <marker id="bad6" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b42318"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">只有查用户按这五步验，任一步失败都是 401 且不转发。</p>
+    </section>
+
+    <section class="jwt" id="after">
+      <div class="sheet-h">
+        <span class="num">07</span>
+        <h2>验过之后</h2>
+      </div>
+      <div class="stage">
+        <svg viewBox="0 0 360 440" role="img" aria-label="验过不传 sub，只按路径 id 转发；不查库，停用账号的旧票在过期前仍有效">
+          <rect x="80" y="12" width="200" height="40" rx="12" fill="#e7f6ee" stroke="#187944"/>
+          <text x="180" y="37" text-anchor="middle" font-size="14" fill="#187944">五项都过</text>
+          <line x1="180" y1="52" x2="180" y2="76" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink7)"/>
+          <text x="188" y="70" font-size="12" fill="#b42318">不传 sub</text>
+
+          <rect x="50" y="82" width="260" height="52" rx="12" fill="#fffdf9" stroke="#1c1712"/>
+          <text x="180" y="104" text-anchor="middle" font-size="12" fill="#6f665d">只留 URL 里的 id</text>
+          <text x="180" y="124" text-anchor="middle" font-size="14" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">/v1/users/{id}</text>
+          <line x1="180" y1="134" x2="180" y2="158" stroke="#1c1712" stroke-width="1.5" marker-end="url(#ink7)"/>
+
+          <rect x="70" y="164" width="220" height="84" rx="12" fill="#f6f1e8" stroke="#1c1712"/>
+          <text x="180" y="192" text-anchor="middle" font-size="16" font-weight="600">user</text>
+          <text x="180" y="214" text-anchor="middle" font-size="12" fill="#6f665d">gRPC :9000</text>
+          <text x="180" y="234" text-anchor="middle" font-size="13">按 id 查 · 不再验票</text>
+
+          <line x1="24" y1="268" x2="336" y2="268" stroke="#e3d8c9"/>
+          <text x="180" y="290" text-anchor="middle" font-size="12" fill="#6f665d">验签不查库，也不看停用</text>
+
+          <rect x="16" y="308" width="110" height="44" rx="10" fill="#fdeceb" stroke="#b42318"/>
+          <text x="71" y="335" text-anchor="middle" font-size="14">停用账号</text>
+          <text x="148" y="335" text-anchor="middle" font-size="16">+</text>
+          <rect x="176" y="308" width="110" height="44" rx="10" fill="#fff1e4" stroke="#f0c4a4"/>
+          <text x="231" y="335" text-anchor="middle" font-size="14">未到 exp</text>
+          <line x1="151" y1="352" x2="151" y2="376" stroke="#187944" stroke-width="1.5" marker-end="url(#ok7)"/>
+          <rect x="56" y="380" width="190" height="40" rx="10" fill="#e7f6ee" stroke="#187944"/>
+          <text x="151" y="405" text-anchor="middle" font-size="14" fill="#187944">旧票仍有效</text>
+
+          <defs>
+            <marker id="bad7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#b42318"/>
+            </marker>
+            <marker id="ink7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#1c1712"/>
+            </marker>
+            <marker id="ok7" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#187944"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="cap">验过只按路径 id 转发；不查库，停用账号的旧票在过期前仍有效。</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>用户端进店规则</title>
+  <style>
+    :root {
+      --bg: #f3ecdf;
+      --paper: #fffaf3;
+      --ink: #241910;
+      --muted: #6e6256;
+      --line: #e6d8c6;
+      --accent: #c24b24;
+      --accent-soft: #f8e3d6;
+      --pine: #21584a;
+      --pine-soft: #dceae4;
+      --amber: #8a5a12;
+      --amber-soft: #f6ead2;
+      --chip: #efe4d4;
+      --shadow: 0 16px 40px rgba(36, 25, 16, 0.07);
+      --radius: 18px;
+      --read: 740px;
+      --toc: 214px;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14110e;
+        --paper: #211c17;
+        --ink: #f6efe6;
+        --muted: #b7aa9c;
+        --line: #3a322a;
+        --accent: #ef8a62;
+        --accent-soft: #3a241c;
+        --pine: #8dcebb;
+        --pine-soft: #1c312b;
+        --amber: #e4c27a;
+        --amber-soft: #3a2e18;
+        --chip: #2c261f;
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(880px 380px at 0% -10%, rgba(194, 75, 36, 0.14), transparent 58%),
+        var(--bg);
+      font-family: var(--sans);
+      font-size: 16.5px;
+      line-height: 1.75;
+    }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 20;
+      height: 2px;
+      width: 0;
+      background: var(--accent);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: var(--toc) minmax(0, var(--read));
+      justify-content: center;
+      gap: 40px;
+      width: min(1080px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 32px 0 80px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+    }
+
+    .toc-brand {
+      margin: 0 0 16px;
+      font-family: var(--serif);
+      font-size: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .toc a {
+      display: block;
+      margin: 2px 0;
+      padding: 7px 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .toc a:hover,
+    .toc a.active {
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    .toc a.active { box-shadow: inset 3px 0 0 var(--accent); }
+
+    .toc-fold { display: none; margin: 0 0 18px; }
+
+    .toc-fold summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .toc-fold a {
+      display: block;
+      margin-top: 8px;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .page { min-width: 0; }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 0.16em;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-family: var(--serif);
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: 0.02em;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 38em;
+      color: var(--muted);
+    }
+
+    .summary {
+      margin: 22px 0 0;
+      padding: 16px 18px;
+      border-radius: var(--radius);
+      background: var(--accent-soft);
+      border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+    }
+
+    .summary p { margin: 0; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 8px;
+    }
+
+    .metric {
+      padding: 14px 14px 12px;
+      border-radius: 16px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .metric b {
+      display: block;
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .metric span,
+    .metric small {
+      display: block;
+      color: var(--muted);
+    }
+
+    .metric small { margin-top: 2px; font-size: 13px; }
+
+    section { margin-top: 42px; }
+
+    h2 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .num {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.72em;
+    }
+
+    .hash {
+      color: var(--line);
+      font-family: var(--sans);
+      font-size: 16px;
+      text-decoration: none;
+    }
+
+    h2:hover .hash { color: var(--accent); }
+
+    .prose {
+      max-width: 40em;
+      margin: 0 0 14px;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 0;
+      margin: 0 0 16px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .flow li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flow li + li::before {
+      content: "→";
+      color: var(--accent);
+      padding-right: 10px;
+    }
+
+    .node {
+      min-width: 132px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .node strong { display: block; }
+    .node span { color: var(--muted); font-size: 13px; }
+
+    .scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--paper);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      background: var(--chip);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--chip) 45%, var(--paper)); }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card {
+      padding: 14px 14px 6px;
+      border-radius: 16px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .card header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 8px 12px;
+      margin: 0;
+    }
+
+    .fields dt { color: var(--muted); }
+    .fields dd { margin: 0; }
+
+    .badge {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 1.7;
+      background: var(--pine-soft);
+      color: var(--pine);
+    }
+
+    .badge.lock {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .note {
+      display: grid;
+      grid-template-columns: 4px minmax(0, 1fr);
+      gap: 12px;
+      margin: 14px 0 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--amber-soft);
+    }
+
+    .note i {
+      display: block;
+      border-radius: 99px;
+      background: var(--amber);
+    }
+
+    .note strong { display: block; }
+    .note p { margin: 2px 0 0; }
+
+    .checks {
+      margin: 0;
+      padding: 6px 8px;
+      list-style: none;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .checks li {
+      min-width: 0;
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .checks li:last-child { border-bottom: 0; }
+
+    .checks label {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+
+    .checks code {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.86em;
+      padding: 0.08em 0.38em;
+      border-radius: 6px;
+      background: var(--chip);
+    }
+
+    .top {
+      display: inline-block;
+      margin-top: 28px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        grid-template-columns: 1fr;
+        width: min(100% - 28px, var(--read));
+      }
+
+      .toc { display: none; }
+      .toc-fold { display: block; }
+      h1 { font-size: 32px; }
+      .metrics, .pair { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="shell">
+    <nav class="toc" aria-label="目录">
+      <p class="toc-brand">进店规则</p>
+      <a href="#top">回到开头</a>
+      <a href="#paths">01 进店路径</a>
+      <a href="#calls">02 只打网关</a>
+      <a href="#session">03 当次会话</a>
+      <a href="#gate">04 网关判定</a>
+      <a href="#check">05 可核对</a>
+    </nav>
+
+    <article class="page" id="top">
+      <details class="toc-fold">
+        <summary>目录</summary>
+        <a href="#paths">01 进店路径</a>
+        <a href="#calls">02 只打网关</a>
+        <a href="#session">03 当次会话</a>
+        <a href="#gate">04 网关判定</a>
+        <a href="#check">05 可核对</a>
+      </details>
+
+      <p class="kicker">用户端 · 网关</p>
+      <h1>进店只认网关</h1>
+      <p class="lede">注册、登录、看自己的资料，都从用户端打到网关。页面只管表单和展示。令牌怎么签发、用户存在哪，留在 user。</p>
+      <div class="summary">
+        <p>三条路径都能单独打开，<code>/</code> 直接进登录。浏览器只请求 <code>/v1</code>，开发时转到 <code>127.0.0.1:8080</code>。注册和登录公开并原样转发。查用户先在网关做 HS256 验签，失败回 401，请求不到 user。</p>
+      </div>
+      <div class="metrics">
+        <div class="metric"><b>3</b><span>条用户路径</span><small>根路径进入登录</small></div>
+        <div class="metric"><b>8080</b><span>唯一对外 HTTP</span><small>不另开服务端口</small></div>
+        <div class="metric"><b>401</b><span>验签失败即停</span><small>不把查询打到 user</small></div>
+      </div>
+
+      <section id="paths">
+        <h2><span class="num">01</span> 进店路径 <a class="hash" href="#paths">#</a></h2>
+        <p class="prose">以后加页面，就加一条路径和一张只负责表单的页面。登录态不写进路由配置里。</p>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>路径</th><th>页面</th><th>做完之后</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>/</code></td><td>转入登录</td><td>替换成 <code>/login</code></td></tr>
+              <tr><td><code>/register</code></td><td>办理会员</td><td>有令牌才去我的</td></tr>
+              <tr><td><code>/login</code></td><td>登录</td><td>没有令牌不算成功</td></tr>
+              <tr><td><code>/me</code></td><td>我的资料</td><td>带令牌查看，可退出</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>注册可以没有令牌</strong>
+            <p>响应里没有 <code>access_token</code> 时，停在「注册成功」，不进入我的。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="calls">
+        <h2><span class="num">02</span> 只打网关 <a class="hash" href="#calls">#</a></h2>
+        <p class="prose">用户端不知道 user 的地址。开发服务器把 <code>/v1</code> 转到本机网关。</p>
+        <ol class="flow">
+          <li><div class="node"><strong>页面</strong><span>只发相对路径</span></div></li>
+          <li><div class="node"><strong>/v1</strong><span>代理到 8080</span></div></li>
+          <li><div class="node"><strong>网关</strong><span>公开或先验签</span></div></li>
+        </ol>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>动作</th><th>请求</th><th>门禁</th><th>去向</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>注册</td>
+                <td><code>POST /v1/users/register</code></td>
+                <td><span class="badge">公开</span></td>
+                <td>原样转发</td>
+              </tr>
+              <tr>
+                <td>登录</td>
+                <td><code>POST /v1/users/login</code></td>
+                <td><span class="badge">公开</span></td>
+                <td>原样转发</td>
+              </tr>
+              <tr>
+                <td>查资料</td>
+                <td><code>GET /v1/users/{id}</code></td>
+                <td><span class="badge lock">Bearer</span></td>
+                <td>先验签再转发</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>不要写 user 的端口</strong>
+            <p>页面和请求层都不出现 8000 或 9000。9000 只存在于网关到 user 的 gRPC。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="session">
+        <h2><span class="num">03</span> 当次会话 <a class="hash" href="#session">#</a></h2>
+        <p class="prose">登录成功后记下两样东西。页面展示资料时读出来，退出时一起清掉。</p>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>项</th><th>规则</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>位置</td><td><code>sessionStorage</code>，限当次标签页</td></tr>
+              <tr><td>令牌</td><td>键名 <code>access_token</code></td></tr>
+              <tr><td>用户</td><td>另存用户 id，键名 <code>user_id</code></td></tr>
+              <tr><td>解析</td><td>不读 JWT 载荷</td></tr>
+              <tr><td>续期</td><td>不刷新令牌</td></tr>
+              <tr><td>退出</td><td>两个键一起删除</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>查资料时怎么带</strong>
+            <p>请求头是 <code>Authorization: Bearer</code> 加上已保存的令牌。用户 id 来自会话，不从令牌里拆。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="gate">
+        <h2><span class="num">04</span> 网关判定 <a class="hash" href="#gate">#</a></h2>
+        <p class="prose">对外只有 HTTP <code>0.0.0.0:8080</code>。超时用配置里的 <code>timeout_ms</code>。上游是 user 的 gRPC <code>127.0.0.1:9000</code>。</p>
+        <div class="pair">
+          <article class="card">
+            <header>
+              <h3>注册与登录</h3>
+              <span class="badge">公开</span>
+            </header>
+            <dl class="fields">
+              <dt>请求体</dt>
+              <dd>原样交给上游</dd>
+              <dt>验签</dt>
+              <dd>不做</dd>
+              <dt>上游</dt>
+              <dd>Register / Login</dd>
+            </dl>
+          </article>
+          <article class="card">
+            <header>
+              <h3>按 id 查用户</h3>
+              <span class="badge lock">先验签</span>
+            </header>
+            <dl class="fields">
+              <dt>算法</dt>
+              <dd>只认 HS256</dd>
+              <dt>sub</dt>
+              <dd>必须是非空用户 id</dd>
+              <dt>通过后</dt>
+              <dd>按路径 id 转发</dd>
+            </dl>
+          </article>
+        </div>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>见到的令牌</th><th>网关</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>没有，或不是 Bearer</td><td>401，不转发</td></tr>
+              <tr><td>算法不是 HS256</td><td>401，不转发</td></tr>
+              <tr><td>签名失败，或密钥为空</td><td>401，不转发</td></tr>
+              <tr><td><code>sub</code> 为空</td><td>401，不转发</td></tr>
+              <tr><td>HS256 且 <code>sub</code> 有用户 id</td><td>按路径 id 转发</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <aside class="note">
+          <i></i>
+          <div>
+            <strong>密钥与 user 同一占位</strong>
+            <p>配置键 <code>auth.jwt_secret</code>，环境变量 <code>AUTH_JWT_SECRET</code>，本地默认是占位，不是真密钥。网关不连数据库。</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="check">
+        <h2><span class="num">05</span> 可核对 <a class="hash" href="#check">#</a></h2>
+        <ul class="checks">
+          <li><label><input type="checkbox"> <code>/</code> 进入 <code>/login</code>，注册、登录、我的都能单独打开</label></li>
+          <li><label><input type="checkbox"> 三条请求都走 <code>/v1</code>，开发代理目标是 <code>http://127.0.0.1:8080</code></label></li>
+          <li><label><input type="checkbox"> 用户端不出现 8000 或 9000</label></li>
+          <li><label><input type="checkbox"> <code>access_token</code> 与用户 id 在 <code>sessionStorage</code>，不解析、不刷新</label></li>
+          <li><label><input type="checkbox"> 查用户带 <code>Authorization: Bearer</code></label></li>
+          <li><label><input type="checkbox"> 网关只听 HTTP 8080，注册和登录原样转到 <code>127.0.0.1:9000</code></label></li>
+          <li><label><input type="checkbox"> 查用户本地验 HS256，<code>sub</code> 为用户 id，失败 401 且不打到 user</label></li>
+        </ul>
+        <a class="top" href="#top">回到开头</a>
+      </section>
+    </article>
+  </div>
+  <script>
+    const bar = document.getElementById('progress')
+    const links = Array.from(document.querySelectorAll('.toc a[href^="#"]')).filter((a) => a.getAttribute('href') !== '#top')
+    const sections = links.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean)
+
+    function onScroll() {
+      const root = document.documentElement
+      const height = root.scrollHeight - root.clientHeight
+      bar.style.width = (height > 0 ? (root.scrollTop / height) * 100 : 0) + '%'
+      let current = sections[0]
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 96) current = section
+      }
+      const id = current ? '#' + current.id : ''
+      for (const link of links) link.classList.toggle('active', link.getAttribute('href') === id)
+    }
+
+    document.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+  </script>
+</body>
+</html>

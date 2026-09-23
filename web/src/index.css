@@ -1,0 +1,171 @@
+:root {
+  color: #14261c;
+  background: #e7f0e4;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+}
+
+.sign {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.25rem;
+  background: #143f24;
+  color: #f4f7f2;
+}
+
+.brand {
+  margin: 0;
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.sign nav {
+  display: flex;
+  gap: 1.1rem;
+}
+
+.sign a {
+  color: #d7ead9;
+  text-decoration: none;
+}
+
+.sign a.active {
+  color: #f0c43a;
+}
+
+.stripe {
+  height: 7px;
+  background: #f0c43a;
+}
+
+main {
+  width: min(26rem, calc(100% - 2rem));
+  margin: 1.75rem auto 3rem;
+}
+
+.slip {
+  margin: 0;
+  padding: 1.4rem 1.25rem 1.2rem;
+  background: #fff;
+  border-left: 8px solid #1f6a3a;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.lead {
+  margin: 0.35rem 0 0;
+  color: #5d6b61;
+}
+
+label {
+  display: block;
+  margin-top: 1rem;
+  color: #3d4f44;
+  font-size: 0.92rem;
+}
+
+input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.3rem;
+  padding: 0.55rem 0;
+  border: none;
+  border-bottom: 1px solid #b7c7b8;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.primary {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #1f6a3a;
+  color: #f7faf6;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.quiet {
+  margin-top: 0.9rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #5d6b61;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.note {
+  margin: 0.9rem 0 0;
+}
+
+.note.bad {
+  color: #a33b2b;
+}
+
+.switch {
+  margin: 0.9rem 0 0;
+}
+
+.switch a {
+  color: #1f6a3a;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.45rem 0.75rem;
+  margin: 1.15rem 0 0;
+}
+
+.card .avatar {
+  grid-column: 1 / -1;
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+}
+
+.card dt {
+  color: #5d6b61;
+}
+
+.card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #1f6a3a;
+  outline-offset: 2px;
+}
+
+.sign a:focus-visible {
+  outline-color: #f0c43a;
+}
+
+@media (max-width: 520px) {
+  .sign {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+}

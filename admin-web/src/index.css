@@ -1,0 +1,71 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f3f4f6;
+  color: #111;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+nav a.active {
+  font-weight: 700;
+}
+
+main {
+  max-width: 24rem;
+  margin: 1.5rem auto;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+label {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.5rem;
+  font: inherit;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+}
+
+.message {
+  margin-top: 1rem;
+}
+
+pre {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  overflow: auto;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

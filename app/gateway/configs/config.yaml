@@ -1,0 +1,10 @@
+server:
+  http:
+    addr: 0.0.0.0:8080
+    timeout_ms: 1000
+client:
+  user:
+    addr: 127.0.0.1:9000
+    timeout_ms: 1000
+auth:
+  jwt_secret: ${AUTH_JWT_SECRET:change-me-local-jwt-secret}
