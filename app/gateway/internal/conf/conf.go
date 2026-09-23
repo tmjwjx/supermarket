@@ -23,21 +23,28 @@ func (h HTTP) Timeout() time.Duration {
 	return time.Duration(h.TimeoutMs) * time.Millisecond
 }
 
-// user 服务的 gRPC 地址
+// 各上游 gRPC 地址和超时
 type Client struct {
-	User User `json:"user"`
+	User         Endpoint `json:"user"`
+	Product      Endpoint `json:"product"`
+	Inventory    Endpoint `json:"inventory"`
+	Order        Endpoint `json:"order"`
+	Payment      Endpoint `json:"payment"`
+	Notification Endpoint `json:"notification"`
+	Admin        Endpoint `json:"admin"`
 }
 
-type User struct {
+type Endpoint struct {
 	Addr      string `json:"addr"`
 	TimeoutMs int64  `json:"timeout_ms"`
 }
 
-func (u User) Timeout() time.Duration {
-	return time.Duration(u.TimeoutMs) * time.Millisecond
+func (e Endpoint) Timeout() time.Duration {
+	return time.Duration(e.TimeoutMs) * time.Millisecond
 }
 
-// 与 user 的 jwt_secret 同一环境变量占位
+// 买家令牌和后台令牌使用不同密钥
 type Auth struct {
-	JWTSecret string `json:"jwt_secret"`
+	JWTSecret      string `json:"jwt_secret"`
+	AdminJWTSecret string `json:"admin_jwt_secret"`
 }

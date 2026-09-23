@@ -1,18 +1,13 @@
 package auth
 
 import (
-	"strings"
-
 	"github.com/tmjwjx/supermarket/app/gateway/internal/conf"
+	"github.com/tmjwjx/supermarket/pkg/httpauth"
 
-	kerrors "github.com/go-kratos/kratos/v3/errors"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewVerifier)
-
-var errUnauthorized = kerrors.Unauthorized("GATEWAY_UNAUTHORIZED", "unauthorized")
+var ProviderSet = wire.NewSet(NewVerifier, NewAdminVerifier)
 
 type Verifier struct {
 	secret []byte
@@ -26,32 +21,24 @@ func NewVerifier(a *conf.Auth) *Verifier {
 	return &Verifier{secret: []byte(secret)}
 }
 
-// 只接受带非空 sub 的 HS256 Bearer 令牌 失败则拒绝
-func (v *Verifier) Verify(header string) error {
-	token, ok := bearerToken(header)
-	if !ok || len(v.secret) == 0 {
-		return errUnauthorized
-	}
-	parsed, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
-		if t.Method != jwt.SigningMethodHS256 {
-			return nil, errUnauthorized
-		}
-		return v.secret, nil
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-	if err != nil || !parsed.Valid {
-		return errUnauthorized
-	}
-	claims, ok := parsed.Claims.(*jwt.RegisteredClaims)
-	if !ok || claims.Subject == "" {
-		return errUnauthorized
-	}
-	return nil
+// 只接受带非空 sub 的 HS256 Bearer 令牌 成功返回 sub
+func (v *Verifier) Verify(header string) (string, error) {
+	return httpauth.VerifyUser(header, v.secret)
 }
 
-func bearerToken(header string) (string, bool) {
-	fields := strings.Fields(header)
-	if len(fields) != 2 || !strings.EqualFold(fields[0], "Bearer") {
-		return "", false
+type AdminVerifier struct {
+	secret []byte
+}
+
+func NewAdminVerifier(a *conf.Auth) *AdminVerifier {
+	var secret string
+	if a != nil {
+		secret = a.AdminJWTSecret
 	}
-	return fields[1], true
+	return &AdminVerifier{secret: []byte(secret)}
+}
+
+// 后台令牌必须是 aud 为 admin 的 HS256 成功返回运营账号 id 和角色
+func (v *AdminVerifier) Verify(header string) (string, string, error) {
+	return httpauth.VerifyAdmin(header, v.secret)
 }

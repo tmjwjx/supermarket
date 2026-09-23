@@ -1,26 +1,19 @@
 package server
 
 import (
-	"context"
-
-	userv1 "github.com/tmjwjx/supermarket/api/user/v1"
-	"github.com/tmjwjx/supermarket/app/gateway/internal/auth"
 	"github.com/tmjwjx/supermarket/app/gateway/internal/conf"
 
+	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/transport/http"
 )
 
-type userProxy struct {
-	users  userv1.UserServiceClient
-	tokens *auth.Verifier
-}
-
-// 只开 HTTP 注册和登录公开 查用户先验本地 JWT
-func NewHTTPServer(c *conf.Server, users userv1.UserServiceClient, tokens *auth.Verifier) *http.Server {
+// 只开 HTTP 公开 可选 登录和后台路由都转到上游 gRPC
+func NewHTTPServer(c *conf.Server, s Services) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			tracing.Server(),
 		),
 	}
 	if c.HTTP.Network != "" {
@@ -33,77 +26,33 @@ func NewHTTPServer(c *conf.Server, users userv1.UserServiceClient, tokens *auth.
 		opts = append(opts, http.Timeout(d))
 	}
 	srv := http.NewServer(opts...)
-	p := &userProxy{users: users, tokens: tokens}
+	g := gate{tokens: s.Tokens, admins: s.AdminTokens}
 	r := srv.Route("/")
-	// 公开
-	r.POST("/v1/users/register", p.register)
-	// 公开
-	r.POST("/v1/users/login", p.login)
-	// 要 token 验签失败不打到 user
-	r.GET("/v1/users/{id}", p.requireToken(p.getUser))
+	(&userProxy{gate: g, users: s.Users, addresses: s.Addresses}).routes(r)
+	(&productProxy{
+		gate:            g,
+		products:        s.Products,
+		brands:          s.Brands,
+		categories:      s.Categories,
+		favorites:       s.Favorites,
+		histories:       s.Histories,
+		reviews:         s.Reviews,
+		recommendations: s.Recommendations,
+		attributes:      s.Attributes,
+	}).routes(r)
+	(&inventoryProxy{gate: g, stocks: s.Stocks}).routes(r)
+	(&orderProxy{gate: g, carts: s.Carts, orders: s.Orders}).routes(r)
+	(&paymentProxy{gate: g, payments: s.Payments}).routes(r)
+	(&notificationProxy{gate: g, notifications: s.Notifications}).routes(r)
+	(&adminProxy{gate: g, admins: s.Admins}).routes(r)
 	return srv
 }
 
-// 缺令牌或验签失败时拒绝 不进入后面的转发
-func (p *userProxy) requireToken(next func(http.Context) error) func(http.Context) error {
-	return func(ctx http.Context) error {
-		if err := p.tokens.Verify(ctx.Request().Header.Get("Authorization")); err != nil {
-			return err
-		}
-		return next(ctx)
+// 自定义方法允许空 body 没有 Content-Type 时不把解码失败当成参数错误
+func bindBody(ctx http.Context, in any) error {
+	r := ctx.Request()
+	if r.Header.Get("Content-Type") == "" && r.ContentLength == 0 {
+		return nil
 	}
-}
-
-// 公开 请求体原样交给上游 Register
-func (p *userProxy) register(ctx http.Context) error {
-	var in userv1.RegisterRequest
-	if err := ctx.Bind(&in); err != nil {
-		return err
-	}
-	http.SetOperation(ctx, userv1.OperationUserServiceRegister)
-	h := ctx.Middleware(func(c context.Context, req any) (any, error) {
-		return p.users.Register(c, req.(*userv1.RegisterRequest))
-	})
-	out, err := h(ctx, &in)
-	if err != nil {
-		return err
-	}
-	return ctx.Result(200, out.(*userv1.RegisterResponse))
-}
-
-// 公开 请求体原样交给上游 Login
-func (p *userProxy) login(ctx http.Context) error {
-	var in userv1.LoginRequest
-	if err := ctx.Bind(&in); err != nil {
-		return err
-	}
-	http.SetOperation(ctx, userv1.OperationUserServiceLogin)
-	h := ctx.Middleware(func(c context.Context, req any) (any, error) {
-		return p.users.Login(c, req.(*userv1.LoginRequest))
-	})
-	out, err := h(ctx, &in)
-	if err != nil {
-		return err
-	}
-	return ctx.Result(200, out.(*userv1.LoginResponse))
-}
-
-// 验签通过后按路径 id 转发 GetUser
-func (p *userProxy) getUser(ctx http.Context) error {
-	var in userv1.GetUserRequest
-	if err := ctx.BindQuery(&in); err != nil {
-		return err
-	}
-	if err := ctx.BindVars(&in); err != nil {
-		return err
-	}
-	http.SetOperation(ctx, userv1.OperationUserServiceGetUser)
-	h := ctx.Middleware(func(c context.Context, req any) (any, error) {
-		return p.users.GetUser(c, req.(*userv1.GetUserRequest))
-	})
-	out, err := h(ctx, &in)
-	if err != nil {
-		return err
-	}
-	return ctx.Result(200, out.(*userv1.GetUserResponse))
+	return ctx.Bind(in)
 }

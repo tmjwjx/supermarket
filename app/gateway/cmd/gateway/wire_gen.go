@@ -23,14 +23,98 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confClient *conf.Client, confAuth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
-	userServiceClient, cleanup, err := client.NewUserClient(confClient)
+	userClients, cleanup, err := client.NewUserClient(confClient)
 	if err != nil {
 		return nil, nil, err
 	}
+	userServiceClient := userClients.Users
+	addressServiceClient := userClients.Addresses
+	productClients, cleanup2, err := client.NewProductClient(confClient)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	productServiceClient := productClients.Products
+	brandServiceClient := productClients.Brands
+	categoryServiceClient := productClients.Categories
+	favoriteServiceClient := productClients.Favorites
+	browseHistoryServiceClient := productClients.Histories
+	reviewServiceClient := productClients.Reviews
+	recommendationServiceClient := productClients.Recommendations
+	attributeServiceClient := productClients.Attributes
+	stockServiceClient, cleanup3, err := client.NewInventoryClient(confClient)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	orderClients, cleanup4, err := client.NewOrderClient(confClient)
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	cartServiceClient := orderClients.Carts
+	orderServiceClient := orderClients.Orders
+	paymentServiceClient, cleanup5, err := client.NewPaymentClient(confClient)
+	if err != nil {
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	notificationServiceClient, cleanup6, err := client.NewNotificationClient(confClient)
+	if err != nil {
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	adminUserServiceClient, cleanup7, err := client.NewAdminClient(confClient)
+	if err != nil {
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	verifier := auth.NewVerifier(confAuth)
-	httpServer := server.NewHTTPServer(confServer, userServiceClient, verifier)
+	adminVerifier := auth.NewAdminVerifier(confAuth)
+	services := server.Services{
+		Users:           userServiceClient,
+		Addresses:       addressServiceClient,
+		Products:        productServiceClient,
+		Brands:          brandServiceClient,
+		Categories:      categoryServiceClient,
+		Favorites:       favoriteServiceClient,
+		Histories:       browseHistoryServiceClient,
+		Reviews:         reviewServiceClient,
+		Recommendations: recommendationServiceClient,
+		Attributes:      attributeServiceClient,
+		Stocks:          stockServiceClient,
+		Carts:           cartServiceClient,
+		Orders:          orderServiceClient,
+		Payments:        paymentServiceClient,
+		Notifications:   notificationServiceClient,
+		Admins:          adminUserServiceClient,
+		Tokens:          verifier,
+		AdminTokens:     adminVerifier,
+	}
+	httpServer := server.NewHTTPServer(confServer, services)
 	app := newApp(logger, httpServer)
 	return app, func() {
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
 		cleanup()
 	}, nil
 }
