@@ -17,17 +17,17 @@
 
 ## 服务
 
-| 服务 | 职责 | 状态 |
-|---|---|---|
-| gateway | API 网关：路由、鉴权、限流 | 未开始 |
-| user | 用户：注册登录、资料、地址 | 未开始 |
-| product | 商品：SPU/SKU、分类、检索 | 未开始 |
-| order | 订单：状态机、延迟取消 | 未开始 |
-| inventory | 库存：预扣、防超卖 | 未开始 |
-| payment | 支付（mock）：幂等、对账 | 未开始 |
-| notification | 通知：Kafka 消费、多渠道下发 | 未开始 |
-| admin-web | 管理台（React + TS） | 未开始 |
-| web | 用户端 H5：商品浏览、购物车、下单 | 未开始 |
+| 服务 | 目录 | 职责 | 端口（HTTP / gRPC） | 状态 |
+|---|---|---|---|---|
+| gateway | `app/gateway` | API 网关：路由、鉴权、限流 | 8080 / — | 转发注册登录，查资料验签 |
+| user | `app/user` | 用户：注册登录、资料、地址 | 8000 / 9000 | 注册、登录、查资料 |
+| product | `app/product` | 商品：SPU/SKU、分类、检索 | 8001 / 9001 | 目录已建 |
+| inventory | `app/inventory` | 库存：预扣、防超卖 | 8002 / 9002 | 目录已建 |
+| order | `app/order` | 订单：状态机、延迟取消 | 8003 / 9003 | 目录已建 |
+| payment | `app/payment` | 支付（mock）：幂等、对账 | 8004 / 9004 | 目录已建 |
+| notification | — | 通知：Kafka 消费、多渠道下发 | — | 未开始 |
+| web | `frontend/web` | 用户端 H5：商品浏览、购物车、下单 | 5174 | 注册、登录、我的 |
+| admin-web | `frontend/admin-web` | 管理台（React + TS） | 5173 | 空壳，待运营账号 |
 
 ## 技术栈
 

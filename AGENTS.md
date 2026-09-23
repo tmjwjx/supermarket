@@ -13,6 +13,7 @@ app/<svc>/internal/server/  HTTP / gRPC 服务器装配。
 app/<svc>/internal/service/ 传输适配；一个资源一个目录（`<resource>/`）。
 app/<svc>/internal/biz/     领域模型、用例、仓库接口、错误；一个资源一个目录（`<resource>/`）。
 app/<svc>/internal/data/    仓库实现和存储客户端；一个资源一个目录（`<resource>/`）。
+frontend/<app>/             前端应用（web 用户端、admin-web 管理台）。只请求 gateway。
 ```
 
 ## 分层与依赖
