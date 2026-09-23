@@ -81,7 +81,7 @@ order ── 取 SKU 快照          product ──► inventory 建库存记录
 
 入口是现有的 `app/product/cmd/product/main.go`。现在它只起 HTTP `8001` 和 gRPC `9001`，没有任何资源。
 
-第一期先补三样东西。配置里加数据库和 Redis，写法照 `app/user/internal/conf/conf.go` 的 `Data`。连接串默认指向 `127.0.0.1:3306/product`。环境变量叫 `PRODUCT_DATABASE_SOURCE`，不和 user 共用，否则两个服务会连到同一个库。`app/product/internal/data/data.go` 照 user 的 `NewData` 打开 MySQL 和 Redis，本地开发时自动建表。`app/product/cmd/product/wire.go` 把 data、biz、service 三层接进来。
+第一期先补三样东西。配置里加数据库和 Redis，写法照 `app/user/internal/conf/conf.go` 的 `Data`。连接串直接写在 `app/product/configs/dev.yaml`，指向 `mysql:3306/product`，不和 user 共用一个库。`app/product/internal/data/data.go` 照 user 的 `NewData` 打开 MySQL 和 Redis，本地开发时自动建表。`app/product/cmd/product/wire.go` 把 data、biz、service 三层接进来。
 
 本地第一次运行前，要手动在 MySQL 里建 `product` 库。服务不负责建库，只负责建表。
 

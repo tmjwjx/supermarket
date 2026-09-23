@@ -7,7 +7,7 @@
 ```
 api/<domain>/<version>/     Proto 源文件和生成桩。对外契约。
 app/<svc>/cmd/<app>/        入口、Wire、main.go。
-app/<svc>/configs/          运行时配置（config.yaml）。禁止提交真实密钥。
+app/<svc>/configs/          运行时配置（dev.yaml、prod.yaml）。禁止提交真实密钥。
 app/<svc>/internal/conf/    手写配置结构体（conf.go）。不要再为配置写 proto。
 app/<svc>/internal/server/  HTTP / gRPC 服务器装配。
 app/<svc>/internal/service/ 传输适配；一个资源一个目录（`<resource>/`）。
@@ -106,4 +106,4 @@ frontend/<app>/             前端应用（web 用户端、admin-web 管理台�
 ## 提交与安全
 
 - Conventional Commits：`feat:`、`fix:`、`refactor:`、`chore(deps):`、`docs:`、`test:`。生成文件和它的源放在同一次提交。
-- 不要把真实密钥写进 `configs/config.yaml`。
+- 不要把真实密钥写进 `configs/dev.yaml` 或 `configs/prod.yaml`。

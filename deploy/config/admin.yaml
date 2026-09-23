@@ -8,9 +8,9 @@ server:
 data:
   database:
     driver: mysql
-    source: ${ADMIN_DATABASE_SOURCE:root:root@tcp(127.0.0.1:3306)/admin?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4}
+    source: "root:root@tcp(mysql:3306)/admin?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4"
     debug: true
     auto_migrate: true
 auth:
-  jwt_secret: ${ADMIN_JWT_SECRET:change-me-admin-jwt-secret}
+  jwt_secret: tmjwjx-admin-jwt-secret
   token_expire_ms: 43200000

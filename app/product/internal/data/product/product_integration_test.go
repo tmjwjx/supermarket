@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -105,7 +104,7 @@ func openCatalog(t *testing.T, name string) *gorm.DB {
 // 缓存里是旧的下架快照 库里已经在售 check 拿到的必须是锁住读到的库内状态
 func TestUpdateCheckSeesLockedRowNotCache(t *testing.T) {
 	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{Addr: envOr("REDIS_ADDR", "127.0.0.1:6379")})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		t.Skipf("redis unavailable: %v", err)
 	}
@@ -205,11 +204,4 @@ func TestChangePriceConcurrentKeepsRange(t *testing.T) {
 	if po.MinPrice != 2000 || po.MaxPrice != 2900 {
 		t.Fatalf("range %d %d", po.MinPrice, po.MaxPrice)
 	}
-}
-
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }

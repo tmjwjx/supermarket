@@ -1,0 +1,29 @@
+server:
+  http:
+    addr: 0.0.0.0:8080
+    timeout_ms: 7000
+client:
+  user:
+    addr: user:9000
+    timeout_ms: 1000
+  product:
+    addr: product:9001
+    timeout_ms: 1000
+  inventory:
+    addr: inventory:9002
+    timeout_ms: 1000
+  order:
+    addr: order:9003
+    timeout_ms: 6000
+  payment:
+    addr: payment:9004
+    timeout_ms: 1000
+  notification:
+    addr: notification:9005
+    timeout_ms: 1000
+  admin:
+    addr: admin:9006
+    timeout_ms: 1000
+auth:
+  jwt_secret: tmjwjx-user-jwt-secret
+  admin_jwt_secret: tmjwjx-admin-jwt-secret

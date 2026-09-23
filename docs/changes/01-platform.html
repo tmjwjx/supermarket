@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01 工程底座与公共包 · 变更说明</title>
+<style>
+:root{
+  --bg:#f7f6f2;--panel:#ffffff;--ink:#1f2328;--muted:#5b6470;--line:#e4e1d8;
+  --brand:#2f6f5e;--brand-soft:#e6f0ec;--warn:#b7791f;--warn-soft:#fbf1e1;
+  --bad:#b83a3a;--bad-soft:#f8e6e6;--info:#2b5c8a;--info-soft:#e5eef7;
+  --radius:10px;--measure:820px;
+  --font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#15171a;--panel:#1d2024;--ink:#e7e4dd;--muted:#9aa3ad;--line:#30343a;
+  --brand:#6cc0a4;--brand-soft:#1c3830;--warn:#e3aa4f;--warn-soft:#3a2e1b;
+  --bad:#e57b7b;--bad-soft:#3d2326;--info:#80b3e3;--info-soft:#1c2d3f;
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15.5px;line-height:1.8;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.86em;background:var(--brand-soft);padding:.08em .4em;border-radius:5px;overflow-wrap:anywhere}
+p{margin:10px 0}
+.progress{position:fixed;top:0;left:0;z-index:30;height:2px;width:0;background:var(--brand)}
+.topbar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:12px 28px;background:var(--bg);border-bottom:1px solid var(--line);font-size:14px}
+.crumb{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.pager{display:flex;gap:8px}
+.pager a{padding:2px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink)}
+.pager a:hover{border-color:var(--brand);color:var(--brand);text-decoration:none}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1140px;margin:0 auto;padding:0 28px 80px}
+.toc{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding-top:30px;font-size:14px}
+.toc-title{font-size:12px;letter-spacing:.12em;color:var(--muted);margin:0 0 10px}
+.toc ol,.toc-mobile ol{list-style:none;margin:0;padding:0}
+.toc ol{border-left:1px solid var(--line)}
+.toc a{display:block;padding:5px 0 5px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--muted);line-height:1.5}
+.toc a .n,.toc-mobile a .n{font-family:var(--mono);font-size:12px;margin-right:8px}
+.toc a.active{color:var(--brand);border-left-color:var(--brand);font-weight:600}
+.toc a:hover{text-decoration:none;color:var(--ink)}
+.totop{display:inline-block;margin-top:14px;font-size:13px;color:var(--muted)}
+.toc-mobile{display:none}
+main{min-width:0;max-width:var(--measure)}
+.cover{padding:44px 0 4px}
+.cover-no{font-family:var(--mono);font-weight:800;font-size:88px;line-height:1;color:var(--brand);letter-spacing:-.02em}
+.cover h1{font-size:34px;line-height:1.3;margin:12px 0 4px}
+.kicker{color:var(--muted);font-size:14px;margin:0}
+.summary{margin:22px 0;padding:16px 20px;background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:0 var(--radius) var(--radius) 0;font-size:16.5px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.metric .v{font-family:var(--mono);font-weight:700;font-size:32px;line-height:1.1;color:var(--brand)}
+.metric .k{font-weight:600;margin-top:6px}
+.metric .d{font-size:12.5px;color:var(--muted);line-height:1.6}
+.sec{padding-top:44px}
+.sec h2{display:flex;align-items:baseline;gap:12px;font-size:24px;line-height:1.35;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.sec h2 .no{font-family:var(--mono);font-weight:700;font-size:14px;line-height:1;color:var(--panel);background:var(--brand);padding:5px 8px;border-radius:6px;transform:translateY(-3px)}
+.sec h2 .anchor{margin-left:auto;color:var(--line);font-weight:400;font-size:18px}
+.sec h2:hover .anchor{color:var(--muted)}
+.sec h3{font-size:17px;margin:28px 0 8px}
+.lead{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.cards.c4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.card h4{margin:0 0 4px;font-size:15.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card p{margin:0;font-size:14px;color:var(--muted);line-height:1.7}
+.card.mini{padding:10px 14px}
+.card.mini h4{font-family:var(--mono);font-size:14.5px}
+.kv{display:grid;grid-template-columns:7.5em minmax(0,1fr);margin:0;font-size:14.5px}
+.kv>dt,.kv>dd{margin:0;padding:8px 0;border-bottom:1px solid var(--line)}
+.kv>dt{color:var(--muted);padding-right:12px}
+.kv>dt:last-of-type,.kv>dd:last-of-type{border-bottom:0}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+.step-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;background:var(--brand-soft);border-bottom:1px solid var(--line);font-weight:600}
+.step-h .tag{font-family:var(--mono);font-size:12px;line-height:1;background:var(--brand);color:var(--panel);border-radius:5px;padding:4px 7px}
+.step-b{padding:2px 16px}
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+th,td{padding:9px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--brand-soft);font-weight:600;white-space:nowrap}
+tbody tr:nth-child(even) td{background:var(--bg)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+.flow{display:flex;flex-wrap:wrap;gap:10px 24px;margin:14px 0;padding:0;list-style:none}
+.flow li{position:relative;flex:1 1 118px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;font-size:14px;line-height:1.55}
+.flow li b{display:block}
+.flow li span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.flow li+li::before{content:"→";position:absolute;left:-12px;top:50%;transform:translate(-50%,-50%);color:var(--muted)}
+.flow li.hl{border-color:var(--warn);background:var(--warn-soft)}
+.callout{display:grid;grid-template-columns:26px minmax(0,1fr);gap:2px 12px;margin:16px 0;padding:14px 16px;border-left:4px solid var(--info);background:var(--info-soft);border-radius:0 var(--radius) var(--radius) 0}
+.callout .ic{grid-row:span 2;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:13px;background:var(--info);color:var(--panel)}
+.callout .t{font-weight:600}
+.callout p{margin:0;font-size:14.5px}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}.callout.warn .ic{background:var(--warn)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}.callout.bad .ic{background:var(--bad)}
+.callout.tip{border-color:var(--brand);background:var(--brand-soft)}.callout.tip .ic{background:var(--brand)}
+.badge{display:inline-block;font-size:12px;line-height:1.5;padding:0 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap;font-weight:600;font-family:var(--font)}
+.b-brand{color:var(--brand);background:var(--brand-soft)}
+.b-warn{color:var(--warn);background:var(--warn-soft)}
+.b-bad{color:var(--bad);background:var(--bad-soft)}
+.b-info{color:var(--info);background:var(--info-soft)}
+.b-muted{color:var(--muted);background:var(--bg)}
+.checklist{list-style:none;margin:14px 0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.checklist li{border-bottom:1px solid var(--line)}
+.checklist li:last-child{border-bottom:0}
+.checklist label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;padding:10px 16px;cursor:pointer}
+.checklist input{margin:6px 0 0;width:16px;height:16px;accent-color:var(--brand)}
+.checklist .what{font-weight:600}
+.checklist .how{display:block;color:var(--muted);font-size:13.5px;line-height:1.7}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+.compare .col{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:var(--radius);padding:12px 16px}
+.compare .col.before{border-top-color:var(--bad)}
+.compare h4{margin:0 0 6px;font-size:14.5px;display:flex;gap:8px;align-items:center}
+.compare p{margin:4px 0;font-size:14px}
+.diagram{margin:18px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.diagram .scroll{overflow-x:auto}
+.diagram svg{display:block;width:100%;height:auto;min-width:640px}
+.diagram figcaption{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.7}
+.diagram figcaption b{color:var(--ink)}
+svg text{font-family:var(--font)}
+.s-box{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+.s-brand{fill:var(--brand-soft);stroke:var(--brand);stroke-width:1.2}
+.s-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.2}
+.s-bad{fill:var(--bad-soft);stroke:var(--bad);stroke-width:1.2}
+.s-info{fill:var(--info-soft);stroke:var(--info);stroke-width:1.2}
+.s-dash{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 4}
+.s-t{fill:var(--ink);font-size:13px;font-weight:600}
+.s-s{fill:var(--muted);font-size:11px}
+.s-code{fill:var(--ink);font-family:var(--mono);font-size:11.5px}
+.s-l{stroke:var(--muted);stroke-width:1.3;fill:none}
+.s-a{fill:var(--muted)}
+.s-lab{fill:var(--muted);font-size:11px}
+.s-chip-m{fill:var(--brand)}.s-chip-r{fill:var(--bad)}.s-chip-k{fill:var(--info)}
+.s-chip-t{fill:var(--panel);font-size:11px;font-weight:700}
+.foot{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13.5px;color:var(--muted)}
+@media (max-width:960px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:0;padding:0 18px 64px}
+  .toc{display:none}
+  .toc-mobile{display:block;margin:18px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 16px;font-size:14px}
+  .toc-mobile summary{cursor:pointer;font-weight:600}
+  .toc-mobile ol{padding-top:6px}
+  .toc-mobile a{display:block;padding:4px 0;color:var(--muted)}
+  .toc-mobile a.active{color:var(--brand);font-weight:600}
+  .topbar{padding:10px 18px}
+  .cover-no{font-size:68px}
+  .cover h1{font-size:28px}
+}
+@media (max-width:600px){
+  .flow{flex-direction:column;gap:22px}
+  .flow li{flex:none}
+  .flow li+li::before{content:"↓";left:50%;top:-12px}
+  .kv{grid-template-columns:6em minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+  <nav class="crumb" aria-label="面包屑"><a href="index.html">变更说明</a><span>/</span><b>工程底座与公共包</b></nav>
+  <nav class="pager" aria-label="翻页"><a href="index.html">← 上一篇 · 00 总览</a><a href="02-gateway.html">下一篇 · 02 gateway 与鉴权 →</a></nav>
+</header>
+
+<div class="layout">
+<aside class="toc" aria-label="目录">
+  <p class="toc-title">目录</p>
+  <ol>
+    <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+    <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+    <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+    <li><a href="#s4"><span class="n">04</span>依赖、库与入口</a></li>
+    <li><a href="#s5"><span class="n">05</span>关键规则与失败处理</a></li>
+    <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+    <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+  </ol>
+  <a class="totop" href="#top">↑ 回到顶部</a>
+</aside>
+
+<main>
+<section class="cover" id="top">
+  <div class="cover-no">01</div>
+  <h1>工程底座与公共包</h1>
+  <p class="kicker">deploy · Makefile · CI · pkg · 配置读取</p>
+  <div class="summary">一条 <code>make up</code> 起齐 MySQL、Redis、Kafka；七个服务共用 <code>pkg/</code> 里的 HTTP 自验令牌、密钥检查、全局追踪和测试建库；地址和密钥写在 yaml 里，CI 守住契约、单测、数据层和两个前端。</div>
+  <div class="metrics">
+    <div class="metric"><div class="v">3</div><div class="k">本地依赖容器</div><div class="d">mysql · redis · kafka</div></div>
+    <div class="metric"><div class="v">7</div><div class="k">业务库</div><div class="d">init.sql 首次启动创建</div></div>
+    <div class="metric"><div class="v">4</div><div class="k">CI 任务</div><div class="d">go · integration · web · admin-web</div></div>
+    <div class="metric"><div class="v">5</div><div class="k">公共包</div><div class="d">httpauth · secretcheck · trace · testdb · kafkaout</div></div>
+  </div>
+  <details class="toc-mobile">
+    <summary>目录</summary>
+    <ol>
+      <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+      <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+      <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+      <li><a href="#s4"><span class="n">04</span>依赖、库与入口</a></li>
+      <li><a href="#s5"><span class="n">05</span>关键规则与失败处理</a></li>
+      <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+      <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+    </ol>
+  </details>
+</section>
+
+<section class="sec" id="s1">
+  <h2><span class="no">01</span>这个模块负责什么<a class="anchor" href="#s1">#</a></h2>
+  <p class="lead">它不是一个业务服务，而是所有服务共同站着的地面。本地依赖、构建入口、流水线和跨服务的公共代码都在这里。</p>
+
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 760 356" role="img" aria-label="本地依赖拓扑：gateway 与七个服务连接 compose 起的三个容器">
+      <defs><marker id="p1-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="290" y="14" width="180" height="52" rx="10" class="s-info"/>
+      <text x="380" y="37" text-anchor="middle" class="s-t">gateway</text>
+      <text x="380" y="55" text-anchor="middle" class="s-s">HTTP :8080 · 不连存储</text>
+      <g class="s-l">
+        <path d="M380,66 L62,112"/><path d="M380,66 L168,112"/><path d="M380,66 L274,112"/><path d="M380,66 L380,112"/><path d="M380,66 L486,112"/><path d="M380,66 L592,112"/><path d="M380,66 L698,112"/>
+      </g>
+      <g>
+        <rect x="14" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="62" y="136" text-anchor="middle" class="s-t">user</text><text x="62" y="154" text-anchor="middle" class="s-s">8000 / 9000</text>
+        <rect x="38" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="49" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="64" y="166" width="22" height="18" rx="4" class="s-chip-r"/><text x="75" y="179" text-anchor="middle" class="s-chip-t">R</text>
+
+        <rect x="120" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="168" y="136" text-anchor="middle" class="s-t">product</text><text x="168" y="154" text-anchor="middle" class="s-s">8001 / 9001</text>
+        <rect x="131" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="142" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="157" y="166" width="22" height="18" rx="4" class="s-chip-r"/><text x="168" y="179" text-anchor="middle" class="s-chip-t">R</text>
+        <rect x="183" y="166" width="22" height="18" rx="4" class="s-chip-k"/><text x="194" y="179" text-anchor="middle" class="s-chip-t">K</text>
+
+        <rect x="226" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="274" y="136" text-anchor="middle" class="s-t">inventory</text><text x="274" y="154" text-anchor="middle" class="s-s">8002 / 9002</text>
+        <rect x="250" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="261" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="276" y="166" width="22" height="18" rx="4" class="s-chip-k"/><text x="287" y="179" text-anchor="middle" class="s-chip-t">K</text>
+
+        <rect x="332" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="380" y="136" text-anchor="middle" class="s-t">order</text><text x="380" y="154" text-anchor="middle" class="s-s">8003 / 9003</text>
+        <rect x="356" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="367" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="382" y="166" width="22" height="18" rx="4" class="s-chip-k"/><text x="393" y="179" text-anchor="middle" class="s-chip-t">K</text>
+
+        <rect x="438" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="486" y="136" text-anchor="middle" class="s-t">payment</text><text x="486" y="154" text-anchor="middle" class="s-s">8004 / 9004</text>
+        <rect x="462" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="473" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="488" y="166" width="22" height="18" rx="4" class="s-chip-k"/><text x="499" y="179" text-anchor="middle" class="s-chip-t">K</text>
+
+        <rect x="544" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="592" y="136" text-anchor="middle" class="s-t">notification</text><text x="592" y="154" text-anchor="middle" class="s-s">8005 / 9005</text>
+        <rect x="568" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="579" y="179" text-anchor="middle" class="s-chip-t">M</text>
+        <rect x="594" y="166" width="22" height="18" rx="4" class="s-chip-k"/><text x="605" y="179" text-anchor="middle" class="s-chip-t">K</text>
+
+        <rect x="650" y="112" width="96" height="86" rx="10" class="s-box"/>
+        <text x="698" y="136" text-anchor="middle" class="s-t">admin</text><text x="698" y="154" text-anchor="middle" class="s-s">8006 / 9006</text>
+        <rect x="687" y="166" width="22" height="18" rx="4" class="s-chip-m"/><text x="698" y="179" text-anchor="middle" class="s-chip-t">M</text>
+      </g>
+      <text x="380" y="220" text-anchor="middle" class="s-s">M = MySQL　R = Redis　K = Kafka（kafkaout 发件箱与消费者）· 端口为 HTTP / gRPC</text>
+      <rect x="24" y="232" width="712" height="114" rx="12" class="s-dash"/>
+      <text x="38" y="249" class="s-s">deploy/compose.yaml</text>
+      <rect x="40" y="256" width="210" height="80" rx="10" class="s-brand"/>
+      <text x="145" y="279" text-anchor="middle" class="s-t">MySQL 8</text>
+      <text x="145" y="299" text-anchor="middle" class="s-code">3306</text>
+      <text x="145" y="319" text-anchor="middle" class="s-s">init.sql 首启建 7 个库</text>
+      <rect x="275" y="256" width="210" height="80" rx="10" class="s-bad"/>
+      <text x="380" y="279" text-anchor="middle" class="s-t">Redis 7</text>
+      <text x="380" y="299" text-anchor="middle" class="s-code">6379</text>
+      <text x="380" y="319" text-anchor="middle" class="s-s">redis.addr（user、product）</text>
+      <rect x="510" y="256" width="210" height="80" rx="10" class="s-info"/>
+      <text x="615" y="279" text-anchor="middle" class="s-t">Kafka 3.9.1 · KRaft</text>
+      <text x="615" y="299" text-anchor="middle" class="s-code">9092</text>
+      <text x="615" y="319" text-anchor="middle" class="s-s">kafka.brokers · 自动建主题</text>
+    </svg>
+    </div>
+    <figcaption><b>图 1　本地依赖拓扑。</b>gateway 只转发不连存储；每个服务框里的色块表示它连接的容器，Redis 只有 user 和 product 在配置里声明了 <code>data.redis.addr</code>。</figcaption>
+  </figure>
+
+  <div class="cards c4">
+    <div class="card"><h4>本地依赖 <span class="badge b-brand">deploy/</span></h4><p>compose 起 MySQL、Redis、Kafka，端口写死在 <code>127.0.0.1</code>。业务库由 <code>make db-init</code> 执行 init.sql。</p></div>
+    <div class="card"><h4>统一入口 <span class="badge b-brand">Makefile</span></h4><p>起停依赖、生成代码、单测、数据层测试、灌数据、端到端都有对应目标。</p></div>
+    <div class="card"><h4>流水线 <span class="badge b-brand">ci.yaml</span></h4><p>push 与 PR 触发四个并行任务，覆盖契约、Go 单测、MySQL 数据层与两个前端。</p></div>
+    <div class="card"><h4>公共包 <span class="badge b-brand">pkg/</span></h4><p>各服务共用的鉴权、密钥检查、追踪、测试建库和 Kafka 发件箱。</p></div>
+  </div>
+</section>
+
+<section class="sec" id="s2">
+  <h2><span class="no">02</span>变更点<a class="anchor" href="#s2">#</a></h2>
+  <p class="lead">按能力列出本次落地的规则，文件细节放在后面几节。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>能力</th><th>规则</th><th>落在哪</th></tr></thead>
+      <tbody>
+        <tr><td>本地依赖</td><td>一条命令起 MySQL 8、Redis 7、Kafka 3.9.1</td><td><code>deploy/compose.yaml</code></td></tr>
+        <tr><td>端口覆盖</td><td><code>MYSQL_PORT</code> / <code>REDIS_PORT</code> / <code>KAFKA_PORT</code></td><td><code>deploy/compose.yaml</code></td></tr>
+        <tr><td>建库</td><td>首启建 7 个 utf8mb4 库</td><td><code>deploy/mysql/init.sql</code></td></tr>
+        <tr><td>统一入口</td><td>新增 7 个 make 目标</td><td><code>Makefile</code></td></tr>
+        <tr><td>持续集成</td><td>push / PR 触发 4 个任务</td><td><code>.github/workflows/ci.yaml</code></td></tr>
+        <tr><td>HTTP 自验令牌</td><td>先剥客户端身份头，验签后才写元数据</td><td><code>pkg/httpauth</code></td></tr>
+        <tr><td>密钥检查</td><td>为空或两把相同，启动即退出</td><td><code>pkg/secretcheck</code></td></tr>
+        <tr><td>全局追踪</td><td>全局 TracerProvider + W3C TraceContext</td><td><code>pkg/trace</code></td></tr>
+        <tr><td>测试建库</td><td>每个用例删掉重建独立库</td><td><code>pkg/testdb</code></td></tr>
+        <tr><td>发件箱</td><td>事务内写 <code>outbox_events</code>，后台投递</td><td><code>pkg/kafkaout</code></td></tr>
+        <tr><td>配置读取</td><td>只读 yaml 文件</td><td><code>app/*/cmd/*/main.go</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="s3">
+  <h2><span class="no">03</span>实现逻辑<a class="anchor" href="#s3">#</a></h2>
+
+  <h3>服务启动顺序</h3>
+  <p>七个服务和 gateway 的 <code>main.go</code> 走同一条启动链。密钥检查放在装配之前，不合格就不会监听端口。</p>
+  <ol class="flow">
+    <li><b>trace.Setup()</b><span>装全局追踪，退出时 Shutdown</span></li>
+    <li><b>config.New</b><span>只接 file.NewSource</span></li>
+    <li><b>c.Scan(&amp;bc)</b><span>扫进手写 conf 结构体</span></li>
+    <li class="hl"><b>secretcheck.Check</b><span>不合格 os.Exit(1)</span></li>
+    <li><b>wireApp</b><span>Wire 装配各层</span></li>
+    <li><b>app.Run()</b><span>阻塞到收到停止信号</span></li>
+  </ol>
+
+  <h3>HTTP 端口自验令牌</h3>
+  <p>各服务的 HTTP 端口可以被直接访问，所以不能相信请求里自带的身份头。<code>httpauth.Server</code> 挂在 <code>metadata.Server()</code> 之后，先清掉身份键，再按规则写回验签得到的身份。</p>
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 860 500" role="img" aria-label="httpauth 判定流程">
+      <defs><marker id="p1-arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="280" y="10" width="300" height="40" rx="10" class="s-box"/>
+      <text x="430" y="35" text-anchor="middle" class="s-t">请求到达服务的 HTTP 端口</text>
+      <rect x="600" y="10" width="240" height="40" rx="10" class="s-dash"/>
+      <text x="720" y="35" text-anchor="middle" class="s-s">gRPC 调用：Kind 不是 HTTP，直接放行</text>
+      <rect x="280" y="72" width="300" height="52" rx="10" class="s-box"/>
+      <text x="430" y="94" text-anchor="middle" class="s-t">trusted() 丢弃三个身份键</text>
+      <text x="430" y="113" text-anchor="middle" class="s-s">x-md-global-user-id · admin-id · admin-role，其余保留</text>
+      <rect x="310" y="148" width="240" height="40" rx="10" class="s-warn"/>
+      <text x="430" y="173" text-anchor="middle" class="s-t">operation 在 Public？</text>
+      <rect x="600" y="148" width="240" height="40" rx="10" class="s-brand"/>
+      <text x="720" y="173" text-anchor="middle" class="s-t">放行，不写身份</text>
+      <rect x="310" y="214" width="240" height="40" rx="10" class="s-warn"/>
+      <text x="430" y="239" text-anchor="middle" class="s-t">路径以 /v1/admin/ 开头？</text>
+
+      <rect x="20" y="290" width="250" height="52" rx="10" class="s-box"/>
+      <text x="145" y="312" text-anchor="middle" class="s-t">VerifyAdmin(AdminSecret)</text>
+      <text x="145" y="331" text-anchor="middle" class="s-s">HS256 · aud 含 admin · sub、role 非空</text>
+      <rect x="295" y="296" width="80" height="40" rx="10" class="s-bad"/>
+      <text x="335" y="321" text-anchor="middle" class="s-t">401</text>
+      <rect x="20" y="370" width="250" height="44" rx="10" class="s-warn"/>
+      <text x="145" y="397" text-anchor="middle" class="s-t">AllowAdmin(path, role)？</text>
+      <rect x="295" y="372" width="80" height="40" rx="10" class="s-bad"/>
+      <text x="335" y="397" text-anchor="middle" class="s-t">403</text>
+      <rect x="20" y="446" width="250" height="44" rx="10" class="s-brand"/>
+      <text x="145" y="473" text-anchor="middle" class="s-t">写 admin-id、admin-role</text>
+
+      <rect x="590" y="290" width="250" height="52" rx="10" class="s-box"/>
+      <text x="715" y="312" text-anchor="middle" class="s-t">VerifyUser(UserSecret)</text>
+      <text x="715" y="331" text-anchor="middle" class="s-s">HS256 · sub 非空</text>
+      <rect x="485" y="296" width="80" height="40" rx="10" class="s-brand"/>
+      <text x="525" y="321" text-anchor="middle" class="s-t">写 user-id</text>
+      <rect x="590" y="370" width="250" height="44" rx="10" class="s-warn"/>
+      <text x="715" y="397" text-anchor="middle" class="s-t">operation 在 Optional？</text>
+      <rect x="485" y="372" width="80" height="40" rx="10" class="s-bad"/>
+      <text x="525" y="397" text-anchor="middle" class="s-t">401</text>
+      <rect x="590" y="446" width="250" height="44" rx="10" class="s-brand"/>
+      <text x="715" y="473" text-anchor="middle" class="s-t">放行，不写身份</text>
+
+      <g class="s-l" marker-end="url(#p1-arr2)">
+        <path d="M430,50 V70"/><path d="M430,124 V146"/>
+        <path d="M550,168 H598"/><path d="M430,188 V212"/>
+        <path d="M310,234 H145 V288"/><path d="M550,234 H715 V288"/>
+        <path d="M270,316 H293"/><path d="M145,342 V368"/>
+        <path d="M270,392 H293"/><path d="M145,414 V444"/>
+        <path d="M590,316 H567"/><path d="M715,342 V368"/>
+        <path d="M590,392 H567"/><path d="M715,414 V444"/>
+      </g>
+      <text x="574" y="160" text-anchor="middle" class="s-lab">是</text>
+      <text x="442" y="205" class="s-lab">否</text>
+      <text x="228" y="226" text-anchor="middle" class="s-lab">是</text>
+      <text x="632" y="226" text-anchor="middle" class="s-lab">否（买家路径）</text>
+      <text x="282" y="308" text-anchor="middle" class="s-lab">失败</text>
+      <text x="158" y="360" class="s-lab">通过</text>
+      <text x="282" y="385" text-anchor="middle" class="s-lab">否</text>
+      <text x="158" y="435" class="s-lab">是</text>
+      <text x="578" y="308" text-anchor="middle" class="s-lab">通过</text>
+      <text x="728" y="360" class="s-lab">失败</text>
+      <text x="578" y="385" text-anchor="middle" class="s-lab">否</text>
+      <text x="728" y="435" class="s-lab">是</text>
+    </svg>
+    </div>
+    <figcaption><b>图 2　httpauth.Server 判定流程。</b>绿色终点都会用 <code>metadata.NewServerContext</code> 把清洗后的元数据交给 handler；追踪头等非身份元数据原样保留。</figcaption>
+  </figure>
+
+  <div class="step">
+    <div class="step-h"><span class="tag">pkg/httpauth</span>服务端口的身份闸门</div>
+    <div class="step-b"><dl class="kv">
+      <dt>入口</dt><dd><code>httpauth.Server(Options)</code>，返回 Kratos 中间件</dd>
+      <dt>选项</dt><dd><code>UserSecret</code>、<code>AdminSecret</code>、<code>Public</code>、<code>Optional</code>（后两者是 operation 名单）</dd>
+      <dt>后台判定</dt><dd>看 URL 路径是否以 <code>/v1/admin/</code> 开头，不看 operation</dd>
+      <dt>角色规则</dt><dd><code>AllowAdmin(path, role)</code>，gateway 的 <code>allowAdmin</code> 直接调用它，两边共用一套</dd>
+      <dt>验签函数</dt><dd><code>VerifyUser</code> / <code>VerifyAdmin</code>，gateway 的两个验签器也是它们的薄包装</dd>
+      <dt>测试辅助</dt><dd><code>httpauthtest.RejectsForged</code>：只带伪造身份头直连，必须得到 401</dd>
+    </dl></div>
+  </div>
+
+  <h3>配置只读文件</h3>
+  <p>地址和令牌密钥直接写在 <code>dev.yaml</code> 与 <code>prod.yaml</code>。不再用占位符，也不再接环境源。</p>
+  <div class="compare">
+    <div class="col before"><h4><span class="badge b-bad">之前</span><code>env.NewSource("KRATOS")</code></h4><p>设置 <code>ADMIN_JWT_SECRET=x</code> 后读到的仍是 <code>change-me-…</code> 缺省值。</p><p>由 <code>TestPrefixedEnvMissesPlaceholder</code> 固定这个反例。</p></div>
+    <div class="col"><h4><span class="badge b-brand">现在</span>只读 yaml</h4><p>地址和密钥写在 <code>dev.yaml</code> / <code>prod.yaml</code>，不再从环境变量替换。</p><p>由各服务的 conf 测试按文件里的字面值核对。</p></div>
+  </div>
+
+  <h3>其余三个公共包</h3>
+  <div class="cards">
+    <div class="card"><h4><code>secretcheck</code></h4><p><code>Check(keys...)</code> 逐把检查：空白或与前面某把相同就记错，全部用 <code>errors.Join</code> 一次报出；仍以 <code>change-me-</code> 开头只打警告。</p></div>
+    <div class="card"><h4><code>trace</code></h4><p><code>Setup()</code> 设全局 <code>sdktrace.TracerProvider</code> 与 <code>propagation.TraceContext</code>，日志通过 <code>tracing.TraceAttrs</code> 带上同一个 trace id。</p></div>
+    <div class="card"><h4><code>testdb</code></h4><p><code>Open(t, name, models...)</code> 先 <code>DROP</code> 再 <code>CREATE</code> 独立库并 AutoMigrate，不碰服务正在用的库；连接串是 <code>root:root@tcp(127.0.0.1:3306)/</code>。</p></div>
+  </div>
+  <div class="callout">
+    <span class="ic">i</span><span class="t"><code>pkg/kafkaout</code> 在订单、支付、通知文档里展开</span>
+    <p>它提供 <code>Insert</code>（事务内写发件箱）、<code>StartPublisher</code>（每秒投递一批）和 <code>StartConsumer</code>（同一条原地重试，200ms 起翻倍封顶 3s，连续失败 5 次跳过）。</p>
+  </div>
+</section>
+
+<section class="sec" id="s4">
+  <h2><span class="no">04</span>依赖、库与入口<a class="anchor" href="#s4">#</a></h2>
+
+  <h3>compose 里的三个容器</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>服务</th><th>镜像</th><th>本机端口</th><th>要点</th></tr></thead>
+      <tbody>
+        <tr><td><code>mysql</code></td><td><code>mysql:8</code></td><td><code>3306</code></td><td>root / root，卷 <code>mysql_data</code>，utf8mb4</td></tr>
+        <tr><td><code>redis</code></td><td><code>redis:7</code></td><td><code>6379</code></td><td>无密码、无持久卷</td></tr>
+        <tr><td><code>kafka</code></td><td><code>apache/kafka:3.9.1</code></td><td><code>9092</code></td><td>单节点兼任 broker 与 controller</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>init.sql 建的七个库</h3>
+  <p>每个服务一个库，连接串写在该服务 yaml 的 <code>data.database.source</code>；gateway 没有库。</p>
+  <div class="cards c4">
+    <div class="card mini"><h4>user</h4><p><code>dev.yaml</code> 里的 user 库</p></div>
+    <div class="card mini"><h4>product</h4><p><code>dev.yaml</code> 里的 product 库</p></div>
+    <div class="card mini"><h4>inventory</h4><p><code>dev.yaml</code> 里的 inventory 库</p></div>
+    <div class="card mini"><h4>order</h4><p><code>dev.yaml</code> 里的 order 库</p></div>
+    <div class="card mini"><h4>payment</h4><p><code>dev.yaml</code> 里的 payment 库</p></div>
+    <div class="card mini"><h4>notification</h4><p><code>dev.yaml</code> 里的 notification 库</p></div>
+    <div class="card mini"><h4>admin</h4><p><code>dev.yaml</code> 里的 admin 库</p></div>
+  </div>
+
+  <h3>Makefile 目标</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>目标</th><th>命令要点</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>up</code> <span class="badge b-brand">新增</span></td><td><code>docker compose … up -d</code></td><td>起 MySQL、Redis、Kafka</td></tr>
+        <tr><td><code>down</code> <span class="badge b-brand">新增</span></td><td><code>docker compose … down</code></td><td>停掉三个容器</td></tr>
+        <tr><td><code>init</code></td><td><code>go install</code> wire、buf</td><td>装生成工具</td></tr>
+        <tr><td><code>api</code></td><td><code>buf generate</code></td><td>由 proto 生成桩代码</td></tr>
+        <tr><td><code>generate</code></td><td><code>go generate</code> + <code>go mod tidy</code></td><td>刷新 Wire 与依赖</td></tr>
+        <tr><td><code>all</code></td><td><code>make api</code> + <code>make generate</code></td><td>全部重新生成</td></tr>
+        <tr><td><code>build</code></td><td><code>go build -o ./bin/</code></td><td>带版本号编译</td></tr>
+        <tr><td><code>test</code> <span class="badge b-brand">新增</span></td><td><code>go test ./...</code></td><td>单测，不连数据库</td></tr>
+        <tr><td><code>test-integration</code> <span class="badge b-brand">新增</span></td><td><code>-tags integration -p 1</code></td><td>数据层测试，连 <code>127.0.0.1:3306</code></td></tr>
+        <tr><td><code>seed</code> <span class="badge b-brand">新增</span></td><td><code>go run ./app/product/cmd/seed</code></td><td>经 gRPC 灌目录和库存</td></tr>
+        <tr><td><code>seed-admin</code> <span class="badge b-brand">新增</span></td><td><code>go run ./app/admin/cmd/seed</code></td><td>建超级管理员，需口令</td></tr>
+        <tr><td><code>e2e</code> <span class="badge b-brand">新增</span></td><td><code>-tags e2e ./app/gateway/e2e/...</code></td><td>经 gateway 跑下单支付</td></tr>
+        <tr><td><code>help</code></td><td><code>awk</code> 读目标上方注释</td><td>默认目标，列出说明</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>配置一览</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>配置</th><th>谁读</th><th>开发取值</th></tr></thead>
+      <tbody>
+        <tr><td><code>auth.jwt_secret</code></td><td>gateway 与需要验买家令牌的服务 yaml</td><td><code>tmjwjx-user-jwt-secret</code></td></tr>
+        <tr><td><code>auth.admin_jwt_secret</code></td><td>gateway 与需要验运营令牌的服务 yaml</td><td><code>tmjwjx-admin-jwt-secret</code></td></tr>
+        <tr><td><code>data.redis.addr</code></td><td>user、product 的 dev.yaml</td><td>容器内 <code>redis:6379</code></td></tr>
+        <tr><td><code>kafka.brokers</code></td><td>product、inventory、order、payment、notification 的 dev.yaml</td><td><code>kafka:29092</code></td></tr>
+        <tr><td>集成测试 MySQL</td><td><code>testdb.DSN()</code></td><td><code>root:root@tcp(127.0.0.1:3306)/</code></td></tr>
+        <tr><td><code>seed.init_password</code></td><td><code>make seed-admin</code></td><td>yaml 未写，空则失败，至少 8 位</td></tr>
+        <tr><td>e2e gateway</td><td><code>make e2e</code></td><td><code>http://127.0.0.1:8080</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="s5">
+  <h2><span class="no">05</span>关键规则与失败处理<a class="anchor" href="#s5">#</a></h2>
+  <h3>httpauth 判定表</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>请求情况</th><th>结果</th><th>错误</th></tr></thead>
+      <tbody>
+        <tr><td>operation 在 Public</td><td>放行，不写身份</td><td>—</td></tr>
+        <tr><td>后台路径，无令牌或密钥不对</td><td>拒绝，买家令牌验签即失败</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>后台令牌 aud 不含 admin 或缺 role</td><td>拒绝</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>后台令牌有效，角色不符</td><td>拒绝</td><td><span class="badge b-bad">403 FORBIDDEN</span></td></tr>
+        <tr><td>买家路径，令牌有效</td><td>写 <code>x-md-global-user-id</code></td><td>—</td></tr>
+        <tr><td>买家路径，令牌无效，在 Optional</td><td>放行，不写身份</td><td>—</td></tr>
+        <tr><td>买家路径，令牌无效，不在 Optional</td><td>拒绝</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>算法不是 HS256 / 密钥为空</td><td><code>parseHS256</code> 直接拒</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>传输不是 HTTP</td><td>中间件不处理</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>secretcheck 判定表</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>密钥状态</th><th>报错文本</th><th>进程</th></tr></thead>
+      <tbody>
+        <tr><td>为空或只有空白</td><td><code>&lt;变量名&gt; is empty</code></td><td><span class="badge b-bad">exit 1</span></td></tr>
+        <tr><td>与前面某把相同</td><td><code>&lt;后者&gt; must differ from &lt;前者&gt;</code></td><td><span class="badge b-bad">exit 1</span></td></tr>
+        <tr><td>仍以 <code>change-me-</code> 开头</td><td>只打 <code>log.Warn</code></td><td><span class="badge b-warn">继续启动</span></td></tr>
+        <tr><td>只传一把</td><td>不做相同比较</td><td><span class="badge b-brand">正常</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout tip">
+    <span class="ic">✓</span><span class="t">每个进程检查的是自己用到的那几把</span>
+    <p>user 只查 <code>jwt_secret</code>，admin 只查 <code>jwt_secret</code>，gateway 与 product、inventory、order、payment、notification 查 <code>jwt_secret</code> 和 <code>admin_jwt_secret</code>。</p>
+  </div>
+</section>
+
+<section class="sec" id="s6">
+  <h2><span class="no">06</span>验证与测试<a class="anchor" href="#s6">#</a></h2>
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 870 268" role="img" aria-label="CI 四个任务的步骤">
+      <defs><marker id="p1-arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="10" y="12" width="136" height="52" rx="10" class="s-info"/>
+      <text x="78" y="34" text-anchor="middle" class="s-t">go</text><text x="78" y="52" text-anchor="middle" class="s-s">Go 1.26.5 + buf</text>
+      <rect x="160" y="12" width="130" height="52" rx="10" class="s-box"/><text x="225" y="42" text-anchor="middle" class="s-code">buf lint</text>
+      <rect x="302" y="12" width="130" height="52" rx="10" class="s-box"/><text x="367" y="42" text-anchor="middle" class="s-code">make api</text>
+      <rect x="444" y="12" width="130" height="52" rx="10" class="s-warn"/><text x="509" y="34" text-anchor="middle" class="s-code">git diff</text><text x="509" y="52" text-anchor="middle" class="s-code">--exit-code</text>
+      <rect x="586" y="12" width="130" height="52" rx="10" class="s-box"/><text x="651" y="42" text-anchor="middle" class="s-code">go build ./...</text>
+      <rect x="728" y="12" width="130" height="52" rx="10" class="s-box"/><text x="793" y="42" text-anchor="middle" class="s-code">go test ./...</text>
+
+      <rect x="10" y="76" width="136" height="52" rx="10" class="s-info"/>
+      <text x="78" y="98" text-anchor="middle" class="s-t">integration</text><text x="78" y="116" text-anchor="middle" class="s-s">services: mysql:8</text>
+      <rect x="160" y="76" width="272" height="52" rx="10" class="s-box"/><text x="296" y="98" text-anchor="middle" class="s-t">等待健康检查</text><text x="296" y="116" text-anchor="middle" class="s-code">mysqladmin ping（最多 30 次）</text>
+      <rect x="444" y="76" width="272" height="52" rx="10" class="s-brand"/><text x="580" y="98" text-anchor="middle" class="s-code">make test-integration</text><text x="580" y="116" text-anchor="middle" class="s-s">连 127.0.0.1:3306</text>
+
+      <rect x="10" y="140" width="136" height="52" rx="10" class="s-info"/>
+      <text x="78" y="162" text-anchor="middle" class="s-t">web</text><text x="78" y="180" text-anchor="middle" class="s-s">frontend/web · Node 26</text>
+      <rect x="160" y="140" width="130" height="52" rx="10" class="s-box"/><text x="225" y="170" text-anchor="middle" class="s-code">npm ci</text>
+      <rect x="302" y="140" width="130" height="52" rx="10" class="s-box"/><text x="367" y="170" text-anchor="middle" class="s-code">npm test</text>
+      <rect x="444" y="140" width="130" height="52" rx="10" class="s-box"/><text x="509" y="170" text-anchor="middle" class="s-code">npm run build</text>
+
+      <rect x="10" y="204" width="136" height="52" rx="10" class="s-info"/>
+      <text x="78" y="226" text-anchor="middle" class="s-t">admin-web</text><text x="78" y="244" text-anchor="middle" class="s-s">frontend/admin-web</text>
+      <rect x="160" y="204" width="130" height="52" rx="10" class="s-box"/><text x="225" y="234" text-anchor="middle" class="s-code">npm ci</text>
+      <rect x="302" y="204" width="130" height="52" rx="10" class="s-box"/><text x="367" y="234" text-anchor="middle" class="s-code">npm test</text>
+      <rect x="444" y="204" width="130" height="52" rx="10" class="s-box"/><text x="509" y="234" text-anchor="middle" class="s-code">npm run build</text>
+
+      <g class="s-l" marker-end="url(#p1-arr3)">
+        <path d="M146,38 H158"/><path d="M290,38 H300"/><path d="M432,38 H442"/><path d="M574,38 H584"/><path d="M716,38 H726"/>
+        <path d="M146,102 H158"/><path d="M432,102 H442"/>
+        <path d="M146,166 H158"/><path d="M290,166 H300"/><path d="M432,166 H442"/>
+        <path d="M146,230 H158"/><path d="M290,230 H300"/><path d="M432,230 H442"/>
+      </g>
+      <text x="600" y="172" class="s-s">四个任务互不依赖，并行执行</text>
+      <text x="600" y="236" class="s-s">触发：push 与 pull_request</text>
+    </svg>
+    </div>
+    <figcaption><b>图 3　ci.yaml 的四个任务。</b>go 任务里 <code>go test ./...</code> 默认不连数据库；数据层测试只在 integration 任务里跑。黄色一步的局限见第 07 节。</figcaption>
+  </figure>
+
+  <ul class="checklist">
+    <li><label><input type="checkbox"><span><span class="what">身份头伪造与角色规则</span><span class="how"><code>go test ./pkg/httpauth/ -run TestServer</code>：13 个子用例，覆盖伪造头被丢弃、aud 必须是 admin、按路径查角色、非身份元数据保留。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">密钥检查</span><span class="how"><code>go test ./pkg/secretcheck/ -run TestCheck</code>：两把都设、占位只警告、单把、空、相同共 6 种组合。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">消费重试与分区提交</span><span class="how"><code>go test ./pkg/kafkaout/</code>：<code>TestConsumeRetriesInPlaceUntilSuccess</code>、<code>TestConsumeSkipsAfterFiveFailures</code>、<code>TestRetryDelayBackoff</code> 等 6 个。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">密钥按 yaml 字面值读取</span><span class="how"><code>go test ./app/admin/internal/conf/ ./app/gateway/internal/conf/ ./app/order/internal/conf/</code></span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">七个服务 HTTP 端口拒绝伪造身份</span><span class="how">各服务 <code>internal/server/http_test.go</code> 的 <code>TestHTTPRejectsForgedIdentity</code> 都调 <code>httpauthtest.RejectsForged</code>。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">数据层集成测试</span><span class="how"><code>make up &amp;&amp; make test-integration</code>：4 个 <code>*_integration_test.go</code> 经 <code>testdb.Open</code> 建 <code>inventory_it</code>、<code>product_it_*</code>、<code>order_it_*</code> 独立库。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">种子口令必填</span><span class="how">在 <code>seed.init_password</code> 仍为空时执行 <code>make seed-admin</code>，应立即打印提示并失败。</span></span></label></li>
+  </ul>
+</section>
+
+<section class="sec" id="s7">
+  <h2><span class="no">07</span>已知遗留<a class="anchor" href="#s7">#</a></h2>
+  <div class="callout warn">
+    <span class="ic">!</span><span class="t">compose 端口绑定所有网卡</span>
+    <p>端口写成 <code>127.0.0.1:3306:3306</code>。MySQL 是 root / root，Redis 与 Kafka 没有认证。</p>
+  </div>
+  <div class="callout warn">
+    <span class="ic">!</span><span class="t">CI 的 git diff 检查发现不了未提交的新生成文件</span>
+    <p><code>git diff --exit-code</code> 只比较已跟踪文件。新 proto 第一次被 <code>make api</code> 生成出来的 <code>*.pb.go</code> 是未跟踪文件，漏提交时这一步照样通过。</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <a href="index.html">← 上一篇 · 00 总览</a>
+  <a href="02-gateway.html">下一篇 · 02 gateway 与鉴权 →</a>
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  var secs=[].slice.call(document.querySelectorAll('main section[id]'));
+  var links=[].slice.call(document.querySelectorAll('.toc ol a[href^="#"],.toc-mobile a[href^="#"]'));
+  function update(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop||document.body.scrollTop)/max*100:0)+'%';
+    var cur='';
+    secs.forEach(function(s){if(s.getBoundingClientRect().top<120)cur=s.id;});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+  }
+  addEventListener('scroll',update,{passive:true});
+  addEventListener('resize',update);
+  document.querySelectorAll('.toc-mobile a').forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false;});});
+  update();
+})();
+</script>
+</body>
+</html>

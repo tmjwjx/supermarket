@@ -7,6 +7,12 @@ type Bootstrap struct {
 	Data   Data   `json:"data"`
 	Client Client `json:"client"`
 	Auth   Auth   `json:"auth"`
+	Kafka  Kafka  `json:"kafka"`
+}
+
+// Kafka 是订单发件箱投递用的地址 容器内写服务名
+type Kafka struct {
+	Brokers string `json:"brokers"`
 }
 
 type Server struct {

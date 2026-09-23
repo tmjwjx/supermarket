@@ -1,8 +1,6 @@
 package testdb
 
 import (
-	"os"
-	"strings"
 	"testing"
 
 	"gorm.io/driver/mysql"
@@ -10,12 +8,12 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// DSN 从 TEST_MYSQL_DSN 读取不带库名的连接串 缺省本机 root 账号
+// 集成测试连本机已映射的 MySQL 不带库名 由 Open 自建库
+const dsn = "root:root@tcp(127.0.0.1:3306)/"
+
+// DSN 返回集成测试用的连接串
 func DSN() string {
-	if v := strings.TrimSpace(os.Getenv("TEST_MYSQL_DSN")); v != "" {
-		return v
-	}
-	return "root:root@tcp(127.0.0.1:3306)/"
+	return dsn
 }
 
 // Open 重建一个独立测试库并建好表 不碰服务正在用的库

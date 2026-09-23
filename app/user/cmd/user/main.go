@@ -12,7 +12,6 @@ import (
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3"
 	"github.com/go-kratos/kratos/v3/config"
-	"github.com/go-kratos/kratos/v3/config/env"
 	"github.com/go-kratos/kratos/v3/config/file"
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/go-kratos/kratos/v3/transport/grpc"
@@ -34,7 +33,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "../../configs/dev.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
@@ -69,7 +68,6 @@ func main() {
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
-			env.NewSource(),
 		),
 	)
 	defer c.Close()
@@ -82,7 +80,7 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	if err := secretcheck.Check(secretcheck.Key{Name: "AUTH_JWT_SECRET", Value: bc.Auth.JWTSecret}); err != nil {
+	if err := secretcheck.Check(secretcheck.Key{Name: "jwt_secret", Value: bc.Auth.JWTSecret}); err != nil {
 		log.Error("invalid jwt secrets", "err", err)
 		os.Exit(1)
 	}

@@ -668,7 +668,7 @@
           <i></i>
           <div>
             <strong>拒绝时的错误</strong>
-            <p>原因码 <code>GATEWAY_UNAUTHORIZED</code>，正文 <code>unauthorized</code>。密钥读 <code>AUTH_JWT_SECRET</code>，与 user 同一变量；未设置时用本地占位 <code>change-me-local-jwt-secret</code>。</p>
+            <p>原因码 <code>GATEWAY_UNAUTHORIZED</code>，正文 <code>unauthorized</code>。密钥读配置 <code>auth.jwt_secret</code>，与 user 服务同一把，写在 yaml 里。</p>
           </div>
         </aside>
       </section>
@@ -740,7 +740,7 @@
           <div>请求头</div>
           <div>有令牌才加 <code>Authorization: Bearer</code></div>
           <div>基址</div>
-          <div>默认空字符串；设了 <code>VITE_API_BASE</code> 才改前缀</div>
+          <div>空字符串，请求走当前站点的 <code>/v1</code></div>
         </div>
         <aside class="note">
           <i></i>

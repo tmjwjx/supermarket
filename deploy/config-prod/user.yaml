@@ -1,0 +1,17 @@
+# 发布环境 服务器接入后再填写连接地址和密钥
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout_ms: 1000
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout_ms: 1000
+data:
+  database:
+    driver: mysql
+    source: ""
+    debug: false
+    auto_migrate: false
+auth:
+  jwt_secret: ""
+  token_expire_ms: 604800000

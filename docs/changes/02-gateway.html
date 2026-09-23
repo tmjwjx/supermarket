@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02 gateway 与鉴权 · 变更说明</title>
+<style>
+:root{
+  --bg:#f7f6f2;--panel:#ffffff;--ink:#1f2328;--muted:#5b6470;--line:#e4e1d8;
+  --brand:#2f6f5e;--brand-soft:#e6f0ec;--warn:#b7791f;--warn-soft:#fbf1e1;
+  --bad:#b83a3a;--bad-soft:#f8e6e6;--info:#2b5c8a;--info-soft:#e5eef7;
+  --radius:10px;--measure:820px;
+  --font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#15171a;--panel:#1d2024;--ink:#e7e4dd;--muted:#9aa3ad;--line:#30343a;
+  --brand:#6cc0a4;--brand-soft:#1c3830;--warn:#e3aa4f;--warn-soft:#3a2e1b;
+  --bad:#e57b7b;--bad-soft:#3d2326;--info:#80b3e3;--info-soft:#1c2d3f;
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15.5px;line-height:1.8;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.86em;background:var(--brand-soft);padding:.08em .4em;border-radius:5px;overflow-wrap:anywhere}
+p{margin:10px 0}
+.progress{position:fixed;top:0;left:0;z-index:30;height:2px;width:0;background:var(--brand)}
+.topbar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:12px 28px;background:var(--bg);border-bottom:1px solid var(--line);font-size:14px}
+.crumb{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.pager{display:flex;gap:8px}
+.pager a{padding:2px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink)}
+.pager a:hover{border-color:var(--brand);color:var(--brand);text-decoration:none}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1140px;margin:0 auto;padding:0 28px 80px}
+.toc{position:sticky;top:64px;align-self:start;max-height:calc(100vh - 80px);overflow:auto;padding-top:30px;font-size:14px}
+.toc-title{font-size:12px;letter-spacing:.12em;color:var(--muted);margin:0 0 10px}
+.toc ol,.toc-mobile ol{list-style:none;margin:0;padding:0}
+.toc ol{border-left:1px solid var(--line)}
+.toc a{display:block;padding:5px 0 5px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--muted);line-height:1.5}
+.toc a .n,.toc-mobile a .n{font-family:var(--mono);font-size:12px;margin-right:8px}
+.toc a.active{color:var(--brand);border-left-color:var(--brand);font-weight:600}
+.toc a:hover{text-decoration:none;color:var(--ink)}
+.totop{display:inline-block;margin-top:14px;font-size:13px;color:var(--muted)}
+.toc-mobile{display:none}
+main{min-width:0;max-width:var(--measure)}
+.cover{padding:44px 0 4px}
+.cover-no{font-family:var(--mono);font-weight:800;font-size:88px;line-height:1;color:var(--brand);letter-spacing:-.02em}
+.cover h1{font-size:34px;line-height:1.3;margin:12px 0 4px}
+.kicker{color:var(--muted);font-size:14px;margin:0}
+.summary{margin:22px 0;padding:16px 20px;background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:0 var(--radius) var(--radius) 0;font-size:16.5px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.metric .v{font-family:var(--mono);font-weight:700;font-size:32px;line-height:1.1;color:var(--brand)}
+.metric .k{font-weight:600;margin-top:6px}
+.metric .d{font-size:12.5px;color:var(--muted);line-height:1.6}
+.sec{padding-top:44px}
+.sec h2{display:flex;align-items:baseline;gap:12px;font-size:24px;line-height:1.35;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.sec h2 .no{font-family:var(--mono);font-weight:700;font-size:14px;line-height:1;color:var(--panel);background:var(--brand);padding:5px 8px;border-radius:6px;transform:translateY(-3px)}
+.sec h2 .anchor{margin-left:auto;color:var(--line);font-weight:400;font-size:18px}
+.sec h2:hover .anchor{color:var(--muted)}
+.sec h3{font-size:17px;margin:28px 0 8px}
+.lead{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.cards.c4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.card h4{margin:0 0 4px;font-size:15.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card p{margin:0;font-size:14px;color:var(--muted);line-height:1.7}
+.kv{display:grid;grid-template-columns:7.5em minmax(0,1fr);margin:0;font-size:14.5px}
+.kv>dt,.kv>dd{margin:0;padding:8px 0;border-bottom:1px solid var(--line)}
+.kv>dt{color:var(--muted);padding-right:12px}
+.kv>dt:last-of-type,.kv>dd:last-of-type{border-bottom:0}
+.kv.wide{grid-template-columns:9.5em minmax(0,1fr)}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+.step-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;background:var(--brand-soft);border-bottom:1px solid var(--line);font-weight:600}
+.step-h .tag{font-family:var(--mono);font-size:12px;line-height:1;background:var(--brand);color:var(--panel);border-radius:5px;padding:4px 7px}
+.step-b{padding:2px 16px}
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+th,td{padding:9px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--brand-soft);font-weight:600;white-space:nowrap}
+tbody tr:nth-child(even) td{background:var(--bg)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+td.c{text-align:center}
+.flow{display:flex;flex-wrap:wrap;gap:10px 24px;margin:14px 0;padding:0;list-style:none}
+.flow li{position:relative;flex:1 1 118px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;font-size:14px;line-height:1.55}
+.flow li b{display:block}
+.flow li span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.flow li+li::before{content:"→";position:absolute;left:-12px;top:50%;transform:translate(-50%,-50%);color:var(--muted)}
+.flow li.hl{border-color:var(--warn);background:var(--warn-soft)}
+.callout{display:grid;grid-template-columns:26px minmax(0,1fr);gap:2px 12px;margin:16px 0;padding:14px 16px;border-left:4px solid var(--info);background:var(--info-soft);border-radius:0 var(--radius) var(--radius) 0}
+.callout .ic{grid-row:span 2;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:13px;background:var(--info);color:var(--panel)}
+.callout .t{font-weight:600}
+.callout p{margin:0;font-size:14.5px}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}.callout.warn .ic{background:var(--warn)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}.callout.bad .ic{background:var(--bad)}
+.callout.tip{border-color:var(--brand);background:var(--brand-soft)}.callout.tip .ic{background:var(--brand)}
+.badge{display:inline-block;font-size:12px;line-height:1.5;padding:0 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap;font-weight:600;font-family:var(--font)}
+.b-brand{color:var(--brand);background:var(--brand-soft)}
+.b-warn{color:var(--warn);background:var(--warn-soft)}
+.b-bad{color:var(--bad);background:var(--bad-soft)}
+.b-info{color:var(--info);background:var(--info-soft)}
+.b-muted{color:var(--muted);background:var(--bg)}
+.checklist{list-style:none;margin:14px 0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.checklist li{border-bottom:1px solid var(--line)}
+.checklist li:last-child{border-bottom:0}
+.checklist label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;padding:10px 16px;cursor:pointer}
+.checklist input{margin:6px 0 0;width:16px;height:16px;accent-color:var(--brand)}
+.checklist .what{font-weight:600}
+.checklist .how{display:block;color:var(--muted);font-size:13.5px;line-height:1.7}
+.diagram{margin:18px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.diagram .scroll{overflow-x:auto}
+.diagram svg{display:block;width:100%;height:auto;min-width:640px}
+.diagram figcaption{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.7}
+.diagram figcaption b{color:var(--ink)}
+svg text{font-family:var(--font)}
+.s-box{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+.s-brand{fill:var(--brand-soft);stroke:var(--brand);stroke-width:1.2}
+.s-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.2}
+.s-bad{fill:var(--bad-soft);stroke:var(--bad);stroke-width:1.2}
+.s-info{fill:var(--info-soft);stroke:var(--info);stroke-width:1.2}
+.s-dash{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:4 4}
+.s-t{fill:var(--ink);font-size:13px;font-weight:600}
+.s-s{fill:var(--muted);font-size:11px}
+.s-code{fill:var(--ink);font-family:var(--mono);font-size:11.5px}
+.s-l{stroke:var(--muted);stroke-width:1.3;fill:none}
+.s-a{fill:var(--muted)}
+.s-lab{fill:var(--muted);font-size:11px}
+.bars{margin:14px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.bar{display:grid;grid-template-columns:8.5em minmax(0,1fr) 5em;gap:12px;align-items:center;font-size:13.5px;padding:6px 0}
+.bar .track{height:14px;background:var(--bg);border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.bar .fill{height:100%;background:var(--brand)}
+.bar .fill.w{background:var(--warn)}
+.bar .fill.m{background:var(--muted)}
+.bar .num{font-family:var(--mono);text-align:right}
+.bars .note{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+details.group{margin:10px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+details.group>summary{cursor:pointer;padding:10px 16px;font-weight:600;display:flex;flex-wrap:wrap;gap:8px;align-items:center;list-style:none}
+details.group>summary::-webkit-details-marker{display:none}
+details.group>summary::before{content:"▸";color:var(--muted)}
+details.group[open]>summary::before{content:"▾"}
+details.group>summary .up{color:var(--muted);font-weight:400;font-size:13px;margin-right:auto}
+details.group .table-wrap{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 var(--radius) var(--radius)}
+.foot{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13.5px;color:var(--muted)}
+@media (max-width:960px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:0;padding:0 18px 64px}
+  .toc{display:none}
+  .toc-mobile{display:block;margin:18px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 16px;font-size:14px}
+  .toc-mobile summary{cursor:pointer;font-weight:600}
+  .toc-mobile ol{padding-top:6px}
+  .toc-mobile a{display:block;padding:4px 0;color:var(--muted)}
+  .toc-mobile a.active{color:var(--brand);font-weight:600}
+  .topbar{padding:10px 18px}
+  .cover-no{font-size:68px}
+  .cover h1{font-size:28px}
+}
+@media (max-width:600px){
+  .flow{flex-direction:column;gap:22px}
+  .flow li{flex:none}
+  .flow li+li::before{content:"↓";left:50%;top:-12px}
+  .kv{grid-template-columns:6em minmax(0,1fr)}
+  .kv.wide{grid-template-columns:minmax(0,1fr)}
+  .kv.wide>dt{border-bottom:0;padding-bottom:0}
+  .bar{grid-template-columns:6.5em minmax(0,1fr) 4.2em;gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<header class="topbar">
+  <nav class="crumb" aria-label="面包屑"><a href="index.html">变更说明</a><span>/</span><b>gateway 与鉴权</b></nav>
+  <nav class="pager" aria-label="翻页"><a href="01-platform.html">← 上一篇 · 01 工程底座与公共包</a><a href="03-user.html">下一篇 · 03 用户与地址 →</a></nav>
+</header>
+
+<div class="layout">
+<aside class="toc" aria-label="目录">
+  <p class="toc-title">目录</p>
+  <ol>
+    <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+    <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+    <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+    <li><a href="#s4"><span class="n">04</span>接口与数据</a></li>
+    <li><a href="#s5"><span class="n">05</span>关键规则与失败处理</a></li>
+    <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+    <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+  </ol>
+  <a class="totop" href="#top">↑ 回到顶部</a>
+</aside>
+
+<main>
+<section class="cover" id="top">
+  <div class="cover-no">02</div>
+  <h1>gateway 与鉴权</h1>
+  <p class="kicker">app/gateway · 四种模式 · 两把密钥 · 路由总表</p>
+  <div class="summary">gateway 只开 HTTP <code>:8080</code>，按公开、可选、登录、后台四种模式验签，把身份写进 <code>x-md-global-*</code> 元数据后转发给七个上游 gRPC；买家令牌与后台令牌用两把不同的密钥，后台令牌还必须 <code>aud=admin</code> 并按路径查角色。</div>
+  <div class="metrics">
+    <div class="metric"><div class="v">86</div><div class="k">转发路由</div><div class="d">公开 11 · 可选 1 · 登录 27 · 后台 47</div></div>
+    <div class="metric"><div class="v">7</div><div class="k">上游连接</div><div class="d">共 16 个 gRPC 服务客户端</div></div>
+    <div class="metric"><div class="v">2</div><div class="k">签名密钥</div><div class="d">jwt_secret · admin_jwt_secret</div></div>
+    <div class="metric"><div class="v">9</div><div class="k">测试函数</div><div class="d">8 个单元测试 + 1 个 e2e</div></div>
+  </div>
+  <details class="toc-mobile">
+    <summary>目录</summary>
+    <ol>
+      <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+      <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+      <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+      <li><a href="#s4"><span class="n">04</span>接口与数据</a></li>
+      <li><a href="#s5"><span class="n">05</span>关键规则与失败处理</a></li>
+      <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+      <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+    </ol>
+  </details>
+</section>
+
+<section class="sec" id="s1">
+  <h2><span class="no">01</span>这个模块负责什么<a class="anchor" href="#s1">#</a></h2>
+  <p class="lead">两个前端只和 gateway 说话。gateway 自己不存数据，只负责验签、按路径查角色、把身份转给上游。</p>
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 860 330" role="img" aria-label="gateway 架构：前端经 gateway 转发到七个上游 gRPC">
+      <defs><marker id="g-arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="16" y="126" width="150" height="84" rx="10" class="s-info"/>
+      <text x="91" y="154" text-anchor="middle" class="s-t">web / admin-web</text>
+      <text x="91" y="174" text-anchor="middle" class="s-s">只请求 gateway</text>
+      <text x="91" y="192" text-anchor="middle" class="s-code">Bearer 令牌</text>
+
+      <rect x="216" y="14" width="280" height="300" rx="12" class="s-brand"/>
+      <text x="356" y="40" text-anchor="middle" class="s-t">gateway :8080</text>
+      <text x="356" y="58" text-anchor="middle" class="s-s">只开 HTTP · server 超时 7000ms</text>
+      <rect x="236" y="72" width="240" height="38" rx="8" class="s-box"/><text x="356" y="96" text-anchor="middle" class="s-code">recovery · tracing.Server</text>
+      <rect x="236" y="120" width="240" height="38" rx="8" class="s-warn"/><text x="356" y="144" text-anchor="middle" class="s-t">gate：公开 / 可选 / 登录 / 后台</text>
+      <rect x="236" y="168" width="240" height="38" rx="8" class="s-box"/><text x="356" y="192" text-anchor="middle" class="s-code">stamp → x-md-global-*</text>
+      <rect x="236" y="216" width="240" height="38" rx="8" class="s-box"/><text x="356" y="240" text-anchor="middle" class="s-code">call → forwardIdentity</text>
+      <rect x="236" y="264" width="240" height="38" rx="8" class="s-box"/><text x="356" y="288" text-anchor="middle" class="s-code">dial：metadata.Client · tracing</text>
+
+      <g>
+        <rect x="560" y="14" width="284" height="34" rx="8" class="s-box"/><text x="574" y="36" class="s-t">user</text><text x="700" y="36" text-anchor="middle" class="s-code">127.0.0.1:9000</text><text x="832" y="36" text-anchor="end" class="s-s">1000ms</text>
+        <rect x="560" y="57" width="284" height="34" rx="8" class="s-box"/><text x="574" y="79" class="s-t">product</text><text x="700" y="79" text-anchor="middle" class="s-code">127.0.0.1:9001</text><text x="832" y="79" text-anchor="end" class="s-s">1000ms</text>
+        <rect x="560" y="100" width="284" height="34" rx="8" class="s-box"/><text x="574" y="122" class="s-t">inventory</text><text x="700" y="122" text-anchor="middle" class="s-code">127.0.0.1:9002</text><text x="832" y="122" text-anchor="end" class="s-s">1000ms</text>
+        <rect x="560" y="143" width="284" height="34" rx="8" class="s-warn"/><text x="574" y="165" class="s-t">order</text><text x="700" y="165" text-anchor="middle" class="s-code">127.0.0.1:9003</text><text x="832" y="165" text-anchor="end" class="s-t">6000ms</text>
+        <rect x="560" y="186" width="284" height="34" rx="8" class="s-box"/><text x="574" y="208" class="s-t">payment</text><text x="700" y="208" text-anchor="middle" class="s-code">127.0.0.1:9004</text><text x="832" y="208" text-anchor="end" class="s-s">1000ms</text>
+        <rect x="560" y="229" width="284" height="34" rx="8" class="s-box"/><text x="574" y="251" class="s-t">notification</text><text x="700" y="251" text-anchor="middle" class="s-code">127.0.0.1:9005</text><text x="832" y="251" text-anchor="end" class="s-s">1000ms</text>
+        <rect x="560" y="272" width="284" height="34" rx="8" class="s-box"/><text x="574" y="294" class="s-t">admin</text><text x="700" y="294" text-anchor="middle" class="s-code">127.0.0.1:9006</text><text x="832" y="294" text-anchor="end" class="s-s">1000ms</text>
+      </g>
+      <g class="s-l" marker-end="url(#g-arr1)">
+        <path d="M166,168 H214"/>
+        <path d="M356,110 V118"/><path d="M356,158 V166"/><path d="M356,206 V214"/><path d="M356,254 V262"/>
+        <path d="M496,31 H558"/><path d="M496,74 H558"/><path d="M496,117 H558"/><path d="M496,160 H558"/><path d="M496,203 H558"/><path d="M496,246 H558"/><path d="M496,289 H558"/>
+      </g>
+      <text x="190" y="160" text-anchor="middle" class="s-lab">HTTP</text>
+      <text x="527" y="12" text-anchor="middle" class="s-lab">gRPC</text>
+    </svg>
+    </div>
+    <figcaption><b>图 1　gateway 架构。</b>请求依次经过中间件、鉴权包装、身份写入和转发；右侧是 <code>configs/config.yaml</code> 里七个上游的地址与客户端超时，只有 order 放宽到 6000 毫秒。</figcaption>
+  </figure>
+  <div class="cards c4">
+    <div class="card"><h4>只开 HTTP</h4><p><code>kratos.Server(hs)</code> 只挂一个 HTTP 服务器，不暴露 gRPC 端口，也不连数据库。</p></div>
+    <div class="card"><h4>先验签再转发</h4><p>登录与后台模式验签失败就返回，不会打到上游。</p></div>
+    <div class="card"><h4>按路径查角色</h4><p>后台路由用 <code>httpauth.AllowAdmin</code>，和各服务 HTTP 端口是同一套规则。</p></div>
+    <div class="card"><h4>身份随调用走</h4><p>验签得到的 id 与角色写进 <code>x-md-global-*</code>，上游 service 层从元数据读。</p></div>
+  </div>
+</section>
+
+<section class="sec" id="s2">
+  <h2><span class="no">02</span>变更点<a class="anchor" href="#s2">#</a></h2>
+  <p class="lead">上一版 gateway 只转 user 的三条路由；这次扩到全部服务，并把鉴权拆成四种模式、两把密钥。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>能力</th><th>之前</th><th>现在</th></tr></thead>
+      <tbody>
+        <tr><td>路由</td><td>3 条，只转 user</td><td>86 条，覆盖七个服务</td></tr>
+        <tr><td>上游</td><td>一条 user 连接</td><td>七条连接，16 个客户端</td></tr>
+        <tr><td>鉴权模式</td><td>只有 <code>requireToken</code></td><td>公开、可选、登录、后台</td></tr>
+        <tr><td>身份转发</td><td>只验签，不转身份</td><td>写 <code>x-md-global-*</code> 元数据</td></tr>
+        <tr><td>密钥</td><td><code>auth.jwt_secret</code> 一把</td><td>再加 <code>auth.admin_jwt_secret</code>，必须不同</td></tr>
+        <tr><td>后台令牌</td><td>无</td><td>HS256 + <code>aud=admin</code> + <code>role</code></td></tr>
+        <tr><td>超时</td><td>自身与上游都是 1000 毫秒</td><td>自身 7000，order 6000，其余 1000</td></tr>
+        <tr><td>中间件</td><td><code>recovery</code></td><td><code>recovery</code> + <code>tracing.Server</code></td></tr>
+        <tr><td>配置读取</td><td><code>env.NewSource("KRATOS")</code></td><td>只读 yaml 文件</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sec" id="s3">
+  <h2><span class="no">03</span>实现逻辑<a class="anchor" href="#s3">#</a></h2>
+  <h3>四种模式</h3>
+  <p>模式由路由注册时套的包装函数决定，每条路由上方都有一行注释写明模式。公开路由不套任何包装，直接进入 <code>call</code>。</p>
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 860 284" role="img" aria-label="四种鉴权模式的判定">
+      <defs><marker id="g-arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="16" y="16" width="192" height="54" rx="10" class="s-info"/>
+      <text x="112" y="39" text-anchor="middle" class="s-t">公开 · 11 条</text><text x="112" y="58" text-anchor="middle" class="s-code">不套包装</text>
+      <rect x="228" y="16" width="192" height="54" rx="10" class="s-warn"/>
+      <text x="324" y="39" text-anchor="middle" class="s-t">可选 · 1 条</text><text x="324" y="58" text-anchor="middle" class="s-code">optionalLogin</text>
+      <rect x="440" y="16" width="192" height="54" rx="10" class="s-brand"/>
+      <text x="536" y="39" text-anchor="middle" class="s-t">登录 · 27 条</text><text x="536" y="58" text-anchor="middle" class="s-code">requireLogin</text>
+      <rect x="652" y="16" width="192" height="54" rx="10" class="s-bad"/>
+      <text x="748" y="39" text-anchor="middle" class="s-t">后台 · 47 条</text><text x="748" y="58" text-anchor="middle" class="s-code">requireAdmin</text>
+
+      <rect x="16" y="100" width="192" height="48" rx="10" class="s-box"/>
+      <text x="112" y="121" text-anchor="middle" class="s-t">不读 Authorization</text><text x="112" y="139" text-anchor="middle" class="s-s">直接 call 上游</text>
+      <rect x="228" y="100" width="192" height="48" rx="10" class="s-box"/>
+      <text x="324" y="121" text-anchor="middle" class="s-t">tokens.Verify</text><text x="324" y="139" text-anchor="middle" class="s-s">auth.jwt_secret</text>
+      <rect x="440" y="100" width="192" height="48" rx="10" class="s-box"/>
+      <text x="536" y="121" text-anchor="middle" class="s-t">tokens.Verify</text><text x="536" y="139" text-anchor="middle" class="s-s">auth.jwt_secret</text>
+      <rect x="652" y="100" width="192" height="48" rx="10" class="s-box"/>
+      <text x="748" y="121" text-anchor="middle" class="s-t">admins.Verify</text><text x="748" y="139" text-anchor="middle" class="s-s">admin_jwt_secret 再 allowAdmin</text>
+
+      <rect x="16" y="184" width="192" height="46" rx="10" class="s-brand"/>
+      <text x="112" y="212" text-anchor="middle" class="s-t">转发，不带身份</text>
+      <rect x="228" y="184" width="92" height="46" rx="10" class="s-brand"/><text x="274" y="212" text-anchor="middle" class="s-t">写 user-id</text>
+      <rect x="328" y="184" width="92" height="46" rx="10" class="s-warn"/><text x="374" y="212" text-anchor="middle" class="s-t">照样转发</text>
+      <rect x="440" y="184" width="92" height="46" rx="10" class="s-brand"/><text x="486" y="212" text-anchor="middle" class="s-t">写 user-id</text>
+      <rect x="540" y="184" width="92" height="46" rx="10" class="s-bad"/><text x="586" y="212" text-anchor="middle" class="s-t">401</text>
+      <rect x="652" y="184" width="92" height="46" rx="10" class="s-brand"/><text x="698" y="206" text-anchor="middle" class="s-t">写 id</text><text x="698" y="222" text-anchor="middle" class="s-s">+ role</text>
+      <rect x="752" y="184" width="92" height="46" rx="10" class="s-bad"/><text x="798" y="212" text-anchor="middle" class="s-t">401 / 403</text>
+
+      <g class="s-l" marker-end="url(#g-arr2)">
+        <path d="M112,70 V98"/><path d="M324,70 V98"/><path d="M536,70 V98"/><path d="M748,70 V98"/>
+        <path d="M112,148 V182"/>
+        <path d="M274,148 V182"/><path d="M374,148 V182"/>
+        <path d="M486,148 V182"/><path d="M586,148 V182"/>
+        <path d="M698,148 V182"/><path d="M798,148 V182"/>
+      </g>
+      <text x="262" y="170" text-anchor="end" class="s-lab">有效</text><text x="386" y="170" class="s-lab">无效</text>
+      <text x="474" y="170" text-anchor="end" class="s-lab">有效</text><text x="598" y="170" class="s-lab">无效</text>
+      <text x="686" y="170" text-anchor="end" class="s-lab">通过</text><text x="810" y="170" class="s-lab">不符</text>
+
+      <text x="112" y="262" text-anchor="middle" class="s-code">/v1/products</text>
+      <text x="324" y="262" text-anchor="middle" class="s-code">/v1/products/{id}</text>
+      <text x="536" y="262" text-anchor="middle" class="s-code">/v1/orders</text>
+      <text x="748" y="262" text-anchor="middle" class="s-code">/v1/admin/…</text>
+    </svg>
+    </div>
+    <figcaption><b>图 2　四种模式的判定。</b>最下一行是各模式的代表路由；可选模式目前只有商品详情 <code>GET /v1/products/{id}</code>，登录用户看详情时会带上身份。</figcaption>
+  </figure>
+
+  <div class="step">
+    <div class="step-h"><span class="tag">gate</span>三个包装函数</div>
+    <div class="step-b"><dl class="kv wide">
+      <dt><code>requireLogin</code></dt><dd><code>tokens.Verify</code> 失败直接返回错误；成功把 sub 写成 <code>x-md-global-user-id</code></dd>
+      <dt><code>optionalLogin</code></dt><dd>验签成功且 sub 非空才写身份，否则什么都不写，照样往下走</dd>
+      <dt><code>requireAdmin</code></dt><dd><code>admins.Verify</code> 取 id 与 role，<code>allowAdmin(URL.Path, role)</code> 不过返回 <code>GATEWAY_FORBIDDEN</code></dd>
+      <dt>验签器</dt><dd><code>auth.Verifier</code> / <code>auth.AdminVerifier</code>，分别包 <code>httpauth.VerifyUser</code> / <code>VerifyAdmin</code></dd>
+    </dl></div>
+  </div>
+  <div class="step">
+    <div class="step-h"><span class="tag">stamp · call</span>身份怎样到达上游</div>
+    <div class="step-b"><dl class="kv">
+      <dt>写入</dt><dd><code>stamp</code> 用 <code>metadata.AppendToClientContext</code> 把键值挂到请求 context 上</dd>
+      <dt>转发</dt><dd><code>call</code> 设 operation 后走中间件链，<code>forwardIdentity</code> 把这些键复制进 gRPC 调用的 context</dd>
+      <dt>发送</dt><dd>拨号时挂的 <code>metadata.Client()</code> 把元数据带到上游，<code>tracing.Client()</code> 传 trace</dd>
+      <dt>不转的</dt><dd>gateway 没挂 <code>metadata.Server()</code>，客户端自带的 <code>x-md-*</code> 头进不了转发元数据</dd>
+    </dl></div>
+  </div>
+
+  <h3>超时嵌套</h3>
+  <p>下单时 order 还要再调 user 取地址、product 取商品、inventory 预占库存，耗时明显长于其他调用。三层超时必须由外到内递减，外层才能拿到内层的明确错误，而不是自己先超时。</p>
+  <div class="bars">
+    <div class="bar"><span>gateway 自身</span><span class="track"><span class="fill" style="width:100%;display:block"></span></span><span class="num">7000ms</span></div>
+    <div class="bar"><span>gateway 调 order</span><span class="track"><span class="fill w" style="width:85.7%;display:block"></span></span><span class="num">6000ms</span></div>
+    <div class="bar"><span>order 服务端</span><span class="track"><span class="fill m" style="width:71.4%;display:block"></span></span><span class="num">5000ms</span></div>
+    <div class="bar"><span>调其余上游</span><span class="track"><span class="fill m" style="width:14.3%;display:block"></span></span><span class="num">1000ms</span></div>
+    <p class="note">来源：<code>app/gateway/configs/config.yaml</code> 的 <code>server.http.timeout_ms</code> 与 <code>client.*.timeout_ms</code>；order 服务端取自 <code>app/order/configs/config.yaml</code>。</p>
+  </div>
+</section>
+
+<section class="sec" id="s4">
+  <h2><span class="no">04</span>接口与数据<a class="anchor" href="#s4">#</a></h2>
+
+  <h3>三个身份元数据键</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>键</th><th>写入时机</th><th>谁在读</th></tr></thead>
+      <tbody>
+        <tr><td><code>x-md-global-user-id</code></td><td>登录 / 可选模式验签成功</td><td>user、product、order、payment、notification</td></tr>
+        <tr><td><code>x-md-global-admin-id</code></td><td>后台模式验签且角色通过</td><td>admin、product、inventory、order、payment</td></tr>
+        <tr><td><code>x-md-global-admin-role</code></td><td>同上，值为令牌里的 <code>role</code></td><td>同上</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>后台角色表</h3>
+  <p>规则写在 <code>httpauth.AllowAdmin</code>，按路径前缀从上往下匹配。<code>/v1/admin/login</code> 是公开路由，不经过这张表。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>路径</th><th>product 商品运营</th><th>order 订单客服</th><th>super 超级管理员</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/admin/me</code></td><td class="c"><span class="badge b-brand">允许</span></td><td class="c"><span class="badge b-brand">允许</span></td><td class="c"><span class="badge b-brand">允许</span></td></tr>
+        <tr><td><code>/v1/admin/orders…</code></td><td class="c"><span class="badge b-muted">拒绝</span></td><td class="c"><span class="badge b-brand">允许</span></td><td class="c"><span class="badge b-brand">允许</span></td></tr>
+        <tr><td><code>/v1/admin/payments…</code></td><td class="c"><span class="badge b-muted">拒绝</span></td><td class="c"><span class="badge b-brand">允许</span></td><td class="c"><span class="badge b-brand">允许</span></td></tr>
+        <tr><td><code>/v1/admin/users…</code></td><td class="c"><span class="badge b-muted">拒绝</span></td><td class="c"><span class="badge b-muted">拒绝</span></td><td class="c"><span class="badge b-brand">允许</span></td></tr>
+        <tr><td>其余 <code>/v1/admin/*</code></td><td class="c"><span class="badge b-brand">允许</span></td><td class="c"><span class="badge b-muted">拒绝</span></td><td class="c"><span class="badge b-brand">允许</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>上游客户端</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>上游</th><th>客户端</th><th>超时</th></tr></thead>
+      <tbody>
+        <tr><td>user <code>:9000</code></td><td><code>UserService</code>、<code>AddressService</code></td><td>1000ms</td></tr>
+        <tr><td>product <code>:9001</code></td><td>8 个，共用一条连接</td><td>1000ms</td></tr>
+        <tr><td>inventory <code>:9002</code></td><td><code>StockService</code></td><td>1000ms</td></tr>
+        <tr><td>order <code>:9003</code></td><td><code>CartService</code>、<code>OrderService</code></td><td><span class="badge b-warn">6000ms</span></td></tr>
+        <tr><td>payment <code>:9004</code></td><td><code>PaymentService</code></td><td>1000ms</td></tr>
+        <tr><td>notification <code>:9005</code></td><td><code>NotificationService</code></td><td>1000ms</td></tr>
+        <tr><td>admin <code>:9006</code></td><td><code>AdminUserService</code></td><td>1000ms</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lead">product 的 8 个客户端：Product、Brand、Category、Favorite、BrowseHistory、Review、Recommendation、Attribute，由 <code>client.ProductClients</code> 一次建好。</p>
+
+  <h3>路由总表</h3>
+  <p>按 <code>*_proxy.go</code> 分组，与源码注册顺序一致。点开分组查看每条路径。</p>
+
+  <details class="group" open>
+    <summary>user_proxy.go <span class="up">→ user · 9 条</span><span class="badge b-info">公开 2</span><span class="badge b-brand">登录 7</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/users/register</code></td><td>POST</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/users/login</code></td><td>POST</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/users/me</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/users/{id}</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/addresses</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/addresses</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/addresses/{id}</code></td><td>PATCH</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/addresses/{id}:default</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/addresses/{id}</code></td><td>DELETE</td><td><span class="badge b-brand">登录</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>product_proxy.go 前台 <span class="up">→ product · 14 条</span><span class="badge b-info">公开 7</span><span class="badge b-warn">可选 1</span><span class="badge b-brand">登录 6</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/brands</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/categories</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/products</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/products:search</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/products/{id}/detail</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/products/{id}</code></td><td>GET</td><td><span class="badge b-warn">可选</span></td></tr>
+        <tr><td><code>/v1/recommendations</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/products/{product_id}/reviews</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/favorites</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/favorites/{product_id}</code></td><td>DELETE</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/favorites</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/browse-histories</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/browse-histories</code></td><td>DELETE</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/reviews</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>product_proxy.go 后台 <span class="up">→ product · 37 条</span><span class="badge b-bad">后台 37</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/admin/products</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}</code></td><td>PUT</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products:deleted</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:submit</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:approve</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:reject</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:publish</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:unpublish</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:restore</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{id}:purge</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products:batchPublish</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products:batchUnpublish</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{product_id}/skus/{sku_id}:price</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/products/{product_id}/audits</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/product-logs</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/brands</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/brands</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/brands/{id}</code></td><td>PATCH</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/brands/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/categories</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/categories</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/categories/{id}</code></td><td>PATCH</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/categories/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/recommendations</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/recommendations</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/recommendations/{id}</code></td><td>PATCH</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/recommendations/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attribute-templates</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attribute-templates</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attribute-templates/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attribute-templates/{template_id}/attributes</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attribute-templates/{template_id}/attributes</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attributes/{id}</code></td><td>PATCH</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/attributes/{id}</code></td><td>DELETE</td><td><span class="badge b-bad">后台</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>inventory_proxy.go <span class="up">→ inventory · 3 条</span><span class="badge b-info">公开 1</span><span class="badge b-bad">后台 2</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/stocks</code></td><td>GET</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/admin/stocks</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/stocks:adjust</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>order_proxy.go <span class="up">→ order · 11 条</span><span class="badge b-brand">登录 9</span><span class="badge b-bad">后台 2</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/cart/items</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/cart/items/{sku_id}</code></td><td>PATCH</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/cart/items</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/cart/items:batchDelete</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/orders</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/orders</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/orders/{id}</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/orders/{id}:cancel</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/orders/{id}:confirm</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/admin/orders</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/orders/{id}:ship</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>payment_proxy.go <span class="up">→ payment · 4 条</span><span class="badge b-brand">登录 3</span><span class="badge b-bad">后台 1</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/payments</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/payments/{id}</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/payments/{id}:simulate</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/admin/payments/reconcile-diffs</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>notification_proxy.go <span class="up">→ notification · 2 条</span><span class="badge b-brand">登录 2</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/notifications</code></td><td>GET</td><td><span class="badge b-brand">登录</span></td></tr>
+        <tr><td><code>/v1/notifications:read</code></td><td>POST</td><td><span class="badge b-brand">登录</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <details class="group">
+    <summary>admin_proxy.go <span class="up">→ admin · 6 条</span><span class="badge b-info">公开 1</span><span class="badge b-bad">后台 5</span></summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>路径</th><th>方法</th><th>模式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/v1/admin/login</code></td><td>POST</td><td><span class="badge b-info">公开</span></td></tr>
+        <tr><td><code>/v1/admin/me</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/users</code></td><td>GET</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/users</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/users/{id}</code></td><td>PATCH</td><td><span class="badge b-bad">后台</span></td></tr>
+        <tr><td><code>/v1/admin/users/{id}:resetPassword</code></td><td>POST</td><td><span class="badge b-bad">后台</span></td></tr>
+      </tbody>
+    </table></div>
+  </details>
+</section>
+
+<section class="sec" id="s5">
+  <h2><span class="no">05</span>关键规则与失败处理<a class="anchor" href="#s5">#</a></h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>场景</th><th>结果</th><th>错误</th></tr></thead>
+      <tbody>
+        <tr><td>公开路由，带不带令牌</td><td>直接转发，不写身份</td><td>—</td></tr>
+        <tr><td>可选路由，令牌无效</td><td>照样转发，不写身份</td><td>—</td></tr>
+        <tr><td>登录路由，无令牌 / 签名错 / 过期</td><td>不转发</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>登录路由，令牌无 sub 或非 HS256</td><td>不转发</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>后台路由，拿买家令牌</td><td>后台密钥验签失败</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>后台令牌 aud 不是 admin</td><td>不转发</td><td><span class="badge b-bad">401 UNAUTHORIZED</span></td></tr>
+        <tr><td>后台令牌有效，角色不符</td><td>不转发</td><td><span class="badge b-bad">403 GATEWAY_FORBIDDEN</span></td></tr>
+        <tr><td>启动时密钥为空或两把相同</td><td>记日志后退出</td><td><span class="badge b-bad">exit 1</span></td></tr>
+        <tr><td>客户端自带 <code>x-md-global-*</code> 头</td><td>不进入转发元数据</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout tip">
+    <span class="ic">✓</span><span class="t">gateway 放行不等于最终放行</span>
+    <p>各服务 HTTP 端口有 <code>httpauth.Server</code> 再验一次，service 层还会按自己的规则读元数据，例如 <code>/v1/users/{id}</code> 是否本人由 user 服务核对。</p>
+  </div>
+</section>
+
+<section class="sec" id="s6">
+  <h2><span class="no">06</span>验证与测试<a class="anchor" href="#s6">#</a></h2>
+  <h3>进程内下单链路</h3>
+  <p><code>TestCheckoutFlowOrder</code> 在本机随机端口起一个 gRPC 假服务，把 gateway 的 HTTP handler 直接接上去。每个假实现被调到时往 <code>seq</code> 里追加一个词，最后比对顺序。</p>
+  <figure class="diagram">
+    <div class="scroll">
+    <svg viewBox="0 0 860 400" role="img" aria-label="TestCheckoutFlowOrder 时序">
+      <defs><marker id="g-arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="s-a"/></marker></defs>
+      <rect x="20" y="10" width="100" height="34" rx="8" class="s-info"/><text x="70" y="32" text-anchor="middle" class="s-t">测试</text>
+      <rect x="250" y="10" width="100" height="34" rx="8" class="s-brand"/><text x="300" y="32" text-anchor="middle" class="s-t">gateway</text>
+      <rect x="390" y="10" width="80" height="34" rx="8" class="s-box"/><text x="430" y="32" text-anchor="middle" class="s-t">user</text>
+      <rect x="500" y="10" width="80" height="34" rx="8" class="s-box"/><text x="540" y="32" text-anchor="middle" class="s-t">product</text>
+      <rect x="610" y="10" width="80" height="34" rx="8" class="s-box"/><text x="650" y="32" text-anchor="middle" class="s-t">order</text>
+      <rect x="730" y="10" width="80" height="34" rx="8" class="s-box"/><text x="770" y="32" text-anchor="middle" class="s-t">payment</text>
+      <g class="s-dash"><path d="M70,44 V346"/><path d="M300,44 V346"/><path d="M430,44 V346"/><path d="M540,44 V346"/><path d="M650,44 V346"/><path d="M770,44 V346"/></g>
+
+      <text x="76" y="74" class="s-code">POST /v1/users/register</text>
+      <text x="306" y="90" class="s-code">Register</text>
+      <text x="438" y="108" class="s-lab">+register</text>
+      <text x="76" y="124" class="s-code">GET /v1/products</text>
+      <text x="306" y="140" class="s-code">ListProducts</text>
+      <text x="548" y="158" class="s-lab">+browse</text>
+      <text x="76" y="174" class="s-code">GET /v1/products/p1</text>
+      <text x="306" y="190" class="s-code">GetProduct</text>
+      <text x="548" y="208" class="s-lab">+detail</text>
+      <text x="76" y="224" class="s-code">POST /v1/cart/items</text>
+      <text x="76" y="252" class="s-lab">带买家令牌</text>
+      <text x="306" y="240" class="s-code">AddCartItem</text>
+      <text x="658" y="258" class="s-lab">+cart</text>
+      <text x="76" y="274" class="s-code">POST /v1/orders</text>
+      <text x="306" y="290" class="s-code">CreateOrder</text>
+      <text x="658" y="308" class="s-lab">+order</text>
+      <text x="76" y="324" class="s-code">POST /v1/payments/pay1:simulate</text>
+      <text x="306" y="340" class="s-code">SimulatePayment</text>
+      <text x="778" y="340" class="s-lab">+pay</text>
+
+      <g class="s-l" marker-end="url(#g-arr3)">
+        <path d="M70,80 H298"/><path d="M300,96 H428"/>
+        <path d="M70,130 H298"/><path d="M300,146 H538"/>
+        <path d="M70,180 H298"/><path d="M300,196 H538"/>
+        <path d="M70,230 H298"/><path d="M300,246 H648"/>
+        <path d="M70,280 H298"/><path d="M300,296 H648"/>
+        <path d="M70,330 H298"/><path d="M300,346 H768"/>
+      </g>
+      <rect x="170" y="358" width="520" height="34" rx="8" class="s-brand"/>
+      <text x="430" y="380" text-anchor="middle" class="s-t">断言 seq = register, browse, detail, cart, order, pay</text>
+    </svg>
+    </div>
+    <figcaption><b>图 3　TestCheckoutFlowOrder 时序。</b>后三步带买家令牌走登录模式，第三步走可选模式；六步都必须返回 200，且上游被调用的顺序与用户操作一致。</figcaption>
+  </figure>
+
+  <h3>真实环境端到端</h3>
+  <p><code>make e2e</code> 跑 <code>TestCheckoutThroughGateway</code>，要求所有服务已启动并跑过 <code>make seed</code>。地址写死为 <code>http://127.0.0.1:8080</code>。</p>
+  <ol class="flow">
+    <li><b>注册 + 登录</b><span>拿买家令牌</span></li>
+    <li><b>列表 + 详情</b><span>挑一个启用且有价的 SKU</span></li>
+    <li><b>加购 + 地址</b><span>cart/items、addresses</span></li>
+    <li><b>下单</b><span>带 request_id</span></li>
+    <li><b>建支付 + 模拟成功</b><span>payments、:simulate</span></li>
+    <li class="hl"><b>30 秒内已支付</b><span>轮询订单 status=2</span></li>
+    <li class="hl"><b>60 秒内有通知</b><span>轮询 notifications</span></li>
+  </ol>
+
+  <ul class="checklist">
+    <li><label><input type="checkbox"><span><span class="what">验签器</span><span class="how"><code>go test ./app/gateway/internal/auth/</code>：<code>TestVerifyReturnsSubject</code>、<code>TestVerifyRejects</code>（空头、只有 Bearer、无 sub、过期、HS384）、<code>TestAdminVerifyRequiresAudience</code>。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">路由模式</span><span class="how"><code>TestRouteAuth</code>：24 条路由与令牌组合；上游客户端为空，能进入转发就会 panic，以此判断“已放行”。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">后台目录路由的角色</span><span class="how"><code>TestAdminCatalogRoutes</code>：14 条路由各试三次，无令牌 401、订单客服 403、商品运营放行。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">角色规则</span><span class="how"><code>TestAllowAdmin</code>：11 组路径与角色，含 <code>/v1/admin/me</code> 三种角色都允许、未知角色拒绝。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">配置</span><span class="how"><code>go test ./app/gateway/internal/conf/ -run TestGatewayConfig</code>：两把密钥读同名变量，自身 7s、order 6s、product 与 payment 1s。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">下单链路顺序</span><span class="how"><code>go test ./app/gateway/internal/server/ -run TestCheckoutFlowOrder</code>，见图 3。</span></span></label></li>
+    <li><label><input type="checkbox"><span><span class="what">端到端</span><span class="how"><code>make up</code>、启动全部服务、<code>make seed</code> 后执行 <code>make e2e</code>。</span></span></label></li>
+  </ul>
+</section>
+
+<section class="sec" id="s7">
+  <h2><span class="no">07</span>已知遗留<a class="anchor" href="#s7">#</a></h2>
+  <div class="callout bad">
+    <span class="ic">!</span><span class="t">各服务 gRPC 端口对外监听，且信任元数据</span>
+    <p>七个服务的 gRPC 都监听 <code>0.0.0.0:9000</code>–<code>9006</code>，中间件只有 <code>recovery</code>、<code>tracing.Server</code>、<code>metadata.Server</code>，不验签。能连上端口的人自带 <code>x-md-global-admin-role: super</code> 就拿到超级权限，<code>app/product/cmd/seed</code> 正是这样直接调 gRPC 的。</p>
+  </div>
+  <div class="callout warn">
+    <span class="ic">!</span><span class="t">角色判断找不到路径时默认放行给商品运营</span>
+    <p><code>AllowAdmin</code> 的 <code>default</code> 分支允许 product 与 super。以后新增的后台路径只要没在 switch 里登记，就会自动对商品运营开放，而不是默认拒绝。</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <a href="01-platform.html">← 上一篇 · 01 工程底座与公共包</a>
+  <a href="03-user.html">下一篇 · 03 用户与地址 →</a>
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  var secs=[].slice.call(document.querySelectorAll('main section[id]'));
+  var links=[].slice.call(document.querySelectorAll('.toc ol a[href^="#"],.toc-mobile a[href^="#"]'));
+  function update(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop||document.body.scrollTop)/max*100:0)+'%';
+    var cur='';
+    secs.forEach(function(s){if(s.getBoundingClientRect().top<120)cur=s.id;});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+  }
+  addEventListener('scroll',update,{passive:true});
+  addEventListener('resize',update);
+  document.querySelectorAll('.toc-mobile a').forEach(function(a){a.addEventListener('click',function(){a.closest('details').open=false;});});
+  update();
+})();
+</script>
+</body>
+</html>

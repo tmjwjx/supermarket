@@ -11,12 +11,12 @@ func TestCheck(t *testing.T) {
 		keys []Key
 		want string
 	}{
-		{"both set", []Key{{"AUTH_JWT_SECRET", "a"}, {"ADMIN_JWT_SECRET", "b"}}, ""},
-		{"placeholder only warns", []Key{{"AUTH_JWT_SECRET", "change-me-a"}, {"ADMIN_JWT_SECRET", "change-me-b"}}, ""},
-		{"single key", []Key{{"ADMIN_JWT_SECRET", "b"}}, ""},
-		{"buyer empty", []Key{{"AUTH_JWT_SECRET", " "}, {"ADMIN_JWT_SECRET", "b"}}, "AUTH_JWT_SECRET is empty"},
-		{"admin empty", []Key{{"AUTH_JWT_SECRET", "a"}, {"ADMIN_JWT_SECRET", ""}}, "ADMIN_JWT_SECRET is empty"},
-		{"same", []Key{{"AUTH_JWT_SECRET", "x"}, {"ADMIN_JWT_SECRET", "x"}}, "ADMIN_JWT_SECRET must differ from AUTH_JWT_SECRET"},
+		{"both set", []Key{{"jwt_secret", "a"}, {"admin_jwt_secret", "b"}}, ""},
+		{"placeholder only warns", []Key{{"jwt_secret", "change-me-a"}, {"admin_jwt_secret", "change-me-b"}}, ""},
+		{"single key", []Key{{"admin_jwt_secret", "b"}}, ""},
+		{"buyer empty", []Key{{"jwt_secret", " "}, {"admin_jwt_secret", "b"}}, "jwt_secret is empty"},
+		{"admin empty", []Key{{"jwt_secret", "a"}, {"admin_jwt_secret", ""}}, "admin_jwt_secret is empty"},
+		{"same", []Key{{"jwt_secret", "x"}, {"admin_jwt_secret", "x"}}, "admin_jwt_secret must differ from jwt_secret"},
 	}
 	for _, tc := range cases {
 		err := Check(tc.keys...)

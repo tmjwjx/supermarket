@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 商品 · 变更说明</title>
+<style>
+:root{
+  --bg:#f7f6f2;--panel:#ffffff;--ink:#1f2328;--muted:#5b6470;--line:#e4e1d8;
+  --brand:#2f6f5e;--brand-soft:#e6f0ec;--warn:#b7791f;--warn-soft:#fbf1e1;
+  --bad:#b83a3a;--bad-soft:#f8e6e6;--info:#2b5c8a;--info-soft:#e5eef7;
+  --radius:10px;
+  --font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#15171a;--panel:#1e2125;--ink:#e7e4dd;--muted:#9aa3ad;--line:#343840;
+    --brand:#6fbfa6;--brand-soft:#1d3530;--warn:#e2a64c;--warn-soft:#3a2e1a;
+    --bad:#e27b7b;--bad-soft:#3c2323;--info:#80b3e2;--info-soft:#1c2c3d;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.8}
+a{color:var(--brand)}
+code{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 5px;overflow-wrap:anywhere}
+p{margin:0 0 14px}
+
+.progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--brand);z-index:50}
+
+.topbar{background:var(--panel);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1160px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between;font-size:14px}
+.crumb{color:var(--muted)}
+.crumb a{text-decoration:none;font-weight:600}
+.crumb .sep{margin:0 6px;opacity:.6}
+.crumb .here{color:var(--ink);font-weight:600}
+.pager{display:flex;flex-wrap:wrap;gap:8px}
+.pager a{color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:2px 12px;white-space:nowrap}
+.pager a:hover{color:var(--brand);border-color:var(--brand)}
+
+.layout{max-width:1160px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:48px}
+.toc{position:sticky;top:0;align-self:start;padding-top:40px;max-height:100vh;overflow-y:auto;font-size:14px}
+.toc-title{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.toc ol{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+.toc a{display:flex;gap:8px;padding:5px 0 5px 14px;margin-left:-2px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;line-height:1.5}
+.toc a .no{font-variant-numeric:tabular-nums;opacity:.7}
+.toc a:hover{color:var(--ink)}
+.toc a.active{color:var(--brand);border-left-color:var(--brand);font-weight:650}
+.toc .totop{display:inline-block;margin-top:16px;color:var(--muted);font-size:13px;text-decoration:none}
+.toc-mobile{display:none;margin:16px 0 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:8px 14px}
+.toc-mobile summary{cursor:pointer;font-weight:650}
+.toc-mobile ol{list-style:none;margin:6px 0 4px;padding:0}
+.toc-mobile a{display:block;padding:4px 0;color:var(--ink);text-decoration:none}
+.doc{max-width:820px;min-width:0;padding-top:40px}
+
+.cover .eyebrow{font-size:13px;color:var(--muted);letter-spacing:.06em}
+.cover-head{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px 20px;margin-top:4px}
+.cover .big{font-size:88px;line-height:1;font-weight:800;color:var(--brand);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cover h1{margin:0;font-size:40px;line-height:1.2}
+.cover .scope{color:var(--muted);font-size:14px;margin-top:4px}
+.summary{margin:26px 0 18px;background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:var(--radius);padding:16px 20px;font-size:17px;line-height:1.75}
+.summary .lbl{display:block;font-size:12px;letter-spacing:.08em;color:var(--brand);font-weight:700;margin-bottom:4px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.metric .v{font-size:30px;font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums}
+.metric .v small{font-size:14px;color:var(--muted);font-weight:500;margin-left:3px}
+.metric .k{font-size:14px;font-weight:650}
+.metric .d{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:2px}
+
+section{padding-top:56px}
+h2.sec{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px;font-size:26px;line-height:1.3;margin:0 0 16px;scroll-margin-top:16px}
+h2.sec .no{font-size:15px;font-weight:700;color:var(--brand);background:var(--brand-soft);border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums}
+h2.sec .hash{font-size:18px;color:var(--line);text-decoration:none;font-weight:400}
+h2.sec:hover .hash{color:var(--muted)}
+h3{font-size:18px;margin:28px 0 10px;line-height:1.4}
+.lead{color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0 18px}
+.grid.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.card h4{margin:0 0 6px;font-size:15.5px;display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.card p{font-size:14.5px;color:var(--muted);line-height:1.7;margin:0}
+.card ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--muted);line-height:1.7}
+.card.accent{border-top:3px solid var(--brand)}
+
+.badge{display:inline-block;font-size:12px;line-height:1.6;padding:0 8px;border-radius:999px;font-weight:650;background:var(--brand-soft);color:var(--brand);white-space:nowrap}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.info{background:var(--info-soft);color:var(--info)}
+.badge.gray{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+
+.fields{display:grid;grid-template-columns:132px minmax(0,1fr);border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;margin:14px 0 18px}
+.fields dt,.fields dd{margin:0;padding:10px 14px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.7}
+.fields dt{font-weight:650;color:var(--muted);background:var(--bg)}
+.fields dt:first-of-type,.fields dt:first-of-type + dd{border-top:0}
+
+.step{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;margin:16px 0}
+.step-h{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;background:var(--brand-soft);border-bottom:1px solid var(--line);font-weight:650}
+.step-h .tag{font-size:12px;background:var(--brand);color:var(--panel);border-radius:6px;padding:0 8px;font-variant-numeric:tabular-nums}
+.step-h .badge{margin-left:auto}
+.step .fields{border:0;border-radius:0;margin:0}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin:14px 0 18px}
+.tbl table{width:100%;min-width:560px;border-collapse:collapse;font-size:14.5px;line-height:1.6}
+.tbl th,.tbl td{padding:9px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.tbl thead th{background:var(--bg);font-size:13px;color:var(--muted);font-weight:650;white-space:nowrap;border-bottom:2px solid var(--line)}
+.tbl tbody tr:nth-child(even) td{background:var(--bg)}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:650}
+
+.callout{--c:var(--info);--s:var(--info-soft);display:grid;grid-template-columns:26px minmax(0,1fr);gap:2px 12px;border-left:4px solid var(--c);background:var(--s);border-radius:var(--radius);padding:12px 16px;margin:16px 0}
+.callout .ic{grid-row:span 2;width:24px;height:24px;border-radius:50%;background:var(--c);color:var(--panel);display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:3px}
+.callout .t{font-weight:700}
+.callout .b{font-size:14.5px;line-height:1.7}
+.callout.ok{--c:var(--brand);--s:var(--brand-soft)}
+.callout.warn{--c:var(--warn);--s:var(--warn-soft)}
+.callout.bad{--c:var(--bad);--s:var(--bad-soft)}
+
+.fig{margin:18px 0 22px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.fig-scroll{overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;min-width:640px}
+.fig figcaption{font-size:13px;color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);line-height:1.6}
+.fig figcaption b{color:var(--ink)}
+.sb{fill:var(--panel);stroke:var(--muted);stroke-width:1.3}
+.sb.g{fill:var(--brand-soft);stroke:var(--brand)}
+.sb.w{fill:var(--warn-soft);stroke:var(--warn)}
+.sb.r{fill:var(--bad-soft);stroke:var(--bad)}
+.sb.i{fill:var(--info-soft);stroke:var(--info)}
+.sb.d{stroke-dasharray:5 4}
+.st{fill:var(--ink);font-size:14px;font-weight:650;font-family:var(--font)}
+.ss{fill:var(--muted);font-size:11.5px;font-family:var(--font)}
+.sl{fill:var(--muted);font-size:11.5px;font-family:var(--font)}
+.sl.g{fill:var(--brand)}.sl.r{fill:var(--bad)}.sl.w{fill:var(--warn)}.sl.i{fill:var(--info)}
+.se{fill:none;stroke:var(--muted);stroke-width:1.5}
+.se.g{stroke:var(--brand)}.se.r{stroke:var(--bad)}.se.w{stroke:var(--warn)}.se.i{stroke:var(--info)}
+.se.d{stroke-dasharray:5 4}
+.sm{fill:var(--muted)}.sm.g{fill:var(--brand)}.sm.r{fill:var(--bad)}.sm.w{fill:var(--warn)}.sm.i{fill:var(--info)}
+
+.vflow{margin:4px 0}
+.vnode{display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;position:relative;padding-bottom:12px}
+.vnode:not(:last-child)::after{content:"";position:absolute;left:15px;top:30px;bottom:0;width:2px;background:var(--line)}
+.vdot{width:30px;height:30px;border-radius:50%;background:var(--panel);border:2px solid var(--brand);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--brand);position:relative;z-index:1}
+.vbody{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:8px 14px}
+.vbody b{display:block;font-size:15px;line-height:1.5}
+.vbody span{display:block;font-size:13.5px;color:var(--muted);line-height:1.65}
+.vtx{border:2px dashed var(--brand);border-radius:14px;padding:18px 12px 0;margin:6px 0 12px;position:relative}
+.vtx-label{position:absolute;top:-12px;left:14px;background:var(--panel);padding:0 8px;font-size:12.5px;color:var(--brand);font-weight:700}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-family:var(--mono);font-size:12.5px;padding:1px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);white-space:nowrap}
+
+.dmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.dgroup{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);padding:12px}
+.dgroup h5{margin:0 0 8px;font-size:13px;color:var(--muted);letter-spacing:.04em}
+.tb{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:6px;padding:6px 10px;margin-bottom:6px}
+.tb:last-child{margin-bottom:0}
+.tb b{font-family:var(--mono);font-size:13px;display:block;overflow-wrap:anywhere}
+.tb span{font-size:12.5px;color:var(--muted);line-height:1.5;display:block}
+.tb.w{border-left-color:var(--warn)}.tb.i{border-left-color:var(--info)}
+
+.check{list-style:none;margin:10px 0 18px;padding:0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+.check li+li{border-top:1px solid var(--line)}
+.check label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;padding:10px 14px;cursor:pointer;font-size:14.5px;line-height:1.65}
+.check input{margin:5px 0 0;width:16px;height:16px;accent-color:var(--brand)}
+.check small{display:block;color:var(--muted);font-size:13px}
+.check input:checked + span{opacity:.6}
+
+.foot{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:space-between;font-size:13px;color:var(--muted)}
+
+@media (max-width:960px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:0;padding:0 16px 64px}
+  .toc{display:none}
+  .toc-mobile{display:block}
+  .doc{padding-top:20px}
+}
+@media (max-width:640px){
+  .topbar-in{padding:10px 16px}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cover .big{font-size:64px}
+  .cover h1{font-size:32px}
+  h2.sec{font-size:22px}
+  .fields{grid-template-columns:minmax(0,1fr)}
+  .fields dd{border-top:0;padding-top:0}
+  .fields dt:first-of-type + dd{padding-top:0}
+}
+</style>
+</head>
+<body id="top">
+<div class="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <nav class="crumb" aria-label="面包屑"><a href="index.html">变更说明</a><span class="sep">/</span><span class="here">04 商品</span></nav>
+    <nav class="pager" aria-label="翻页"><a href="03-user.html">← 上一篇 · 03 用户与地址</a><a href="05-inventory.html">下一篇 · 05 库存 →</a></nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="toc" aria-label="目录">
+    <div class="toc-title">目录</div>
+    <ol>
+      <li><a href="#s1" data-s="s1"><span class="no">01</span>这个模块负责什么</a></li>
+      <li><a href="#s2" data-s="s2"><span class="no">02</span>变更点</a></li>
+      <li><a href="#s3" data-s="s3"><span class="no">03</span>实现逻辑</a></li>
+      <li><a href="#s4" data-s="s4"><span class="no">04</span>接口与数据</a></li>
+      <li><a href="#s5" data-s="s5"><span class="no">05</span>关键规则与失败处理</a></li>
+      <li><a href="#s6" data-s="s6"><span class="no">06</span>验证与测试</a></li>
+      <li><a href="#s7" data-s="s7"><span class="no">07</span>已知遗留</a></li>
+    </ol>
+    <a class="totop" href="#top">↑ 回到顶部</a>
+  </aside>
+
+  <main class="doc">
+    <div class="cover">
+      <div class="eyebrow">变更说明 · 模块 04</div>
+      <div class="cover-head">
+        <div class="big">04</div>
+        <div>
+          <h1>商品</h1>
+          <div class="scope"><code>app/product</code> · <code>api/product/v1</code></div>
+        </div>
+      </div>
+      <div class="summary">
+        <span class="lbl">一句话总纲</span>
+        商品服务从零建成一套可运营的商品目录：品牌、两级分类和属性模板约束商品与 SKU，商品走「草稿 → 审核 → 在售 ⇄ 下架」状态机，写路径锁行读库、读路径走 10 分钟详情缓存，新 SKU 经发件箱通知库存建档。
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="v">54<small>RPC</small></div><div class="k">8 个服务</div><div class="d">51 条挂 HTTP，3 条仅 gRPC 给订单</div></div>
+        <div class="metric"><div class="v">18<small>张表</small></div><div class="k">启动自动建表</div><div class="d">含发件箱 <code>outbox_events</code></div></div>
+        <div class="metric"><div class="v">32<small>个测试</small></div><div class="k">26 单元 + 6 集成</div><div class="d">集成测试连真实 MySQL</div></div>
+        <div class="metric"><div class="v">6<small>个状态</small></div><div class="k">商品状态机</div><div class="d">另有回收站（软删除）</div></div>
+      </div>
+      <details class="toc-mobile">
+        <summary>目录</summary>
+        <ol>
+          <li><a href="#s1">01 这个模块负责什么</a></li>
+          <li><a href="#s2">02 变更点</a></li>
+          <li><a href="#s3">03 实现逻辑</a></li>
+          <li><a href="#s4">04 接口与数据</a></li>
+          <li><a href="#s5">05 关键规则与失败处理</a></li>
+          <li><a href="#s6">06 验证与测试</a></li>
+          <li><a href="#s7">07 已知遗留</a></li>
+        </ol>
+      </details>
+    </div>
+
+    <!-- 01 -->
+    <section id="s1">
+      <h2 class="sec"><span class="no">01</span>这个模块负责什么<a class="hash" href="#s1">#</a></h2>
+      <p>商品服务是整个超市的「货架」：后台在这里建目录、录商品、走审核，买家在这里逛、搜、收藏、评价。订单下单前向它要 SKU 快照和可售判断，库存靠它发出的事件给新 SKU 建档。</p>
+
+      <figure class="fig">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 760 300" role="img" aria-label="商品服务上下游关系">
+            <defs>
+              <marker id="p1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm"/></marker>
+              <marker id="p1g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm g"/></marker>
+            </defs>
+            <!-- 左侧 -->
+            <rect class="sb" x="20" y="30" width="150" height="50" rx="10"/>
+            <text class="st" x="95" y="52" text-anchor="middle">web · admin-web</text>
+            <text class="ss" x="95" y="70" text-anchor="middle">只请求 gateway</text>
+            <rect class="sb" x="20" y="125" width="150" height="50" rx="10"/>
+            <text class="st" x="95" y="147" text-anchor="middle">gateway</text>
+            <text class="ss" x="95" y="165" text-anchor="middle">验 JWT → 写身份元数据</text>
+            <rect class="sb d" x="20" y="220" width="150" height="50" rx="10"/>
+            <text class="st" x="95" y="242" text-anchor="middle">seed 脚本</text>
+            <text class="ss" x="95" y="260" text-anchor="middle">make seed</text>
+            <path class="se" d="M95,80 V123" marker-end="url(#p1a)"/>
+            <path class="se g" d="M170,150 H278" marker-end="url(#p1g)"/>
+            <text class="sl g" x="224" y="142" text-anchor="middle">HTTP · 51 RPC</text>
+            <path class="se" d="M170,245 H278" marker-end="url(#p1a)"/>
+            <text class="sl" x="224" y="237" text-anchor="middle">gRPC 建目录</text>
+            <!-- 中间 -->
+            <rect class="sb g" x="280" y="10" width="200" height="280" rx="12"/>
+            <text class="st" x="380" y="40" text-anchor="middle" style="font-size:17px">product</text>
+            <text class="ss" x="380" y="60" text-anchor="middle">HTTP :8001 · gRPC :9001</text>
+            <text class="ss" x="380" y="96" text-anchor="middle">审核状态机 · 回收站</text>
+            <text class="ss" x="380" y="118" text-anchor="middle">发件箱投递 sku.created</text>
+            <text class="ss" x="380" y="140" text-anchor="middle">消费 order.completed</text>
+            <text class="ss" x="380" y="162" text-anchor="middle">评价核对订单项</text>
+            <rect class="sb" x="295" y="200" width="82" height="72" rx="8"/>
+            <text class="st" x="336" y="230" text-anchor="middle">MySQL</text>
+            <text class="ss" x="336" y="250" text-anchor="middle">18 张表</text>
+            <rect class="sb" x="383" y="200" width="82" height="72" rx="8"/>
+            <text class="st" x="424" y="230" text-anchor="middle">Redis</text>
+            <text class="ss" x="424" y="250" text-anchor="middle">详情 10 分钟</text>
+            <!-- 右侧 -->
+            <rect class="sb" x="590" y="20" width="150" height="62" rx="10"/>
+            <text class="st" x="665" y="46" text-anchor="middle">inventory</text>
+            <text class="ss" x="665" y="64" text-anchor="middle">给新 SKU 建库存</text>
+            <path class="se" d="M480,40 H588" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="34" text-anchor="middle">CreateStock</text>
+            <path class="se d" d="M480,68 H588" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="62" text-anchor="middle">sku.created</text>
+            <rect class="sb" x="590" y="110" width="150" height="80" rx="10"/>
+            <text class="st" x="665" y="144" text-anchor="middle">order</text>
+            <text class="ss" x="665" y="162" text-anchor="middle">下单 · 完成 · 评价</text>
+            <path class="se" d="M588,126 H482" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="120" text-anchor="middle">快照·可售·销量</text>
+            <path class="se d" d="M588,150 H482" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="144" text-anchor="middle">order.completed</text>
+            <path class="se" d="M480,174 H588" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="168" text-anchor="middle">评价核对</text>
+            <rect class="sb" x="590" y="220" width="150" height="60" rx="10"/>
+            <text class="st" x="665" y="245" text-anchor="middle">user</text>
+            <text class="ss" x="665" y="263" text-anchor="middle">评价显示名</text>
+            <path class="se" d="M480,250 H588" marker-end="url(#p1a)"/>
+            <text class="sl" x="535" y="244" text-anchor="middle">GetUser</text>
+          </svg>
+        </div>
+        <figcaption><b>图 1 · 上下游关系。</b>实线是同步 gRPC / HTTP，虚线是 Kafka 事件。给订单的快照、可售、销量三个 RPC 只注册在 gRPC 上。</figcaption>
+      </figure>
+
+      <div class="grid g2">
+        <div class="card accent"><h4>目录底座</h4><p>品牌、两级分类、属性模板（规格 / 参数）。分类可以绑定模板，商品保存时按模板校验。</p></div>
+        <div class="card accent"><h4>商品生命周期</h4><p>商品 + SKU 录入、审核状态机、改价、批量上下架、回收站与彻底删除，全程留审核记录和操作日志。</p></div>
+        <div class="card accent"><h4>买家浏览</h4><p>列表、搜索、详情、推荐位，以及登录后的收藏、浏览记录和评价。</p></div>
+        <div class="card accent"><h4>对外契约</h4><p>给订单三个 gRPC，给库存 <code>product.sku.created</code> 事件，消费 <code>order.completed</code> 记销量。</p></div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section id="s2">
+      <h2 class="sec"><span class="no">02</span>变更点<a class="hash" href="#s2">#</a></h2>
+      <p class="lead">按能力和规则列出这次新增的内容，不按文件罗列。</p>
+
+      <h3>目录底座：品牌、分类、属性模板</h3>
+      <div class="grid">
+        <div class="card">
+          <h4>品牌 <span class="badge gray">5 RPC</span></h4>
+          <ul>
+            <li>名称唯一；并发同名创建靠唯一索引兜底，也译成 <code>BRAND_NAME_EXISTS</code></li>
+            <li><code>UpdateBrand</code> 是 optional 字段补丁，没带的保持原值</li>
+            <li>仍有商品时不能删；买家只看显示中的</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>分类 <span class="badge gray">5 RPC</span></h4>
+          <ul>
+            <li>最多两级，父级只能是一级；同父级下重名拒绝</li>
+            <li><code>UpdateCategory</code> 改名、图标、排序、显示、模板，父级不可改</li>
+            <li>买家树里隐藏的一级连同子级不出；<code>AdminListCategories</code> 含隐藏</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>属性模板 <span class="badge gray">7 RPC</span></h4>
+          <ul>
+            <li>属性分规格（<code>kind=1</code>）和参数（<code>kind=2</code>），带可选值和「允许手填」</li>
+            <li>改属性时可选值非空即整体替换，<code>clear_options</code> 清空</li>
+            <li>模板被分类绑定时不能删</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>商品与 SKU 的数据规则</h3>
+      <dl class="fields">
+        <dt>价格</dt><dd>一律整数分（<code>int64</code>）。售价、划线价不得为负；上架时启用 SKU 售价必须大于 0。</dd>
+        <dt>规格判重</dt><dd><code>specs_json</code> 按规格名排序后取 SHA-256 存成 <code>spec_hash</code>。请求内重复或撞上 <code>(product_id, spec_hash)</code> 唯一索引，都返回 <code>PRODUCT_SPEC_DUPLICATED</code>。</dd>
+        <dt>模板校验</dt><dd>分类绑了模板时，SKU 的每个规格名必须是模板里的规格，取值要在可选值里，勾了「允许手填」才放行任意值。参数名必须是模板里的参数。</dd>
+        <dt>图片与详情</dt><dd>最多 9 张图，第一张当主图；图文详情单独一张表，<code>GetProductDetail</code> 单独取。</dd>
+        <dt>冗余价</dt><dd><code>min_price</code> / <code>max_price</code> 只按启用 SKU 聚合。写路径在事务里用 <code>refreshPrice</code> 从库里重算，不信调用方传的值。</dd>
+      </dl>
+
+      <h3>后台运营</h3>
+      <div class="grid g2">
+        <div class="card"><h4>审核流 <span class="badge">留痕</span></h4><p>提交、通过、驳回（必须写理由）都写 <code>product_audits</code>；上下架、删除、恢复写 <code>product_logs</code>。</p></div>
+        <div class="card"><h4>回收站 <span class="badge info">可恢复</span></h4><p>删除是软删除，SKU 一起软删；恢复回到「下架」；彻底删除物理清掉 SKU、图片、参数、详情。</p></div>
+        <div class="card"><h4>改价与日志 <span class="badge warn">前后值</span></h4><p>单 SKU 改价记 <code>change_price</code> 前后价；整体更新只把改了价的 SKU 写成前后 JSON，没改价就留空。</p></div>
+        <div class="card"><h4>批量上下架</h4><p>逐个调用单条上下架，结果分成成功列表和失败列表，失败带原因，不因一条失败整批回滚。</p></div>
+      </div>
+
+      <h3>买家侧与对外契约</h3>
+      <div class="grid">
+        <div class="card"><h4>列表 · 搜索</h4><p>只列在售。一级分类自动展开子级，可按品牌和价格区间筛；<code>order_by</code> 只认 <code>latest</code> / <code>price</code> / <code>price_desc</code> / <code>sales</code>。</p></div>
+        <div class="card"><h4>详情</h4><p>只放行在售和下架，只带启用 SKU，附规格选择器 <code>spec_options</code>；登录用户顺手记一条浏览。</p></div>
+        <div class="card"><h4>推荐位</h4><p>同位置同商品唯一；起止时间 0 表示不限，结束须晚于开始；公开列表只留生效期内且在售的。</p></div>
+        <div class="card"><h4>收藏 · 浏览</h4><p>重复收藏、取消不存在的都算成功，失效商品标 <code>invalid</code>。浏览记录每人最多 100 条。</p></div>
+        <div class="card"><h4>评价</h4><p>向订单核对订单项归属、已完成、商品一致；1–5 星、500 字内；下游故障返回 503。</p></div>
+        <div class="card"><h4>给订单 · 给库存</h4><p><code>BatchGetSkus</code> / <code>CheckSellable</code> / <code>IncreaseSales</code> 仅 gRPC；新 SKU 发 <code>product.sku.created</code>。</p></div>
+      </div>
+      <div class="callout">
+        <div class="ic">i</div>
+        <div class="t">种子数据走 gRPC</div>
+        <div class="b"><code>make seed</code> 运行 <code>app/product/cmd/seed</code>，以 <code>seed-admin</code> 身份经 gRPC 建品牌、分类、模板、商品并上架、配推荐位，再调 inventory 的 <code>CreateStock</code> 和 <code>AdjustStock</code> 入库，不直接写库。</div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="s3">
+      <h2 class="sec"><span class="no">03</span>实现逻辑<a class="hash" href="#s3">#</a></h2>
+
+      <h3>商品状态机</h3>
+      <p>状态值和库里的数字一一对应（<code>catalog.StatusDraft</code> 等）。每次变更都是一条带起始状态的条件更新，影响 0 行就判为状态冲突，并在同一事务里写留痕。</p>
+      <figure class="fig">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 840 372" role="img" aria-label="商品状态机">
+            <defs>
+              <marker id="p2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm"/></marker>
+              <marker id="p2g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm g"/></marker>
+              <marker id="p2r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm r"/></marker>
+              <marker id="p2w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm w"/></marker>
+              <marker id="p2i" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm i"/></marker>
+            </defs>
+            <!-- 起点 -->
+            <circle cx="70" cy="12" r="6" class="sm"/>
+            <path class="se" d="M70,18 V38" marker-end="url(#p2a)"/>
+            <text class="sl" x="82" y="30">CreateProduct</text>
+            <!-- 节点 -->
+            <rect class="sb" x="10" y="40" width="120" height="52" rx="10"/>
+            <text class="st" x="70" y="63" text-anchor="middle">草稿</text>
+            <text class="ss" x="70" y="81" text-anchor="middle">draft · 1</text>
+            <rect class="sb i" x="230" y="40" width="120" height="52" rx="10"/>
+            <text class="st" x="290" y="63" text-anchor="middle">待审核</text>
+            <text class="ss" x="290" y="81" text-anchor="middle">pending · 2</text>
+            <rect class="sb" x="450" y="40" width="120" height="52" rx="10"/>
+            <text class="st" x="510" y="63" text-anchor="middle">已通过</text>
+            <text class="ss" x="510" y="81" text-anchor="middle">approved · 4</text>
+            <rect class="sb g" x="670" y="40" width="120" height="52" rx="10"/>
+            <text class="st" x="730" y="63" text-anchor="middle">在售</text>
+            <text class="ss" x="730" y="81" text-anchor="middle">on_sale · 5</text>
+            <rect class="sb r" x="230" y="180" width="120" height="52" rx="10"/>
+            <text class="st" x="290" y="203" text-anchor="middle">已驳回</text>
+            <text class="ss" x="290" y="221" text-anchor="middle">rejected · 3</text>
+            <rect class="sb w" x="670" y="180" width="120" height="52" rx="10"/>
+            <text class="st" x="730" y="203" text-anchor="middle">下架</text>
+            <text class="ss" x="730" y="221" text-anchor="middle">off · 6</text>
+            <rect class="sb i d" x="340" y="300" width="150" height="52" rx="10"/>
+            <text class="st" x="415" y="323" text-anchor="middle">回收站</text>
+            <text class="ss" x="415" y="341" text-anchor="middle">deleted_at 非空</text>
+            <rect class="sb r d" x="670" y="300" width="120" height="52" rx="10"/>
+            <text class="st" x="730" y="323" text-anchor="middle">彻底删除</text>
+            <text class="ss" x="730" y="341" text-anchor="middle">物理删除</text>
+            <!-- 主线 -->
+            <path class="se" d="M130,66 H228" marker-end="url(#p2a)"/>
+            <text class="sl" x="180" y="58" text-anchor="middle">提交 Submit</text>
+            <path class="se" d="M350,66 H448" marker-end="url(#p2a)"/>
+            <text class="sl" x="400" y="58" text-anchor="middle">通过 Approve</text>
+            <path class="se g" d="M570,66 H668" marker-end="url(#p2g)"/>
+            <text class="sl g" x="620" y="58" text-anchor="middle">上架 Publish</text>
+            <text class="sl g" x="620" y="84" text-anchor="middle">需过上架校验</text>
+            <!-- 驳回回路 -->
+            <path class="se r" d="M275,92 V178" marker-end="url(#p2r)"/>
+            <text class="sl r" x="268" y="132" text-anchor="end">驳回 Reject</text>
+            <text class="sl r" x="268" y="148" text-anchor="end">理由必填</text>
+            <path class="se" d="M305,180 V94" marker-end="url(#p2a)"/>
+            <text class="sl" x="312" y="140">再提交 Submit</text>
+            <!-- 上下架 -->
+            <path class="se w" d="M745,92 V178" marker-end="url(#p2w)"/>
+            <text class="sl w" x="752" y="140">下架 Unpublish</text>
+            <path class="se g" d="M715,180 V94" marker-end="url(#p2g)"/>
+            <text class="sl g" x="708" y="132" text-anchor="end">重新上架</text>
+            <text class="sl g" x="708" y="148" text-anchor="end">Publish</text>
+            <!-- 回收站 -->
+            <text class="st" x="20" y="322" style="font-size:13px">任意状态</text>
+            <text class="ss" x="20" y="340">含在售</text>
+            <path class="se i d" d="M84,326 H338" marker-end="url(#p2i)"/>
+            <text class="sl i" x="210" y="318" text-anchor="middle">软删除 Delete（SKU 一起软删）</text>
+            <path class="se i" d="M490,312 H600 V218 H668" marker-end="url(#p2i)"/>
+            <text class="sl i" x="606" y="266">恢复 Restore</text>
+            <text class="sl i" x="606" y="282">→ 回到下架</text>
+            <path class="se r" d="M490,340 H668" marker-end="url(#p2r)"/>
+            <text class="sl r" x="580" y="360" text-anchor="middle">彻底删除 Purge</text>
+          </svg>
+        </div>
+        <figcaption><b>图 2 · 商品状态机。</b>只有「已通过」和「下架」能上架；恢复一律回到下架，要卖需重新上架。彻底删除只接受回收站里的商品。</figcaption>
+      </figure>
+
+      <div class="step">
+        <div class="step-h"><span class="tag">环节</span>上架校验 <code>ready</code><span class="badge">PublishProduct</span></div>
+        <dl class="fields">
+          <dt>读数据</dt><dd><code>GetFresh</code> 直读库，不读也不写缓存，避免拿旧快照放行。</dd>
+          <dt>起始状态</dt><dd>只接受已通过（4）或下架（6），否则 409 <code>PRODUCT_STATUS_CONFLICT</code>。</dd>
+          <dt>完整性</dt><dd>分类存在、是二级、显示中；品牌存在、显示中；至少一张图；至少一个启用 SKU。缺哪项就在错误里列出 <code>missing category brand image sku</code>。</dd>
+          <dt>售价</dt><dd>所有启用 SKU 售价 &gt; 0，否则列出出问题的 SKU，返回 400。</dd>
+          <dt>库存记录</dt><dd>对每个启用 SKU 调 inventory <code>CreateStock</code>（幂等，缺了就补建）。任何一个失败返回 503 <code>PRODUCT_UNAVAILABLE</code>，不上架。</dd>
+          <dt>落状态</dt><dd><code>SetStatus</code>：<code>WHERE id = ? AND status IN (4, 6)</code>，同事务写 <code>product_logs</code>（前后状态名），提交后删详情缓存。</dd>
+        </dl>
+      </div>
+
+      <h3>整体更新的写路径</h3>
+      <p>后台编辑商品走 <code>UpdateProduct</code>。「在售能改什么」必须以锁住的库内状态为准，不能看缓存，所以判断放在仓库事务里以回调执行。</p>
+      <figure class="fig">
+        <div class="vflow">
+          <div class="vnode"><div class="vdot">1</div><div class="vbody"><b>service：鉴权并收 DTO</b><span><code>RequireCatalogAdmin</code> 只放行 product / super 角色，请求收成领域对象。</span></div></div>
+          <div class="vnode"><div class="vdot">2</div><div class="vbody"><b>biz 预检</b><span>名称非空、图片 ≤ 9；<code>normalizeSkus</code> 规范规格 JSON 并算哈希，请求内重复直接 409。</span></div></div>
+          <div class="vtx">
+            <div class="vtx-label">同一个数据库事务</div>
+            <div class="vnode"><div class="vdot">3</div><div class="vbody"><b>锁行：<code>lockProduct</code></b><span><code>SELECT … FOR UPDATE</code> 锁住商品行，再读出库内 SKU、图片、参数。</span></div></div>
+            <div class="vnode"><div class="vdot">4</div><div class="vbody"><b>回调 <code>planUpdate</code> 定方案</b><span>锁住的状态是在售：只改价格和文字，分类、品牌、规格结构变了就 400。否则校验二级分类、模板、品牌，允许替换规格。</span></div></div>
+            <div class="vnode"><div class="vdot">5</div><div class="vbody"><b>写 SKU，重算冗余价</b><span>在售只按 id 改售价、划线价、图；否则 <code>replaceSkus</code> 按 id 再按哈希匹配，新 SKU 写发件箱，多余的物理删除。最后 <code>refreshPrice</code>。</span></div></div>
+            <div class="vnode"><div class="vdot">6</div><div class="vbody"><b>重写附属，写日志</b><span>图片、参数删了重建；详情用 upsert 只改正文；<code>product_logs</code> 记 <code>update</code> 与改价前后。</span></div></div>
+          </div>
+          <div class="vnode"><div class="vdot">7</div><div class="vbody"><b>提交之后</b><span>删详情缓存，读库返回；对启用 SKU 补建库存，失败只记日志，上架时还会再补。</span></div></div>
+        </div>
+        <figcaption><b>图 3 · UpdateProduct 写路径。</b>虚线框内任何一步报错，整笔事务回滚，缓存不动。</figcaption>
+      </figure>
+
+      <h3>详情缓存</h3>
+      <figure class="fig">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 760 270" role="img" aria-label="商品详情缓存读写">
+            <defs>
+              <marker id="p4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm"/></marker>
+              <marker id="p4g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm g"/></marker>
+              <marker id="p4w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="sm w"/></marker>
+            </defs>
+            <text class="ss" x="20" y="18" style="font-weight:700">读路径</text>
+            <rect class="sb" x="20" y="30" width="160" height="50" rx="10"/>
+            <text class="st" x="100" y="52" text-anchor="middle">买家读商品</text>
+            <text class="ss" x="100" y="70" text-anchor="middle">GetProduct · 详情</text>
+            <path class="se" d="M180,55 H218" marker-end="url(#p4a)"/>
+            <polygon class="sb i" points="220,55 290,22 360,55 290,88"/>
+            <text class="st" x="290" y="52" text-anchor="middle" style="font-size:13px">Redis</text>
+            <text class="ss" x="290" y="68" text-anchor="middle">命中？</text>
+            <path class="se g" d="M360,55 H448" marker-end="url(#p4g)"/>
+            <text class="sl g" x="404" y="47" text-anchor="middle">是</text>
+            <rect class="sb g" x="450" y="30" width="170" height="50" rx="10"/>
+            <text class="st" x="535" y="52" text-anchor="middle">直接返回</text>
+            <text class="ss" x="535" y="70" text-anchor="middle">反序列化领域对象</text>
+            <path class="se" d="M290,88 V118" marker-end="url(#p4a)"/>
+            <text class="sl" x="298" y="108">否</text>
+            <rect class="sb" x="205" y="120" width="170" height="50" rx="10"/>
+            <text class="st" x="290" y="142" text-anchor="middle">读 MySQL 组装</text>
+            <text class="ss" x="290" y="160" text-anchor="middle">商品 + SKU + 图 + 参数 + 详情</text>
+            <path class="se" d="M375,145 H448" marker-end="url(#p4a)"/>
+            <rect class="sb" x="450" y="120" width="170" height="50" rx="10"/>
+            <text class="st" x="535" y="142" text-anchor="middle">回填 10 分钟</text>
+            <text class="ss" x="535" y="160" text-anchor="middle">product:detail:{id}</text>
+            <line x1="20" y1="190" x2="740" y2="190" class="se d" style="stroke:var(--line)"/>
+            <text class="ss" x="20" y="212" style="font-weight:700">写路径</text>
+            <rect class="sb" x="20" y="218" width="220" height="44" rx="10"/>
+            <text class="st" x="130" y="237" text-anchor="middle" style="font-size:13px">任一写操作事务提交</text>
+            <text class="ss" x="130" y="253" text-anchor="middle">状态 · 更新 · 改价 · 删 · 恢复 · 销量</text>
+            <path class="se w" d="M240,240 H298" marker-end="url(#p4w)"/>
+            <rect class="sb w" x="300" y="218" width="190" height="44" rx="10"/>
+            <text class="st" x="395" y="245" text-anchor="middle" style="font-size:13px">DEL product:detail:{id}</text>
+            <path class="se" d="M490,240 H548" marker-end="url(#p4a)"/>
+            <rect class="sb" x="550" y="218" width="190" height="44" rx="10"/>
+            <text class="st" x="645" y="245" text-anchor="middle" style="font-size:13px">下次读取回源重建</text>
+          </svg>
+        </div>
+        <figcaption><b>图 4 · 详情缓存（先写库，后删缓存）。</b>缓存只服务买家读；上架校验、整体更新、后台取详情都直读库。</figcaption>
+      </figure>
+      <dl class="fields">
+        <dt>绕过缓存</dt><dd><code>GetFresh</code>（上架校验）、<code>lockProduct</code>（整体更新）、<code>GetAny</code>（后台编辑，含回收站）都不读缓存。</dd>
+        <dt>Redis 不可用</dt><dd>启动时 Ping 不通就把客户端置空，缓存整体关闭，读写照常走库。</dd>
+      </dl>
+    </section>
+
+    <!-- 04 -->
+    <section id="s4">
+      <h2 class="sec"><span class="no">04</span>接口与数据<a class="hash" href="#s4">#</a></h2>
+      <p>HTTP 上买家公开的接口在 <code>httpauth</code> 里单独列白名单，<code>GetProduct</code> 是可选登录；其余要登录或后台身份。后台接口在 service 层再查 <code>x-md-global-admin-role</code>，只认 <code>product</code> 和 <code>super</code>。</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>服务</th><th>RPC</th><th>谁能调</th></tr></thead>
+          <tbody>
+            <tr><td>BrandService</td><td>5</td><td><code>ListBrands</code> 公开，其余后台</td></tr>
+            <tr><td>CategoryService</td><td>5</td><td><code>ListCategories</code> 公开，其余后台</td></tr>
+            <tr><td>AttributeService</td><td>7</td><td>全部后台</td></tr>
+            <tr><td>ProductService</td><td>25</td><td>列表/搜索/详情公开，3 个仅 gRPC</td></tr>
+            <tr><td>RecommendationService</td><td>5</td><td><code>ListRecommendations</code> 公开，其余后台</td></tr>
+            <tr><td>FavoriteService</td><td>3</td><td>登录用户</td></tr>
+            <tr><td>BrowseHistoryService</td><td>2</td><td>登录用户</td></tr>
+            <tr><td>ReviewService</td><td>2</td><td>列评价公开，写评价需登录</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>ProductService 的 25 个 RPC</h3>
+      <div class="grid">
+        <div class="card"><h4>买家 <span class="badge">4</span></h4><div class="chips"><span class="chip">ListProducts</span><span class="chip">SearchProducts</span><span class="chip">GetProduct</span><span class="chip">GetProductDetail</span></div><p style="margin-top:8px"><code>GetProduct</code> 可选登录，其余公开。</p></div>
+        <div class="card"><h4>后台 <span class="badge warn">18</span></h4><div class="chips"><span class="chip">CreateProduct</span><span class="chip">UpdateProduct</span><span class="chip">UpdateSkuPrice</span><span class="chip">Submit/Approve/RejectProduct</span><span class="chip">Publish/UnpublishProduct</span><span class="chip">BatchPublish/UnpublishProducts</span><span class="chip">Delete/Restore/PurgeProduct</span><span class="chip">AdminList/AdminGetProduct</span><span class="chip">ListDeletedProducts</span><span class="chip">ListProductAudits</span><span class="chip">ListProductLogs</span></div></div>
+        <div class="card"><h4>仅 gRPC <span class="badge info">3</span></h4><div class="chips"><span class="chip">BatchGetSkus</span><span class="chip">CheckSellable</span><span class="chip">IncreaseSales</span></div><p style="margin-top:8px">给 order 用，没有 HTTP 注解。</p></div>
+      </div>
+      <p class="lead" style="font-size:14px">后台卡片里用斜杠合写的是同一组 RPC，例如 <code>Submit/Approve/RejectProduct</code> 是 3 个。</p>
+
+      <h3>18 张表</h3>
+      <figure class="fig">
+        <div class="dmap">
+          <div class="dgroup">
+            <h5>目录</h5>
+            <div class="tb"><b>brands</b><span>name 唯一</span></div>
+            <div class="tb"><b>categories</b><span>(parent_id, name) 唯一</span></div>
+            <div class="tb"><b>attribute_templates</b><span>name 唯一</span></div>
+            <div class="tb"><b>attributes</b><span>(template_id, name) 唯一</span></div>
+          </div>
+          <div class="dgroup">
+            <h5>商品本体</h5>
+            <div class="tb"><b>products</b><span>status、min/max_price、sales_count、deleted_at</span></div>
+            <div class="tb"><b>skus</b><span>(product_id, spec_hash) 唯一，可软删</span></div>
+            <div class="tb"><b>product_images</b><span>按 sort 排序</span></div>
+            <div class="tb"><b>product_details</b><span>一商品一条，mediumtext</span></div>
+            <div class="tb"><b>product_params</b><span>(product_id, name) 唯一</span></div>
+          </div>
+          <div class="dgroup">
+            <h5>留痕 · 幂等 · 事件</h5>
+            <div class="tb w"><b>product_audits</b><span>只增不改的审核记录</span></div>
+            <div class="tb w"><b>product_logs</b><span>只增不改，含 before / after</span></div>
+            <div class="tb i"><b>sales_applies</b><span>(order_id, product_id) 主键去重</span></div>
+            <div class="tb i"><b>consumed_events</b><span>已处理的 order.completed</span></div>
+            <div class="tb i"><b>outbox_events</b><span>发件箱，每秒投递 Kafka</span></div>
+          </div>
+          <div class="dgroup">
+            <h5>买家互动</h5>
+            <div class="tb"><b>recommendations</b><span>(slot, product_id) 唯一</span></div>
+            <div class="tb"><b>favorites</b><span>(user_id, product_id) 唯一</span></div>
+            <div class="tb"><b>browse_histories</b><span>(user_id, product_id) 唯一</span></div>
+            <div class="tb"><b>reviews</b><span>order_item_id 唯一</span></div>
+          </div>
+        </div>
+        <figcaption><b>图 5 · 数据表分组。</b>左色条：绿色是业务数据，橙色是留痕，蓝色是幂等与事件。表结构由 GORM <code>AutoMigrate</code> 在启动时建（<code>auto_migrate: true</code>）。</figcaption>
+      </figure>
+
+      <h3>事件、缓存键与分页</h3>
+      <dl class="fields">
+        <dt>发出事件</dt><dd><code>product.sku.created</code>，key 为 SKU id，payload <code>{"sku_id","product_id"}</code>；与 SKU 同事务写 <code>outbox_events</code>。</dd>
+        <dt>消费事件</dt><dd><code>order.completed</code>（消费组 <code>product-sales</code>），按 <code>事件id/商品id</code> 去重后加销量。</dd>
+        <dt>缓存键</dt><dd><code>product:detail:{id}</code>，TTL 10 分钟，值是整个商品领域对象的 JSON。</dd>
+        <dt>分页</dt><dd><code>page_token</code> 就是十进制偏移；页大小默认 20，最大 50；多取一条判断有没有下一页。</dd>
+      </dl>
+    </section>
+
+    <!-- 05 -->
+    <section id="s5">
+      <h2 class="sec"><span class="no">05</span>关键规则与失败处理<a class="hash" href="#s5">#</a></h2>
+
+      <h3>状态迁移判定表</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>操作</th><th>允许的起始状态</th><th>成功后</th><th>留痕</th></tr></thead>
+          <tbody>
+            <tr><td>SubmitProduct</td><td>草稿、已驳回</td><td>待审核</td><td><code>product_audits</code> submit</td></tr>
+            <tr><td>ApproveProduct</td><td>待审核</td><td>已通过</td><td><code>product_audits</code> approve</td></tr>
+            <tr><td>RejectProduct</td><td>待审核，理由非空</td><td>已驳回</td><td><code>product_audits</code> reject + 理由</td></tr>
+            <tr><td>PublishProduct</td><td>已通过、下架，且过上架校验</td><td>在售</td><td><code>product_logs</code> publish</td></tr>
+            <tr><td>UnpublishProduct</td><td>在售</td><td>下架</td><td><code>product_logs</code> unpublish</td></tr>
+            <tr><td>DeleteProduct</td><td>任意未删除</td><td>回收站</td><td><code>product_logs</code> delete</td></tr>
+            <tr><td>RestoreProduct</td><td>回收站</td><td>下架</td><td><code>product_logs</code> restore</td></tr>
+            <tr><td>PurgeProduct</td><td>回收站</td><td>物理删除</td><td>不写新记录</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn">
+        <div class="ic">!</div>
+        <div class="t">不满足起始状态 = 409，不存在 = 404</div>
+        <div class="b">条件更新影响 0 行时再数一次行：没有这条商品返回 <code>PRODUCT_NOT_FOUND</code>，有但状态不对返回 <code>PRODUCT_STATUS_CONFLICT</code>。20 个并发上架只会成功一次、只留一条日志。</div>
+      </div>
+
+      <h3>失败场景与返回</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>场景</th><th>返回</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>规格重复</td><td>409 <code>PRODUCT_SPEC_DUPLICATED</code></td><td>请求内或唯一索引冲突</td></tr>
+            <tr><td>规格名或取值不在模板</td><td>400 <code>PRODUCT_INVALID_ARGUMENT</code></td><td>消息为 <code>attribute &lt;名&gt;</code></td></tr>
+            <tr><td>挂在一级分类</td><td>400 <code>CATEGORY_NOT_LEAF</code></td><td>商品只能挂二级</td></tr>
+            <tr><td>在售改分类/品牌/规格结构</td><td>400 <code>PRODUCT_INVALID_ARGUMENT</code></td><td>按锁住的库内状态判断</td></tr>
+            <tr><td>上架缺项或售价 ≤ 0</td><td>400 <code>PRODUCT_INVALID_ARGUMENT</code></td><td>消息列出缺项或 SKU</td></tr>
+            <tr><td>上架时补建库存失败</td><td>503 <code>PRODUCT_UNAVAILABLE</code></td><td>状态不变</td></tr>
+            <tr><td>快照一次超过 50 个 SKU</td><td>400 <code>PRODUCT_INVALID_ARGUMENT</code></td><td>缺失的 SKU 标不可售</td></tr>
+            <tr><td>品牌/分类仍被使用</td><td>409 <code>BRAND_IN_USE</code> / <code>CATEGORY_IN_USE</code></td><td>分类有子级、回收站商品也算</td></tr>
+            <tr><td>模板被分类绑定</td><td>409 <code>ATTRIBUTE_TEMPLATE_IN_USE</code></td><td>先解绑再删</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>评价的判定</h3>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>订单侧返回</th><th>评价返回</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>订单项已评过</td><td>409 <code>REVIEW_EXISTS</code></td><td>库里 order_item_id 唯一也兜底</td></tr>
+            <tr><td>不属于本人 / 未完成 / 商品不符</td><td>403 <code>REVIEW_NOT_ALLOWED</code></td><td>业务拒绝</td></tr>
+            <tr><td>超时、不可用、内部错误</td><td>503 <code>REVIEW_UNAVAILABLE</code></td><td>取昵称失败同样 503</td></tr>
+            <tr><td>写成功后回标失败</td><td>评价仍成功</td><td><code>MarkOrderItemReviewed</code> 只记日志</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <dl class="fields">
+        <dt>显示名</dt><dd>匿名固定「匿名用户」；否则取昵称，没有昵称用「用户 + 手机后四位」，再没有就是「用户」。</dd>
+      </dl>
+    </section>
+
+    <!-- 06 -->
+    <section id="s6">
+      <h2 class="sec"><span class="no">06</span>验证与测试<a class="hash" href="#s6">#</a></h2>
+      <p>单元测试用假仓库测 biz，不连库；集成测试带 <code>integration</code> 构建标签，连 <code>root:root@tcp(127.0.0.1:3306)/</code>。</p>
+
+      <h3>单元测试 · <code>go test ./app/product/...</code></h3>
+      <ul class="check">
+        <li><label><input type="checkbox"><span><code>TestCreateProductDuplicateSpec</code> · <code>TestCreateRejectsSpecOutsideTemplate</code><small>规格哈希判重；规格不在模板被拒</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestSubmitThenPublish</code> · <code>TestPublishMissingSKU</code> · <code>TestPublishRejectsZeroPrice</code><small>审核后上架；缺 SKU、售价为 0 拒绝上架</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestPublishRejectsStockCreateFailure</code> · <code>TestCreateSucceedsWhenStockEnsureFails</code> · <code>TestUpdateSucceedsWhenStockEnsureFails</code><small>上架补库存失败要拒；保存后补库存失败不报错</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestUpdateJudgesOnSaleByLockedRowNotCache</code> · <code>TestUpdateAllowsSpecChangeWhenLockedRowIsOff</code> · <code>TestPublishReadyIgnoresCache</code><small>写路径看锁住的库内数据，不看缓存</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestUpdateLogsSkuPriceChange</code> · <code>TestUpdateWithoutPriceChangeLeavesTrailEmpty</code><small>整体更新只记改了价的 SKU</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestRestoreGoesOffShelf</code> · <code>TestBuyerGetOnlyOnSaleOrOff</code> · <code>TestSearchOrderBy</code> · <code>TestSpecOptionsSkipsDisabledAndDedupes</code><small>恢复回下架；买家只见在售/下架；搜索排序；规格选择器</small></span></label></li>
+        <li><label><input type="checkbox"><span>品牌 2 个、属性 3 个、推荐位 3 个测试<small><code>TestCreateBrandDuplicateName</code>、<code>TestDeleteTemplateInUse</code>、<code>TestCreateRejectsEndBeforeStart</code>、<code>TestPublicListFiltersByNowAndOnSale</code> 等</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestHTTPRejectsForgedIdentity</code><small>HTTP 入口不信任客户端自带的身份头</small></span></label></li>
+      </ul>
+
+      <h3>集成测试 · <code>make test-integration</code></h3>
+      <ul class="check">
+        <li><label><input type="checkbox"><span><code>TestSetStatusConcurrentOnlyOnce</code><small>20 个并发把已通过改在售，只成功一次、只留一条日志</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestChangePriceConcurrentKeepsRange</code><small>并发改 10 个 SKU 的价，最终 min/max = 2000 / 2900</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestUpdateCheckSeesLockedRowNotCache</code> · <code>TestUpdateRecomputesPriceFromSkus</code><small>回调拿到锁住的库内状态；冗余价按库里 SKU 重算</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestUpdateRewritesDetailAndLogsPrice</code><small>详情被覆盖，改价前后在同一事务落日志</small></span></label></li>
+        <li><label><input type="checkbox"><span><code>TestUniqueConflictTranslated</code><small>品牌并发同名只留一条，冲突译成 <code>BRAND_NAME_EXISTS</code></small></span></label></li>
+      </ul>
+
+      <h3>手工冒烟</h3>
+      <ul class="check">
+        <li><label><input type="checkbox"><span><code>make up</code> 后启动 product、inventory，执行 <code>make seed</code><small>品牌、分类、模板、商品、推荐位全部建好，商品在售且有库存</small></span></label></li>
+      </ul>
+    </section>
+
+    <!-- 07 -->
+    <section id="s7">
+      <h2 class="sec"><span class="no">07</span>已知遗留<a class="hash" href="#s7">#</a></h2>
+      <div class="callout ok">
+        <div class="ic">✓</div>
+        <div class="t">已修复：并发改价导致冗余价不一致</div>
+        <div class="b"><code>UpdateSkuPrice</code> 和 <code>UpdateProduct</code> 现在都先 <code>SELECT … FOR UPDATE</code> 锁商品行，再用 <code>refreshPrice</code> 按库里启用 SKU 重算 min/max。<code>TestChangePriceConcurrentKeepsRange</code> 覆盖这一点。</div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h4>公开库存与明文翻页 <span class="badge warn">暴露面</span></h4>
+          <p>买家能查到精确库存（inventory 公开 <code>GetStocks</code>，见 05 篇）。<code>page_token</code> 就是偏移数字，可随意构造跳页，深翻页走 OFFSET 扫描。</p>
+        </div>
+        <div class="card">
+          <h4>批量上下架不限数量 <span class="badge warn">性能</span></h4>
+          <p><code>ids</code> 没有上限，每条上架都要读库、校验、逐个 SKU 调 <code>CreateStock</code>，一次传很多会拖成长请求。</p>
+        </div>
+        <div class="card">
+          <h4>超长字符串返回 500 <span class="badge bad">错误码</span></h4>
+          <p>名称 128、副标题 256 等长度只在列定义里；service 不校验，MySQL 报「Data too long」没被映射，最终是 500 而不是 400。</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>依据工作区代码核对 · <code>app/product</code> · <code>api/product/v1</code></span>
+      <span><a href="03-user.html">← 03 用户</a> · <a href="index.html">总览</a> · <a href="05-inventory.html">05 库存 →</a></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var bar=document.querySelector('.progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a[data-s]'));
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('data-s'));});
+  function update(){
+    var d=document.documentElement,max=d.scrollHeight-d.clientHeight,top=window.pageYOffset||d.scrollTop;
+    bar.style.width=(max>0?Math.min(100,top/max*100):0)+'%';
+    var cur=-1;
+    for(var i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<140)cur=i;}
+    if(max>0&&max-top<4)cur=secs.length-1;
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  }
+  window.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',update);
+  update();
+  [].forEach.call(document.querySelectorAll('.toc-mobile a'),function(a){
+    a.addEventListener('click',function(){a.closest('details').open=false;});
+  });
+})();
+</script>
+</body>
+</html>

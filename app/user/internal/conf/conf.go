@@ -4,7 +4,7 @@ import "time"
 
 const defaultTokenExpire = 7 * 24 * time.Hour
 
-// Bootstrap is the top-level config shape of configs/config.yaml.
+// Bootstrap 是 dev.yaml 和 prod.yaml 的顶层结构
 type Bootstrap struct {
 	Server Server `json:"server"`
 	Data   Data   `json:"data"`
@@ -38,7 +38,6 @@ func (g GRPC) Timeout() time.Duration {
 
 type Data struct {
 	Database Database `json:"database"`
-	Redis    Redis    `json:"redis"`
 }
 
 type Database struct {
@@ -46,21 +45,6 @@ type Database struct {
 	Source      string `json:"source"`
 	Debug       bool   `json:"debug"`
 	AutoMigrate bool   `json:"auto_migrate"`
-}
-
-type Redis struct {
-	Network        string `json:"network"`
-	Addr           string `json:"addr"`
-	ReadTimeoutMs  int64  `json:"read_timeout_ms"`
-	WriteTimeoutMs int64  `json:"write_timeout_ms"`
-}
-
-func (r Redis) ReadTimeout() time.Duration {
-	return time.Duration(r.ReadTimeoutMs) * time.Millisecond
-}
-
-func (r Redis) WriteTimeout() time.Duration {
-	return time.Duration(r.WriteTimeoutMs) * time.Millisecond
 }
 
 type Auth struct {

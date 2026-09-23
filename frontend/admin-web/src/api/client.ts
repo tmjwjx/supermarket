@@ -1,14 +1,12 @@
 import { clearSession, loadToken } from '../session/index.ts'
 
-const apiBase = import.meta.env.VITE_API_BASE ?? ''
-
 export async function send(path: string, init: RequestInit = {}): Promise<unknown> {
   const headers = new Headers(init.headers)
   const token = loadToken()
   if (token) headers.set('Authorization', `Bearer ${token}`)
   let res: Response
   try {
-    res = await fetch(`${apiBase}${path}`, { ...init, headers })
+    res = await fetch(path, { ...init, headers })
   } catch {
     throw new Error('连不上网关')
   }

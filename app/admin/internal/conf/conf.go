@@ -8,6 +8,12 @@ type Bootstrap struct {
 	Server Server `json:"server"`
 	Data   Data   `json:"data"`
 	Auth   Auth   `json:"auth"`
+	Seed   Seed   `json:"seed"`
+}
+
+// Seed 保存超级管理员初始口令 种子命令在为空或短于 8 位时退出
+type Seed struct {
+	InitPassword string `json:"init_password"`
 }
 
 type Server struct {

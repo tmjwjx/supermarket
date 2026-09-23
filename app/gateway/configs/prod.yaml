@@ -1,0 +1,30 @@
+# 发布环境 服务器接入后再填写下游地址和密钥
+server:
+  http:
+    addr: 0.0.0.0:8080
+    timeout_ms: 7000
+client:
+  user:
+    addr: ""
+    timeout_ms: 1000
+  product:
+    addr: ""
+    timeout_ms: 1000
+  inventory:
+    addr: ""
+    timeout_ms: 1000
+  order:
+    addr: ""
+    timeout_ms: 6000
+  payment:
+    addr: ""
+    timeout_ms: 1000
+  notification:
+    addr: ""
+    timeout_ms: 1000
+  admin:
+    addr: ""
+    timeout_ms: 1000
+auth:
+  jwt_secret: ""
+  admin_jwt_secret: ""

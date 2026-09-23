@@ -7,13 +7,13 @@ import (
 
 	bizpayment "github.com/tmjwjx/supermarket/app/payment/internal/biz/payment"
 	"github.com/tmjwjx/supermarket/app/payment/internal/conf"
+	"github.com/tmjwjx/supermarket/pkg/kafkaout"
 	"github.com/tmjwjx/supermarket/pkg/secretcheck"
 	"github.com/tmjwjx/supermarket/pkg/trace"
 
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3"
 	"github.com/go-kratos/kratos/v3/config"
-	"github.com/go-kratos/kratos/v3/config/env"
 	"github.com/go-kratos/kratos/v3/config/file"
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/go-kratos/kratos/v3/transport/grpc"
@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "../../configs/dev.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server, _ *bizpayment.RetryLoop, _ *bizpayment.ReconcileLoop, _ *bizpayment.Streams) *kratos.App {
@@ -66,7 +66,6 @@ func main() {
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
-			env.NewSource(),
 		),
 	)
 	defer c.Close()
@@ -80,12 +79,13 @@ func main() {
 		panic(err)
 	}
 	if err := secretcheck.Check(
-		secretcheck.Key{Name: "AUTH_JWT_SECRET", Value: bc.Auth.JWTSecret},
-		secretcheck.Key{Name: "ADMIN_JWT_SECRET", Value: bc.Auth.AdminJWTSecret},
+		secretcheck.Key{Name: "jwt_secret", Value: bc.Auth.JWTSecret},
+		secretcheck.Key{Name: "admin_jwt_secret", Value: bc.Auth.AdminJWTSecret},
 	); err != nil {
 		log.Error("invalid jwt secrets", "err", err)
 		os.Exit(1)
 	}
+	kafkaout.UseBrokers(bc.Kafka.Brokers)
 
 	app, cleanup, err := wireApp(&bc.Server, &bc.Data, &bc.Client, &bc.Payment, &bc.Auth, logger)
 	if err != nil {

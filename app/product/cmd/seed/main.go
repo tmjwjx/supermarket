@@ -38,8 +38,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&productAddr, "product", envOr("SEED_PRODUCT_ADDR", "127.0.0.1:9001"), "product gRPC address")
-	flag.StringVar(&inventoryAddr, "inventory", envOr("SEED_INVENTORY_ADDR", "127.0.0.1:9002"), "inventory gRPC address")
+	flag.StringVar(&productAddr, "product", "127.0.0.1:9001", "product gRPC address")
+	flag.StringVar(&inventoryAddr, "inventory", "127.0.0.1:9002", "inventory gRPC address")
 }
 
 type brandSeed struct {
@@ -472,11 +472,4 @@ func seedStocks(ctx context.Context, cli inventoryv1.StockServiceClient, product
 		stocked++
 	}
 	return stocked, nil
-}
-
-func envOr(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }

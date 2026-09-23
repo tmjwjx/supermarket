@@ -1,24 +1,16 @@
-FROM golang:1.25 AS builder
+# 只编译 user 配置在启动时挂到 /configs/app.yaml
+FROM golang:1.26.5 AS build
 
-COPY . /src
 WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -o /out/user ./app/user/cmd/user
 
-RUN GOPROXY=https://goproxy.cn make build
+FROM alpine:3.22
 
-FROM debian:stable-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates  \
-        netbase \
-        && rm -rf /var/lib/apt/lists/ \
-        && apt-get autoremove -y && apt-get autoclean -y
-
-COPY --from=builder /src/bin /app
-
-WORKDIR /app
-
-EXPOSE 8000
-EXPOSE 9000
-VOLUME /data/conf
-
-CMD ["./server", "-conf", "/data/conf"]
+RUN apk add --no-cache ca-certificates
+COPY --from=build /out/user /usr/local/bin/user
+EXPOSE 8000 9000
+ENTRYPOINT ["user"]
+CMD ["-conf", "/configs/app.yaml"]

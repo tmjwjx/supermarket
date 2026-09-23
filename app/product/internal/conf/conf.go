@@ -2,12 +2,18 @@ package conf
 
 import "time"
 
-// Bootstrap 是 configs/config.yaml 的顶层结构
+// Bootstrap 是 dev.yaml 和 prod.yaml 的顶层结构
 type Bootstrap struct {
 	Server Server `json:"server"`
 	Data   Data   `json:"data"`
 	Client Client `json:"client"`
 	Auth   Auth   `json:"auth"`
+	Kafka  Kafka  `json:"kafka"`
+}
+
+// Kafka 是发件箱收发用的地址 容器内写服务名
+type Kafka struct {
+	Brokers string `json:"brokers"`
 }
 
 // 买家令牌和后台令牌使用不同密钥

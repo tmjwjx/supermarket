@@ -1,0 +1,29 @@
+# 发布环境 服务器接入后再填写连接地址和密钥
+server:
+  http:
+    addr: 0.0.0.0:8003
+    timeout_ms: 5000
+  grpc:
+    addr: 0.0.0.0:9003
+    timeout_ms: 5000
+data:
+  database:
+    driver: mysql
+    source: ""
+    debug: false
+    auto_migrate: false
+client:
+  product:
+    addr: ""
+    timeout_ms: 1000
+  inventory:
+    addr: ""
+    timeout_ms: 1000
+  user:
+    addr: ""
+    timeout_ms: 1000
+auth:
+  jwt_secret: ""
+  admin_jwt_secret: ""
+kafka:
+  brokers: ""

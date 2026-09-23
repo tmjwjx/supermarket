@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 管理台 frontend/admin-web · 变更说明</title>
+<style>
+:root{--bg:#f7f6f2;--panel:#ffffff;--ink:#1f2328;--muted:#5b6470;--line:#e4e1d8;--brand:#2f6f5e;--brand-soft:#e6f0ec;--warn:#b7791f;--warn-soft:#fbf1e1;--bad:#b83a3a;--bad-soft:#f8e6e6;--info:#2b5c8a;--info-soft:#e5eef7;--radius:10px;--font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--measure:820px}
+@media (prefers-color-scheme:dark){:root{--bg:#15171a;--panel:#1d2024;--ink:#e7e4dc;--muted:#9aa3ad;--line:#33373e;--brand:#6cbfa6;--brand-soft:#1b2f29;--warn:#e3aa55;--warn-soft:#342919;--bad:#e27b7b;--bad-soft:#3a2020;--info:#79acdd;--info-soft:#1a2837}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.8;overflow-x:hidden}
+a{color:var(--brand)}
+code{font-family:var(--mono);font-size:.86em;background:var(--brand-soft);padding:.08em .36em;border-radius:5px;overflow-wrap:anywhere}
+#progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--brand);z-index:60}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;justify-content:space-between;font-size:14px;line-height:1.6}
+.crumb{color:var(--muted)}.crumb a{text-decoration:none}.crumb b{color:var(--ink)}
+.pager{display:flex;flex-wrap:wrap;gap:8px}.pager a{text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:1px 12px;background:var(--panel);white-space:nowrap}
+.layout{max-width:1180px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+.toc{position:sticky;top:56px;align-self:start;max-height:calc(100vh - 64px);overflow:auto;padding:28px 0;font-size:14px}
+.toc-title{font-size:12px;letter-spacing:.12em;color:var(--muted);margin:0 0 8px}
+.toc ol,.toc-mobile ol{list-style:none;margin:0;padding:0}
+.toc a{display:flex;gap:8px;padding:5px 10px;border-left:2px solid var(--line);color:var(--muted);text-decoration:none;line-height:1.5}
+.toc a .n,.toc-mobile a .n{font-variant-numeric:tabular-nums;opacity:.75}
+.toc a.active{color:var(--brand);border-left-color:var(--brand);background:var(--brand-soft);font-weight:600}
+.toc-mobile{display:none}
+main.doc{min-width:0;max-width:var(--measure);padding:24px 0 96px}
+@media (max-width:960px){.layout{grid-template-columns:minmax(0,1fr);gap:0}.toc{display:none}.toc-mobile{display:block;margin:16px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:2px 14px}.toc-mobile summary{cursor:pointer;padding:8px 0;font-weight:600}.toc-mobile a{display:flex;gap:8px;padding:4px 0;color:var(--muted);text-decoration:none}.toc-mobile a.active{color:var(--brand);font-weight:600}}
+@media (max-width:520px){.topbar-inner,.layout{padding-left:14px;padding-right:14px}body{font-size:15px}}
+.cover{padding:20px 0 4px}
+.cover .num{font-size:88px;line-height:1;font-weight:800;color:var(--brand);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cover h1{font-size:34px;line-height:1.3;margin:10px 0 2px}
+.cover .sub{color:var(--muted);margin:0}
+.summary{margin:18px 0;padding:14px 18px;background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:var(--radius);font-size:17px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 8px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px}
+.metric .v{font-size:32px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+.metric .k{font-weight:600}
+.metric .d{font-size:13px;color:var(--muted);line-height:1.5}
+.sec{padding-top:36px;scroll-margin-top:52px}
+.sec>h2{display:flex;align-items:baseline;gap:12px;font-size:24px;line-height:1.35;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.sec>h2 .no{font-size:15px;font-weight:700;color:var(--panel);background:var(--brand);border-radius:6px;padding:0 8px;font-variant-numeric:tabular-nums}
+.sec>h2 .hash{margin-left:auto;color:var(--line);text-decoration:none;font-weight:400}
+.sec>h2:hover .hash{color:var(--muted)}
+h3{font-size:18px;margin:24px 0 8px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.grid.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.card h4{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.7}
+.ico{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:inline-grid;place-items:center;font-size:14px;font-weight:800;flex:none}
+.badge{display:inline-block;font-size:12px;line-height:1.7;padding:0 8px;border-radius:999px;font-weight:600;white-space:nowrap;background:var(--brand-soft);color:var(--brand)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.info{background:var(--info-soft);color:var(--info)}.badge.gray{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+table{width:100%;min-width:540px;border-collapse:collapse;font-size:14px;line-height:1.6}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:var(--brand-soft);font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:var(--bg)}
+tbody tr:last-child td{border-bottom:0}
+tbody td:first-child{font-weight:600}
+.fields{display:grid;grid-template-columns:128px minmax(0,1fr);margin:6px 0 0}
+.fields dt,.fields dd{margin:0;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.7;min-width:0}
+.fields dt{color:var(--muted);font-weight:600;padding-right:12px}
+.fields>*:nth-last-child(-n+2){border-bottom:0}
+@media (max-width:520px){.fields{grid-template-columns:92px minmax(0,1fr)}}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+.step-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 16px;background:var(--brand-soft);border-bottom:1px solid var(--line);font-weight:700}
+.step-head .tag{font-size:12px;background:var(--brand);color:var(--panel);border-radius:6px;padding:0 8px;font-variant-numeric:tabular-nums}
+.step-body{padding:2px 16px 8px}
+.flow{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;list-style:none;padding:0}
+.flow li{flex:1 1 130px;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;font-size:14px;line-height:1.55;min-width:0}
+.flow li b{display:block;font-size:15px}
+.flow li small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.flow li:not(:last-child)::after{content:"→";position:absolute;right:-5px;top:50%;transform:translate(50%,-50%);color:var(--brand);font-weight:800;background:var(--bg);line-height:1;z-index:1}
+.callout{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;padding:12px 16px;margin:14px 0;border-radius:var(--radius);border-left:4px solid var(--info);background:var(--info-soft)}
+.callout .i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--info);color:var(--panel)}
+.callout b.t{display:block;line-height:1.6}
+.callout p{margin:2px 0 0;font-size:14px;line-height:1.7}
+.callout.tip{border-color:var(--brand);background:var(--brand-soft)}.callout.tip .i{background:var(--brand)}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}.callout.warn .i{background:var(--warn)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}.callout.bad .i{background:var(--bad)}
+.checklist{list-style:none;padding:0;margin:14px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.checklist li+li{border-top:1px solid var(--line)}
+.checklist label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;padding:10px 14px;cursor:pointer;font-size:14px;line-height:1.7}
+.checklist input{margin:5px 0 0;accent-color:var(--brand)}
+.checklist small{display:block;color:var(--muted)}
+.fig{margin:16px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.fig .scroll{overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:540px;height:auto}
+.fig figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.6}
+.s-box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.s-brand{fill:var(--brand-soft);stroke:var(--brand);stroke-width:1.5}
+.s-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.5}
+.s-bad{fill:var(--bad-soft);stroke:var(--bad);stroke-width:1.5}
+.s-info{fill:var(--info-soft);stroke:var(--info);stroke-width:1.5}
+.s-frame{fill:none;stroke:var(--brand);stroke-width:1.5;stroke-dasharray:6 4}
+.s-dash{stroke-dasharray:6 4}
+.s-t{fill:var(--ink);font-family:var(--font);font-size:14px}
+.s-m{fill:var(--muted);font-size:12px}
+.s-c{font-family:var(--mono);font-size:12.5px}
+.s-b{font-weight:700}
+.s-tb{fill:var(--brand)}.s-tw{fill:var(--warn)}.s-tr{fill:var(--bad)}.s-ti{fill:var(--info)}
+.s-line{stroke:var(--muted);stroke-width:1.5;fill:none}
+.s-lb{stroke:var(--brand)}.s-lr{stroke:var(--bad)}.s-lw{stroke:var(--warn)}.s-li{stroke:var(--info)}
+.s-arrow{fill:var(--muted)}
+.wires{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:16px 0}
+.desk{background:var(--bg);border:2px solid var(--ink);border-radius:12px;overflow:hidden;font-size:12.5px;line-height:1.5;min-width:0}
+.desk-bar{display:flex;gap:6px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);color:var(--muted);font-family:var(--mono);font-size:11.5px}
+.desk-bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block;flex:none}
+.desk-body{padding:10px}
+.wf{background:var(--panel);border:1px dashed var(--line);border-radius:6px;padding:5px 8px;margin:5px 0;color:var(--muted)}
+.wf.warnbar{background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn)}
+.wf.frame{height:58px;display:grid;place-items:center;border-style:solid;border-color:var(--info);color:var(--info)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.tabs span{border:1px solid var(--line);border-radius:6px;padding:1px 8px;background:var(--panel)}
+.tabs span.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:700}
+table.mini{min-width:0;font-size:11.5px;line-height:1.4;background:var(--panel)}
+table.mini th,table.mini td{border:1px solid var(--line);padding:3px 5px;font-weight:400}
+table.mini thead th{white-space:normal}
+table.mini td.lock{color:var(--muted);background:repeating-linear-gradient(45deg,transparent 0 4px,var(--line) 4px 5px)}
+table.mini td.edit{color:var(--brand);font-weight:700}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.btn{flex:1 1 auto;text-align:center;border-radius:7px;padding:3px 8px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:var(--panel);font-weight:700}
+.thumbs{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0}
+.thumbs span{width:30px;height:30px;border-radius:5px;background:var(--line);display:grid;place-items:center;font-size:10px;color:var(--muted)}
+.thumbs span.add{background:var(--panel);border:1px dashed var(--muted)}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<header class="topbar"><div class="topbar-inner">
+  <nav class="crumb"><a href="index.html">变更说明</a> / <b>管理台 frontend/admin-web</b></nav>
+  <nav class="pager"><a href="10-web.html">← 上一篇 · 10 用户端</a><a href="index.html">下一篇 · 00 总览 →</a></nav>
+</div></header>
+
+<div class="layout">
+<aside class="toc">
+  <p class="toc-title">目录</p>
+  <ol>
+    <li><a href="#top"><span class="n">00</span>封面</a></li>
+    <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+    <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+    <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+    <li><a href="#s4"><span class="n">04</span>接口与数据</a></li>
+    <li><a href="#s5"><span class="n">05</span>关键规则</a></li>
+    <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+    <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+  </ol>
+</aside>
+
+<main class="doc">
+<details class="toc-mobile">
+  <summary>目录</summary>
+  <ol>
+    <li><a href="#top"><span class="n">00</span>封面</a></li>
+    <li><a href="#s1"><span class="n">01</span>这个模块负责什么</a></li>
+    <li><a href="#s2"><span class="n">02</span>变更点</a></li>
+    <li><a href="#s3"><span class="n">03</span>实现逻辑</a></li>
+    <li><a href="#s4"><span class="n">04</span>接口与数据</a></li>
+    <li><a href="#s5"><span class="n">05</span>关键规则</a></li>
+    <li><a href="#s6"><span class="n">06</span>验证与测试</a></li>
+    <li><a href="#s7"><span class="n">07</span>已知遗留</a></li>
+  </ol>
+</details>
+
+<section class="cover sec" id="top">
+  <div class="num">11</div>
+  <h1>管理台 frontend/admin-web</h1>
+  <p class="sub">React 19 · react-router-dom 7 · Vite 8，运营同学的后台</p>
+  <div class="summary">一个前端管完商品、目录、推荐位、库存、订单、对账和运营账号：令牌用独立的 <code>admin_access_token</code>，所有请求走 <code>/v1/admin/*</code>；商品编辑是四步表单，在售时锁住规格结构只放行改价和文字。</div>
+  <div class="metrics">
+    <div class="metric"><div class="v">17</div><div class="k">路由</div><div class="d">1 登录 · 14 业务页 · 2 重定向</div></div>
+    <div class="metric"><div class="v">15</div><div class="k">页面组件</div><div class="d">另有 <code>Notice.tsx</code> 与 <code>shared.ts</code></div></div>
+    <div class="metric"><div class="v">49</div><div class="k">请求函数</div><div class="d">全部在 <code>api/admin.ts</code></div></div>
+    <div class="metric"><div class="v">2</div><div class="k">测试用例</div><div class="d"><code>test/session.test.ts</code></div></div>
+  </div>
+</section>
+
+<section class="sec" id="s1">
+  <h2><span class="no">01</span>这个模块负责什么<a class="hash" href="#s1">#</a></h2>
+  <p>admin-web 只请求 gateway，开发时 Vite 在 5173 端口把 <code>/v1</code> 代理到 <code>127.0.0.1:8080</code>。页面按运营角色分成三块，后端按路径前缀判角色。</p>
+  <div class="grid">
+    <div class="card"><h4><span class="ico">商</span>商品生命周期</h4><p>商品列表、四步编辑、审核、回收站、操作日志。</p></div>
+    <div class="card"><h4><span class="ico">目</span>目录与运营位</h4><p>属性模板、两级分类、品牌、推荐位、库存入库出库。</p></div>
+    <div class="card"><h4><span class="ico">单</span>交易</h4><p>订单列表与发货、按单号发货、支付对账差异。</p></div>
+    <div class="card"><h4><span class="ico">号</span>运营账号</h4><p>建号、改角色、停用启用、重置密码，只给超级管理员。</p></div>
+  </div>
+  <figure class="fig">
+    <div class="scroll">
+    <svg viewBox="0 0 720 440" role="img" aria-label="admin-web 全部页面路由地图">
+      <defs><marker id="a1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="s-arrow"/></marker></defs>
+      <rect x="16" y="16" width="200" height="48" rx="9" class="s-box"/><text x="28" y="36" class="s-t s-b">运营登录 LoginPage</text><text x="28" y="54" class="s-t s-m s-c">/login?from=</text>
+      <rect x="236" y="16" width="220" height="48" rx="9" class="s-box s-dash"/><text x="248" y="36" class="s-t s-b">根路径重定向</text><text x="248" y="54" class="s-t s-m s-c">/ → /products</text>
+      <rect x="476" y="16" width="228" height="48" rx="9" class="s-box s-dash"/><text x="488" y="36" class="s-t s-b">兜底重定向</text><text x="488" y="54" class="s-t s-m s-c">* → /products</text>
+      <rect x="10" y="80" width="700" height="350" rx="12" class="s-frame"/>
+      <text x="360" y="100" text-anchor="middle" class="s-t s-b s-tb">RequireAuth · 无 admin_access_token → /login?from=</text>
+      <text x="130" y="122" text-anchor="middle" class="s-t s-m">商品 · product / super</text>
+      <rect x="28" y="132" width="204" height="36" rx="8" class="s-brand"/><text x="40" y="155" class="s-t s-b">商品</text><text x="220" y="155" text-anchor="end" class="s-t s-m s-c">/products</text>
+      <rect x="28" y="178" width="204" height="36" rx="8" class="s-brand"/><text x="40" y="201" class="s-t s-b">编辑</text><text x="220" y="201" text-anchor="end" class="s-t s-m s-c">/products/:id</text>
+      <rect x="28" y="224" width="204" height="36" rx="8" class="s-brand"/><text x="40" y="247" class="s-t s-b">审核</text><text x="220" y="247" text-anchor="end" class="s-t s-m s-c">/audits</text>
+      <rect x="28" y="270" width="204" height="36" rx="8" class="s-brand"/><text x="40" y="293" class="s-t s-b">回收站</text><text x="220" y="293" text-anchor="end" class="s-t s-m s-c">/recycle</text>
+      <rect x="28" y="316" width="204" height="36" rx="8" class="s-brand"/><text x="40" y="339" class="s-t s-b">操作日志</text><text x="220" y="339" text-anchor="end" class="s-t s-m s-c">/logs</text>
+      <text x="358" y="122" text-anchor="middle" class="s-t s-m">目录与运营位 · product / super</text>
+      <rect x="256" y="132" width="204" height="36" rx="8" class="s-brand"/><text x="268" y="155" class="s-t s-b">属性模板</text><text x="448" y="155" text-anchor="end" class="s-t s-m s-c">/attributes</text>
+      <rect x="256" y="178" width="204" height="36" rx="8" class="s-brand"/><text x="268" y="201" class="s-t s-b">分类</text><text x="448" y="201" text-anchor="end" class="s-t s-m s-c">/categories</text>
+      <rect x="256" y="224" width="204" height="36" rx="8" class="s-brand"/><text x="268" y="247" class="s-t s-b">品牌</text><text x="448" y="247" text-anchor="end" class="s-t s-m s-c">/brands</text>
+      <rect x="256" y="270" width="204" height="36" rx="8" class="s-brand"/><text x="268" y="293" class="s-t s-b">推荐位</text><text x="448" y="293" text-anchor="end" class="s-t s-m s-c">/slots</text>
+      <rect x="256" y="316" width="204" height="36" rx="8" class="s-brand"/><text x="268" y="339" class="s-t s-b">库存</text><text x="448" y="339" text-anchor="end" class="s-t s-m s-c">/stocks</text>
+      <text x="588" y="122" text-anchor="middle" class="s-t s-m">交易 · order / super</text>
+      <rect x="484" y="132" width="208" height="36" rx="8" class="s-info"/><text x="496" y="155" class="s-t s-b">订单</text><text x="680" y="155" text-anchor="end" class="s-t s-m s-c">/orders</text>
+      <rect x="484" y="178" width="208" height="36" rx="8" class="s-info"/><text x="496" y="201" class="s-t s-b">发货</text><text x="680" y="201" text-anchor="end" class="s-t s-m s-c">/ship</text>
+      <rect x="484" y="224" width="208" height="36" rx="8" class="s-info"/><text x="496" y="247" class="s-t s-b">对账</text><text x="680" y="247" text-anchor="end" class="s-t s-m s-c">/reconcile</text>
+      <text x="588" y="292" text-anchor="middle" class="s-t s-m">账号 · 仅 super</text>
+      <rect x="484" y="302" width="208" height="36" rx="8" class="s-warn"/><text x="496" y="325" class="s-t s-b">运营账号</text><text x="680" y="325" text-anchor="end" class="s-t s-m s-c">/admin-users</text>
+      <line x1="130" y1="168" x2="130" y2="176" class="s-line" marker-end="url(#a1a)"/>
+      <path d="M28,150 C12,150 12,334 26,334" class="s-line s-li" marker-end="url(#a1a)"/>
+      <path d="M232,150 C246,150 242,334 254,334" class="s-line s-li" marker-end="url(#a1a)"/>
+      <line x1="588" y1="168" x2="588" y2="176" class="s-line" marker-end="url(#a1a)"/>
+      <text x="360" y="384" text-anchor="middle" class="s-t s-m">蓝线：商品行上的「库存」「日志」链接，带 ?product= / ?product_id= 跳转</text>
+      <text x="360" y="406" text-anchor="middle" class="s-t s-m">订单页「按单号发货」链到 /ship；/products/new 为新建，其余 id 为编辑</text>
+    </svg>
+    </div>
+    <figcaption>图 1 · <code>src/routes.tsx</code> 的 17 条路由，按后端 <code>AllowAdmin</code> 的角色分组着色</figcaption>
+  </figure>
+</section>
+
+<section class="sec" id="s2">
+  <h2><span class="no">02</span>变更点<a class="hash" href="#s2">#</a></h2>
+  <p>按运营能做的事列出，页面名都是 <code>src/pages/</code> 下的组件。</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>能力</th><th>页面</th><th>要点</th></tr></thead>
+    <tbody>
+      <tr><td>运营登录</td><td>LoginPage</td><td>独立令牌，同源跳回，默认回 /products</td></tr>
+      <tr><td>商品列表</td><td>ProductsPage</td><td>状态 + 名称筛选，按状态给动作</td></tr>
+      <tr><td>批量上下架</td><td>ProductsPage</td><td>勾选后批量，逐个列出失败原因</td></tr>
+      <tr><td>商品编辑</td><td>ProductEditPage</td><td>四步表单，保存或保存并提交审核</td></tr>
+      <tr><td>审核</td><td>AuditPage</td><td>待审核通过 / 驳回，按商品查审核记录</td></tr>
+      <tr><td>回收站</td><td>RecyclePage</td><td>恢复为下架，或二次确认彻底删除</td></tr>
+      <tr><td>操作日志</td><td>LogsPage</td><td>按商品 id 查，显示变更前后</td></tr>
+      <tr><td>属性模板</td><td>AttributesPage</td><td>规格 / 参数属性、可选值、允许手填</td></tr>
+      <tr><td>分类</td><td>CategoriesPage</td><td>两级，绑定属性模板，显示 / 隐藏</td></tr>
+      <tr><td>品牌</td><td>BrandsPage</td><td>名称、首字母、Logo、描述、排序</td></tr>
+      <tr><td>推荐位</td><td>SlotsPage</td><td>新品 / 热卖 / 专题，起止时间与状态</td></tr>
+      <tr><td>库存</td><td>StockPage</td><td>实物 / 预占 / 可用，入库出库带原因</td></tr>
+      <tr><td>订单与发货</td><td>OrdersPage · ShipPage</td><td>按状态筛，已支付可发货</td></tr>
+      <tr><td>对账</td><td>ReconcilePage</td><td>按日期查支付差异，加载更多</td></tr>
+      <tr><td>运营账号</td><td>AdminUsersPage</td><td>建号、改角色、停用启用、重置密码</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="sec" id="s3">
+  <h2><span class="no">03</span>实现逻辑<a class="hash" href="#s3">#</a></h2>
+  <h3>登录与会话</h3>
+  <ol class="flow">
+    <li><b>LoginPage</b><small>POST /v1/admin/login</small></li>
+    <li><b>saveToken</b><small>sessionStorage 键 admin_access_token</small></li>
+    <li><b>safeFrom(from)</b><small>同源校验，不合格回 /products</small></li>
+    <li><b>send()</b><small>每个请求带 Bearer</small></li>
+    <li><b>401</b><small>clearSession，跳 /login?from=</small></li>
+  </ol>
+  <p class="muted">键名与用户端的 <code>access_token</code> 分开，同一浏览器可以同时登着买家和运营而互不覆盖。</p>
+
+  <h3>商品状态与列表动作</h3>
+  <figure class="fig">
+    <div class="scroll">
+    <svg viewBox="0 0 720 310" role="img" aria-label="商品状态机与列表按钮">
+      <defs><marker id="a2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="s-arrow"/></marker></defs>
+      <rect x="20" y="40" width="110" height="44" rx="10" class="s-box"/><text x="75" y="60" text-anchor="middle" class="s-t s-b">草稿</text><text x="75" y="76" text-anchor="middle" class="s-t s-m">1</text>
+      <rect x="200" y="40" width="110" height="44" rx="10" class="s-info"/><text x="255" y="60" text-anchor="middle" class="s-t s-b">待审核</text><text x="255" y="76" text-anchor="middle" class="s-t s-m">2</text>
+      <rect x="400" y="40" width="110" height="44" rx="10" class="s-box"/><text x="455" y="60" text-anchor="middle" class="s-t s-b">已通过</text><text x="455" y="76" text-anchor="middle" class="s-t s-m">4</text>
+      <rect x="580" y="40" width="110" height="44" rx="10" class="s-brand"/><text x="635" y="60" text-anchor="middle" class="s-t s-b s-tb">在售</text><text x="635" y="76" text-anchor="middle" class="s-t s-m">5</text>
+      <rect x="200" y="150" width="110" height="44" rx="10" class="s-warn"/><text x="255" y="170" text-anchor="middle" class="s-t s-b">已驳回</text><text x="255" y="186" text-anchor="middle" class="s-t s-m">3</text>
+      <rect x="580" y="150" width="110" height="44" rx="10" class="s-box"/><text x="635" y="170" text-anchor="middle" class="s-t s-b">已下架</text><text x="635" y="186" text-anchor="middle" class="s-t s-m">6</text>
+      <rect x="400" y="240" width="110" height="44" rx="10" class="s-box s-dash"/><text x="455" y="260" text-anchor="middle" class="s-t s-b">回收站</text><text x="455" y="276" text-anchor="middle" class="s-t s-m">:deleted</text>
+      <rect x="580" y="240" width="110" height="44" rx="10" class="s-bad"/><text x="635" y="267" text-anchor="middle" class="s-t s-b s-tr">彻底删除</text>
+      <rect x="20" y="240" width="140" height="44" rx="10" class="s-box s-dash"/><text x="90" y="260" text-anchor="middle" class="s-t s-b">任一状态</text><text x="90" y="276" text-anchor="middle" class="s-t s-m">每行都有「删除」</text>
+      <line x1="130" y1="62" x2="196" y2="62" class="s-line" marker-end="url(#a2a)"/><text x="163" y="54" text-anchor="middle" class="s-t s-m">提交审核</text>
+      <line x1="310" y1="62" x2="396" y2="62" class="s-line s-lb" marker-end="url(#a2a)"/><text x="353" y="54" text-anchor="middle" class="s-t s-m">通过</text>
+      <line x1="510" y1="62" x2="576" y2="62" class="s-line s-lb" marker-end="url(#a2a)"/><text x="543" y="54" text-anchor="middle" class="s-t s-m">上架</text>
+      <line x1="265" y1="84" x2="265" y2="146" class="s-line s-lw" marker-end="url(#a2a)"/><text x="273" y="120" class="s-t s-m">驳回</text>
+      <line x1="245" y1="150" x2="245" y2="88" class="s-line" marker-end="url(#a2a)"/><text x="237" y="120" text-anchor="end" class="s-t s-m">提交审核</text>
+      <line x1="625" y1="84" x2="625" y2="146" class="s-line" marker-end="url(#a2a)"/><text x="617" y="120" text-anchor="end" class="s-t s-m">下架</text>
+      <line x1="645" y1="150" x2="645" y2="88" class="s-line s-lb" marker-end="url(#a2a)"/><text x="653" y="120" class="s-t s-m">上架</text>
+      <line x1="160" y1="262" x2="396" y2="262" class="s-line s-dash" marker-end="url(#a2a)"/><text x="278" y="254" text-anchor="middle" class="s-t s-m">删除 · 二次确认</text>
+      <path d="M510,252 C548,252 566,214 600,198" class="s-line s-lb" marker-end="url(#a2a)"/><text x="530" y="226" class="s-t s-m">恢复为下架</text>
+      <line x1="510" y1="274" x2="576" y2="274" class="s-line s-lr" marker-end="url(#a2a)"/>
+      <text x="20" y="130" class="s-t s-m">批量上架：只放行 4 / 6</text>
+      <text x="20" y="150" class="s-t s-m">批量下架：只放行 5</text>
+    </svg>
+    </div>
+    <figcaption>图 2 · <code>ProductStatus</code> 六个状态与 ProductsPage、RecyclePage 上出现的按钮</figcaption>
+  </figure>
+
+  <h3>四步编辑</h3>
+  <div class="wires">
+    <div class="desk">
+      <div class="desk-bar"><i></i><i></i><i></i>/products/:id · 第 2 步</div>
+      <div class="desk-body">
+        <div class="wf">编辑商品 牛奶 · 状态 在售 · 返回列表</div>
+        <div class="wf warnbar">商品在售 只能改价格和文字 分类 品牌和规格结构已锁定</div>
+        <div class="tabs"><span>1 基本信息</span><span class="on">2 规格与价格</span><span>3 参数</span><span>4 图片与详情</span></div>
+        <table class="mini"><thead><tr><th>容量</th><th>售价 元</th><th>划线价</th><th>图片</th><th>条码</th><th>启用</th></tr></thead>
+          <tbody><tr><td class="lock">500ml</td><td class="edit">12.90</td><td class="lock">15.00</td><td class="lock">…</td><td class="lock">69…</td><td class="lock">☑</td></tr>
+          <tr><td class="lock">1L</td><td class="edit">22.00</td><td class="lock"></td><td class="lock">…</td><td class="lock">69…</td><td class="lock">☑</td></tr></tbody></table>
+        <div class="btns"><span class="btn">加一个 SKU（禁用）</span></div>
+        <div class="btns"><span class="btn">上一步</span><span class="btn">下一步</span><span class="btn pri">保存</span></div>
+      </div>
+    </div>
+    <div class="desk">
+      <div class="desk-bar"><i></i><i></i><i></i>/products/new · 第 4 步</div>
+      <div class="desk-body">
+        <div class="tabs"><span>1 基本信息</span><span>2 规格与价格</span><span>3 参数</span><span class="on">4 图片与详情</span></div>
+        <div class="wf">图片 3 / 9 · 第一张作为主图</div>
+        <div class="thumbs"><span>1</span><span>2</span><span>3</span><span class="add">＋</span></div>
+        <div class="wf">详情 HTML（textarea）</div>
+        <div class="wf frame">iframe sandbox="" srcDoc 预览</div>
+        <div class="btns"><span class="btn">上一步</span><span class="btn pri">保存</span><span class="btn pri">保存并提交审核</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-head"><span class="tag">环节 1</span>回填与按模板出表单</div>
+    <div class="step-body"><dl class="fields">
+      <dt>回填</dt><dd><code>fill(p)</code> 把分转成元字符串，记下每个 SKU 的 <code>origPrice</code></dd>
+      <dt>模板来源</dt><dd>所选二级分类的 <code>templateId</code>，换分类就重拉 <code>listAttributes</code></dd>
+      <dt>有模板</dt><dd>规格维度 = kind 1 的属性；不允许手填且有可选值时出下拉</dd>
+      <dt>无模板</dt><dd>规格维度自由增删，参数名和值自由填</dd>
+      <dt>防串台</dt><dd><code>attrSeq</code> 丢弃过期响应，模板没拉完不许保存</dd>
+    </dl></div>
+  </div>
+  <div class="step">
+    <div class="step-head"><span class="tag">环节 2</span>保存 <code>save(submitAfter)</code></div>
+    <div class="step-body"><dl class="fields">
+      <dt>新建</dt><dd><code>POST /v1/admin/products</code>，要提交再调 <code>:submit</code>，然后跳到新 id</dd>
+      <dt>编辑</dt><dd><code>PUT</code> 整体保存 → 逐个改价 → 可选提交 → 重新 <code>getProduct</code> 回填</dd>
+      <dt>在售改价</dt><dd>PUT 里 SKU 仍带 <code>origPrice</code>，价格变动另走 <code>skus/{sku}:price</code></dd>
+      <dt>提交按钮</dt><dd>只在新建、草稿、已驳回时出现</dd>
+    </dl></div>
+  </div>
+</section>
+
+<section class="sec" id="s4">
+  <h2><span class="no">04</span>接口与数据<a class="hash" href="#s4">#</a></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>资源</th><th>函数数</th><th>主要端点（/v1/admin 下）</th><th>页面</th></tr></thead>
+    <tbody>
+      <tr><td>登录 · 自己</td><td>2</td><td><code>/login</code> · <code>/me</code></td><td>登录 导航</td></tr>
+      <tr><td>商品</td><td>17</td><td><code>/products</code> · <code>:batchPublish</code> · <code>:deleted</code></td><td>商品 编辑 审核 回收站</td></tr>
+      <tr><td>审核与日志</td><td>2</td><td><code>/products/{id}/audits</code> · <code>/product-logs</code></td><td>审核 日志</td></tr>
+      <tr><td>品牌 · 分类</td><td>8</td><td><code>/brands</code> · <code>/categories</code></td><td>品牌 分类 编辑</td></tr>
+      <tr><td>属性模板</td><td>7</td><td><code>/attribute-templates</code> · <code>/attributes</code></td><td>属性模板 编辑</td></tr>
+      <tr><td>推荐位</td><td>4</td><td><code>/recommendations</code></td><td>推荐位</td></tr>
+      <tr><td>库存</td><td>2</td><td><code>/stocks</code> · <code>/stocks:adjust</code></td><td>库存</td></tr>
+      <tr><td>订单 · 对账</td><td>3</td><td><code>/orders</code> · <code>:ship</code> · <code>/payments/reconcile-diffs</code></td><td>订单 发货 对账</td></tr>
+      <tr><td>运营账号</td><td>4</td><td><code>/users</code> · <code>:resetPassword</code></td><td>运营账号</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid two">
+    <div class="card"><h4>金额 <code>money.ts</code></h4><dl class="fields">
+      <dt>formatCents</dt><dd>分 → <code>¥12.90</code>，负数带号</dd>
+      <dt>centsToYuan</dt><dd>回填输入框用的元字符串</dd>
+      <dt>yuanToCents</dt><dd>按小数点拆开：元 × 100 + 补齐两位的分，整数拼回</dd>
+    </dl></div>
+    <div class="card"><h4>会话 <code>session/index.ts</code></h4><dl class="fields">
+      <dt>键名</dt><dd><code>admin_access_token</code>，只此一个</dd>
+      <dt>介质</dt><dd><code>sessionStorage</code></dd>
+      <dt>回跳</dt><dd>拒绝反斜杠、控制字符、外站与 <code>/login</code></dd>
+    </dl></div>
+  </div>
+</section>
+
+<section class="sec" id="s5">
+  <h2><span class="no">05</span>关键规则<a class="hash" href="#s5">#</a></h2>
+  <h3>商品列表按状态给动作</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>状态</th><th>行内按钮（另有 编辑 删除 库存 日志）</th></tr></thead>
+    <tbody>
+      <tr><td>1 草稿 · 3 已驳回</td><td>提交审核</td></tr>
+      <tr><td>2 待审核</td><td>通过 · 驳回（理由可空，空时记「未通过审核」）</td></tr>
+      <tr><td>4 已通过 · 6 已下架</td><td>上架</td></tr>
+      <tr><td>5 在售</td><td>下架</td></tr>
+    </tbody>
+  </table></div>
+  <h3>编辑页保存前校验</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>条件</th><th>提示</th></tr></thead>
+    <tbody>
+      <tr><td>名称为空</td><td>商品名称必填</td></tr>
+      <tr><td>非在售且选了一级分类</td><td>只能选二级分类</td></tr>
+      <tr><td>售价不是大于 0 的元金额</td><td>第 N 个 SKU 售价要填大于 0 的元金额</td></tr>
+      <tr><td>规格值不在模板可选值内</td><td>只能从可选值里选</td></tr>
+      <tr><td>两个 SKU 规格组合相同</td><td>和前面的 SKU 规格重复</td></tr>
+      <tr><td>重量不是非负整数</td><td>重量要填非负整数克</td></tr>
+      <tr><td>图片多于 9 张</td><td>图片最多 9 张（「加一张」到 9 即禁用）</td></tr>
+    </tbody>
+  </table></div>
+  <h3>在售锁定</h3>
+  <div class="grid">
+    <div class="card"><h4><span class="badge">可改</span></h4><p>名称、副标题、关键词、单位、重量、SKU 售价、参数文字、图片、详情。</p></div>
+    <div class="card"><h4><span class="badge bad">锁定</span></h4><p>分类、品牌、规格维度与值、划线价、SKU 图、条码、启用、增删 SKU。</p></div>
+  </div>
+  <h3>其他页面的规则</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>页面</th><th>规则</th></tr></thead>
+    <tbody>
+      <tr><td>推荐位</td><td>结束须晚于开始；按当前时间显示生效中 / 未开始 / 已过期</td></tr>
+      <tr><td>库存</td><td>数量须为正整数，出库不能超过可用；原因空时记入库 / 出库</td></tr>
+      <tr><td>订单</td><td>只有已支付（2）行出现「发货」，发货前二次确认</td></tr>
+      <tr><td>详情预览</td><td><code>iframe sandbox=""</code>，预览里的脚本不会执行</td></tr>
+      <tr><td>角色</td><td>导航 13 个入口对所有角色都显示，越权由后端返回 403</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="sec" id="s6">
+  <h2><span class="no">06</span>验证与测试<a class="hash" href="#s6">#</a></h2>
+  <ul class="checklist">
+    <li><label><input type="checkbox"><span><code>cd frontend/admin-web &amp;&amp; npm test</code><small>即 <code>node --test test/*.test.ts</code>，跑 2 个用例</small></span></label></li>
+    <li><label><input type="checkbox"><span>用例 1：<code>safeFrom('/orders?status=2#list')</code> 原样保留，同源绝对地址收成路径</span></label></li>
+    <li><label><input type="checkbox"><span>用例 2：外站、反斜杠、控制字符、登录页都回到 <code>/products</code></span></label></li>
+    <li><label><input type="checkbox"><span><code>npm run build</code> 通过<small>即 <code>tsc -b &amp;&amp; vite build</code></small></span></label></li>
+    <li><label><input type="checkbox"><span><code>npm run lint</code>（oxlint）无报错</span></label></li>
+    <li><label><input type="checkbox"><span>CI：<code>.github/workflows/ci.yaml</code> 在 <code>frontend/admin-web</code> 跑 <code>npm ci &amp;&amp; npm test &amp;&amp; npm run build</code></span></label></li>
+    <li><label><input type="checkbox"><span>手工：在 admin 配置写入至少 8 位的 <code>seed.init_password</code> 后执行 <code>make seed-admin</code> 建超管，用它能登录并看到「运营账号」列表。这项口令目前还空着。</span></label></li>
+    <li><label><input type="checkbox"><span>手工：打开在售商品，分类与品牌下拉禁用，改售价保存后提示「改价 N 个 SKU」</span></label></li>
+    <li><label><input type="checkbox"><span>手工：批量上架里混一个在售商品，结果提示里带它的名字和失败原因</span></label></li>
+  </ul>
+</section>
+
+<section class="sec" id="s7">
+  <h2><span class="no">07</span>已知遗留<a class="hash" href="#s7">#</a></h2>
+  <div class="grid two">
+    <div class="card"><h4><span class="badge bad">并发</span>在售保存可能回滚别人的改价</h4><p>PUT 里每个 SKU 带的是打开页面时的 <code>origPrice</code>。这期间别人改过价，保存会把价格写回旧值。</p></div>
+    <div class="card"><h4><span class="badge warn">分页</span>全量列表 page_size 超上限</h4><p><code>listAllProducts</code> 每页要 100，后端 <code>paging.Size</code> 静默收成 50。最多翻 20 页，超过 1000 件拿不到。</p></div>
+  </div>
+  <figure class="fig">
+    <div class="scroll">
+    <svg viewBox="0 0 720 300" role="img" aria-label="在售保存回滚他人改价的时序">
+      <defs><marker id="a3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="s-arrow"/></marker></defs>
+      <rect x="40" y="12" width="150" height="30" rx="7" class="s-brand"/><text x="115" y="32" text-anchor="middle" class="s-t s-b">运营 A 编辑页</text>
+      <rect x="285" y="12" width="150" height="30" rx="7" class="s-info"/><text x="360" y="32" text-anchor="middle" class="s-t s-b">product 服务</text>
+      <rect x="530" y="12" width="150" height="30" rx="7" class="s-brand"/><text x="605" y="32" text-anchor="middle" class="s-t s-b">运营 B</text>
+      <line x1="115" y1="42" x2="115" y2="262" class="s-line s-dash"/>
+      <line x1="360" y1="42" x2="360" y2="262" class="s-line s-dash"/>
+      <line x1="605" y1="42" x2="605" y2="262" class="s-line s-dash"/>
+      <line x1="360" y1="74" x2="119" y2="74" class="s-line s-dash" marker-end="url(#a3a)"/>
+      <text x="238" y="66" text-anchor="middle" class="s-t s-m">GET 回填 origPrice = 12.90</text>
+      <line x1="605" y1="112" x2="364" y2="112" class="s-line" marker-end="url(#a3a)"/>
+      <text x="482" y="104" text-anchor="middle" class="s-t s-m s-c">:price → 11.90</text>
+      <line x1="115" y1="152" x2="356" y2="152" class="s-line s-lr" marker-end="url(#a3a)"/>
+      <text x="238" y="144" text-anchor="middle" class="s-t s-m s-tr">PUT skus.price = 12.90</text>
+      <rect x="372" y="164" width="200" height="30" rx="7" class="s-bad"/>
+      <text x="472" y="184" text-anchor="middle" class="s-t s-m s-tr s-b">价格被写回 12.90</text>
+      <line x1="115" y1="222" x2="356" y2="222" class="s-line" marker-end="url(#a3a)"/>
+      <text x="238" y="214" text-anchor="middle" class="s-t s-m">只有 A 自己改过的 SKU 才走 :price</text>
+      <text x="360" y="288" text-anchor="middle" class="s-t s-m">金额为示例；时序对应 ProductEditPage 的 buildSkus 在售分支</text>
+    </svg>
+    </div>
+    <figcaption>图 3 · A 没改价时也会覆盖 B 刚改的价格，因为 PUT 总带着旧价</figcaption>
+  </figure>
+  <div class="callout warn"><span class="i">!</span><div><b class="t">分页上限影响不止商品页</b><p>审核、库存、推荐位的商品下拉也都调 <code>listAllProducts</code>；回收站的 <code>listDeleted</code> 同样传 100，但它有「加载更多」，只是每页实际 50 条。</p></div></div>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a, .toc-mobile a'));
+  var ids=[];links.forEach(function(a){var id=a.getAttribute('href').slice(1);if(ids.indexOf(id)<0)ids.push(id)});
+  var secs=ids.map(function(id){return document.getElementById(id)}).filter(Boolean);
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%';
+    var cur=secs.length?secs[0].id:'';
+    secs.forEach(function(s){if(s.getBoundingClientRect().top<=90)cur=s.id});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+  }
+  var d=document.querySelector('.toc-mobile');
+  if(d)d.addEventListener('click',function(e){if(e.target.closest('a'))d.open=false});
+  window.addEventListener('scroll',onScroll,{passive:true});window.addEventListener('resize',onScroll);onScroll();
+})();
+</script>
+</body>
+</html>

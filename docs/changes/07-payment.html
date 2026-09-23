@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 支付 · 变更说明</title>
+<style>
+:root{
+  --bg:#f7f6f2;--panel:#ffffff;--ink:#1f2328;--muted:#5b6470;--line:#e4e1d8;
+  --brand:#2f6f5e;--brand-soft:#e6f0ec;--warn:#b7791f;--warn-soft:#fbf1e1;
+  --bad:#b83a3a;--bad-soft:#f8e6e6;--info:#2b5c8a;--info-soft:#e5eef7;
+  --radius:10px;--font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--measure:820px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#15171a;--panel:#1d2024;--ink:#e7e4dd;--muted:#9aa3ad;--line:#30343a;
+    --brand:#6dbba3;--brand-soft:#1d332d;--warn:#e2ab4f;--warn-soft:#382c18;
+    --bad:#e27a7a;--bad-soft:#3a2222;--info:#80b1e1;--info-soft:#1b2b3b;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 var(--font);overflow-x:hidden}
+a{color:var(--brand)}
+code{font-family:var(--mono);font-size:.86em;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+.progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--brand);z-index:60}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1140px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px}
+.crumb a{text-decoration:none;font-weight:600}
+.crumb .sep{color:var(--muted);margin:0 6px}
+.pager{display:flex;gap:8px;flex-wrap:wrap}
+.pager a{display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);text-decoration:none;font-size:13px}
+.pager a:hover{border-color:var(--brand);color:var(--brand)}
+.pager small{color:var(--muted);font-variant-numeric:tabular-nums}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;max-width:1140px;margin:0 auto;padding:0 24px}
+.toc{position:sticky;top:56px;align-self:start;max-height:calc(100vh - 64px);overflow:auto;padding:28px 0}
+.toc-title{font-size:12px;color:var(--muted);letter-spacing:.08em;margin:0 0 8px 12px}
+.toc a,.toc-m a{display:block;padding:5px 10px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.5}
+.toc a .n,.toc-m a .n{font-variant-numeric:tabular-nums;margin-right:6px;opacity:.75}
+.toc a.active,.toc-m a.active{color:var(--brand);border-left-color:var(--brand);background:var(--brand-soft);border-radius:0 6px 6px 0;font-weight:600}
+.toc .top{margin-top:12px;font-size:13px}
+.toc-m{display:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:16px 0 0;padding:4px 12px 8px}
+.toc-m summary{cursor:pointer;font-weight:600;padding:6px 0}
+main{min-width:0;max-width:var(--measure);padding:28px 0 96px}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);padding:0 16px}.toc{display:none}.toc-m{display:block}.topbar-in{padding:8px 16px}}
+.cover{display:flex;align-items:flex-end;gap:20px;margin:8px 0 18px}
+.cover-no{font-size:88px;line-height:.9;font-weight:800;color:var(--brand);letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.eyebrow{margin:0;color:var(--muted);font-size:13px}
+.cover h1{margin:2px 0 0;font-size:32px;line-height:1.3}
+@media (max-width:520px){.cover{gap:14px}.cover-no{font-size:60px}.cover h1{font-size:25px}}
+.summary{background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:var(--radius);padding:14px 18px;font-size:17px;line-height:1.75;margin:0 0 18px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.metric b{display:block;font-size:30px;line-height:1.2;color:var(--brand);font-variant-numeric:tabular-nums}
+.metric b small{font-size:15px;margin-left:3px;color:var(--ink);font-weight:600}
+.metric span{display:block;font-weight:600;margin-top:2px}
+.metric em{display:block;font-style:normal;color:var(--muted);font-size:13px;line-height:1.55;margin-top:2px}
+section{margin-top:56px;scroll-margin-top:64px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font-size:24px;line-height:1.4}
+.sec-h .no{font-size:14px;font-weight:700;color:var(--brand);background:var(--brand-soft);border-radius:6px;padding:1px 8px;font-variant-numeric:tabular-nums;flex:none}
+.sec-h .hash{margin-left:auto;color:var(--line);text-decoration:none;font-weight:400;font-size:20px}
+.sec-h:hover .hash{color:var(--muted)}
+h3{font-size:18px;margin:30px 0 10px;line-height:1.5}
+p{margin:0 0 12px}
+.lead{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.card h4{margin:0 0 6px;font-size:16px;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card p,.card li{font-size:14px;line-height:1.7}
+.card p:last-child{margin-bottom:0}
+.card ul{margin:0;padding-left:18px}
+.badge{display:inline-block;font-size:12px;line-height:1.7;padding:0 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.b-new{background:var(--brand-soft);color:var(--brand)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-mute{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.fields{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0;font-size:14px;line-height:1.7}
+.fields dt{color:var(--muted);font-weight:600}
+.fields dd{margin:0;min-width:0}
+@media (max-width:520px){.fields{grid-template-columns:minmax(0,1fr);gap:0}.fields dd{margin-bottom:8px}}
+.stage{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;margin:12px 0}
+.stage-h{display:flex;align-items:center;gap:10px;padding:9px 16px;background:var(--brand-soft);font-weight:700;flex-wrap:wrap}
+.stage-h .step{min-width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--panel);display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.stage-b{padding:12px 16px}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px;line-height:1.6}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--bg);font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:var(--bg)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .node{flex:1 1 120px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;min-width:0}
+.flow .node.hl{border-color:var(--brand);background:var(--brand-soft)}
+.flow .node b{display:block;font-size:14px;line-height:1.5}
+.flow .node small{display:block;color:var(--muted);font-size:12px;line-height:1.55}
+.flow .arrow{align-self:center;color:var(--muted);font-size:18px;flex:none}
+@media (max-width:640px){.flow{flex-direction:column}.flow .arrow{transform:rotate(90deg)}}
+.steps{list-style:none;margin:12px 0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 16px 40px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.steps li::after{content:"";position:absolute;left:12px;top:32px;bottom:4px;width:2px;background:var(--line)}
+.steps li:last-child{padding-bottom:0}
+.steps li:last-child::after{display:none}
+.steps b{display:block;line-height:1.6}
+.steps span{color:var(--muted);font-size:14px}
+.callout{--c:var(--info);--s:var(--info-soft);display:flex;gap:12px;border-left:4px solid var(--c);background:var(--s);border-radius:var(--radius);padding:12px 16px;margin:14px 0;font-size:14px;line-height:1.7}
+.callout .ic{flex:none;width:22px;height:22px;margin-top:2px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:var(--panel);background:var(--c)}
+.callout .t{display:block;font-weight:700;margin-bottom:2px}
+.callout.tip{--c:var(--brand);--s:var(--brand-soft)}
+.callout.warn{--c:var(--warn);--s:var(--warn-soft)}
+.callout.risk{--c:var(--bad);--s:var(--bad-soft)}
+.checklist{list-style:none;padding:0;margin:12px 0;display:grid;gap:8px}
+.checklist li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;font-size:14px;line-height:1.65}
+.checklist input{margin-top:5px;accent-color:var(--brand);flex:none}
+.checklist label{flex:1;min-width:0;cursor:pointer}
+.checklist small{display:block;color:var(--muted)}
+.issues{display:grid;gap:12px;margin:12px 0}
+.issue{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:var(--radius);padding:12px 16px}
+.issue.bad{border-left-color:var(--bad)}
+.issue h4{margin:0 0 8px;font-size:16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fig{margin:16px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.fig-scroll{overflow-x:auto}
+.fig-scroll svg{display:block;width:100%;height:auto;min-width:640px}
+.fig figcaption{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+.fig figcaption b{color:var(--ink)}
+svg text{fill:var(--ink);font-family:var(--font);font-size:13px}
+svg .sub{fill:var(--muted);font-size:11px}
+svg .mono{font-family:var(--mono);font-size:11px}
+svg .box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+svg .box.brand{fill:var(--brand-soft);stroke:var(--brand)}
+svg .box.warn{fill:var(--warn-soft);stroke:var(--warn)}
+svg .box.bad{fill:var(--bad-soft);stroke:var(--bad)}
+svg .box.info{fill:var(--info-soft);stroke:var(--info)}
+svg .box.end{stroke-width:3}
+svg .box.dash{stroke-dasharray:5 4}
+svg .edge{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .edge.brand{stroke:var(--brand)}
+svg .edge.bad{stroke:var(--bad)}
+svg .edge.warn{stroke:var(--warn)}
+svg .edge.dash{stroke-dasharray:5 4}
+svg .ah{fill:var(--muted)}
+svg .ah.brand{fill:var(--brand)}
+svg .ah.bad{fill:var(--bad)}
+svg .ah.warn{fill:var(--warn)}
+svg .lane{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 4}
+.foot{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.midnight{display:grid;gap:10px;margin:4px 0}
+.mn-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;font-size:13px}
+.mn-lab{color:var(--muted);font-family:var(--mono);font-size:12px;overflow-wrap:anywhere}
+.mn-track{position:relative;height:30px;border-radius:6px;background:linear-gradient(90deg,var(--info-soft) 0 50%,var(--brand-soft) 50% 100%)}
+.mn-track::after{content:"";position:absolute;left:50%;top:-6px;bottom:-6px;border-left:2px dashed var(--bad)}
+.mn-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:2px solid var(--panel)}
+.mn-dot.p{background:var(--info)}
+.mn-dot.o{background:var(--brand)}
+.mn-tag{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mn-axis{display:grid;grid-template-columns:150px 1fr 1fr;gap:12px;font-size:12px;color:var(--muted)}
+.mn-axis span:last-child{text-align:right}
+@media (max-width:560px){.mn-row,.mn-axis{grid-template-columns:minmax(0,1fr)}.mn-axis span:first-child{display:none}}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="crumb"><a href="index.html">变更说明</a><span class="sep">/</span><span>支付</span></div>
+    <nav class="pager" aria-label="上下篇">
+      <a href="06-order.html">← 上一篇 · 06 购物车与订单</a>
+      <a href="08-notification.html">下一篇 · 08 通知与事件 →</a>
+    </nav>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <nav>
+      <a href="#s1"><span class="n">01</span>这个模块负责什么</a>
+      <a href="#s2"><span class="n">02</span>变更点</a>
+      <a href="#s3"><span class="n">03</span>实现逻辑</a>
+      <a href="#s4"><span class="n">04</span>接口与数据</a>
+      <a href="#s5"><span class="n">05</span>关键规则与失败处理</a>
+      <a href="#s6"><span class="n">06</span>验证与测试</a>
+      <a href="#s7"><span class="n">07</span>已知遗留</a>
+      <a class="top" href="#top">↑ 回到顶部</a>
+    </nav>
+  </aside>
+
+  <main id="top">
+    <header class="cover">
+      <div class="cover-no">07</div>
+      <div>
+        <p class="eyebrow"><code>app/payment</code> · <code>api/payment/v1</code> · HTTP 8004 / gRPC 9004</p>
+        <h1>支付</h1>
+      </div>
+    </header>
+    <div class="summary">payment 自己扮演支付渠道：建单时向 order 核对订单，模拟回调只让「待支付」变成成功或失败，成功后同步通知 order；通知不到就每分钟重试，订单已取消就标成已退款并发 <code>payment.refunded</code>，每天凌晨 2 点再和订单对一次账。</div>
+    <div class="metrics">
+      <div class="metric"><b>4<small>个 RPC</small></b><span>对外契约</span><em>建单、查单、模拟回调、对账差异列表</em></div>
+      <div class="metric"><b>5<small>种状态</small></b><span>支付单</span><em>待支付 1 · 已成功 2 · 已失败 3 · 已关闭 4 · 已退款 5</em></div>
+      <div class="metric"><b>3<small>个后台循环</small></b><span>定时任务</span><em>通知重试每分钟 · 对账每天 02:00 · 发件箱每秒</em></div>
+      <div class="metric"><b>4<small>类差异</small></b><span>对账结果</span><em>写入 <code>reconcile_diffs</code>，后台按日查询</em></div>
+    </div>
+
+    <details class="toc-m">
+      <summary>目录</summary>
+      <a href="#s1"><span class="n">01</span>这个模块负责什么</a>
+      <a href="#s2"><span class="n">02</span>变更点</a>
+      <a href="#s3"><span class="n">03</span>实现逻辑</a>
+      <a href="#s4"><span class="n">04</span>接口与数据</a>
+      <a href="#s5"><span class="n">05</span>关键规则与失败处理</a>
+      <a href="#s6"><span class="n">06</span>验证与测试</a>
+      <a href="#s7"><span class="n">07</span>已知遗留</a>
+    </details>
+
+    <!-- 01 -->
+    <section id="s1">
+      <h2 class="sec-h"><span class="no">01</span>这个模块负责什么<a class="hash" href="#s1" aria-label="本节链接">#</a></h2>
+      <p class="lead">不接真实渠道，渠道流水号自己生成，<code>channel</code> 固定为 <code>mock</code>。以后接真实渠道时，只替换「谁来触发回调」这一层。</p>
+      <div class="flow">
+        <div class="node"><b>gateway</b><small>买家：<code>/v1/payments</code></small><small>后台：<code>/v1/admin/payments/reconcile-diffs</code></small></div>
+        <div class="arrow">→</div>
+        <div class="node hl"><b>payment 服务</b><small><code>PaymentUsecase</code></small><small><code>RetryLoop</code> · <code>ReconcileLoop</code> · <code>Streams</code></small></div>
+        <div class="arrow">→</div>
+        <div class="node"><b>order（gRPC 9003）</b><small><code>GetOrder</code> 核对订单</small><small><code>MarkOrderPaid</code> 通知已付</small><small><code>ListPaidOrders</code> 对账取数</small></div>
+      </div>
+      <div class="cards">
+        <div class="card"><h4>收款 <span class="badge b-new">新增</span></h4><p>一张订单只有一张支付单，金额以订单应付金额为准。</p></div>
+        <div class="card"><h4>通知 <span class="badge b-new">新增</span></h4><p>成功后通知 order；失败的留在库里，由循环兜底。</p></div>
+        <div class="card"><h4>对账 <span class="badge b-new">新增</span></h4><p>只发现差异、写表、记日志，不自动修复。</p></div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section id="s2">
+      <h2 class="sec-h"><span class="no">02</span>变更点<a class="hash" href="#s2" aria-label="本节链接">#</a></h2>
+      <div class="tbl"><table>
+        <thead><tr><th>能力</th><th>规则</th><th>落点</th></tr></thead>
+        <tbody>
+          <tr><td>模拟开关</td><td><code>payment.simulate_enabled</code>，关掉时模拟回调返回 404</td><td><code>conf.Payment.SimulateOn</code></td></tr>
+          <tr><td>建单核对</td><td>订单归属本人、待支付、未过截止时间</td><td><code>PaymentUsecase.Create</code></td></tr>
+          <tr><td>同单复用</td><td>待支付直接返回；已失败重置成待支付</td><td><code>FindByOrderID</code> · <code>ResetFailed</code></td></tr>
+          <tr><td>模拟回调</td><td>条件更新，只有待支付能变成功或失败</td><td><code>MarkResult</code></td></tr>
+          <tr><td>通知订单</td><td>成功后同步调 <code>MarkOrderPaid</code></td><td><code>notifyPaid</code></td></tr>
+          <tr><td>通知重试</td><td>每分钟捞已成功且 <code>notified = false</code>，每批 100</td><td><code>RetryLoop</code></td></tr>
+          <tr><td>订单已取消</td><td>标已退款，写 <code>payment.refunded</code></td><td><code>MarkRefunded</code></td></tr>
+          <tr><td>每日对账</td><td>凌晨 2 点对前一天，差异按日覆盖写入</td><td><code>ReconcileLoop</code> · <code>SaveDiffs</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 03 -->
+    <section id="s3">
+      <h2 class="sec-h"><span class="no">03</span>实现逻辑<a class="hash" href="#s3" aria-label="本节链接">#</a></h2>
+      <h3>一次支付的时序</h3>
+      <figure class="fig">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 780 710" role="img" aria-label="支付时序图：用户、payment、order、inventory">
+            <defs>
+              <marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah"/></marker>
+              <marker id="pg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah brand"/></marker>
+            </defs>
+            <rect class="box info" x="15" y="10" width="130" height="40" rx="8"/><text x="80" y="30" text-anchor="middle">用户</text><text class="sub" x="80" y="44" text-anchor="middle">web → gateway</text>
+            <rect class="box brand" x="235" y="10" width="130" height="40" rx="8"/><text x="300" y="35" text-anchor="middle">payment</text>
+            <rect class="box" x="455" y="10" width="130" height="40" rx="8"/><text x="520" y="35" text-anchor="middle">order</text>
+            <rect class="box" x="635" y="10" width="130" height="40" rx="8"/><text x="700" y="35" text-anchor="middle">inventory</text>
+            <line class="lane" x1="80" y1="50" x2="80" y2="700"/>
+            <line class="lane" x1="300" y1="50" x2="300" y2="700"/>
+            <line class="lane" x1="520" y1="50" x2="520" y2="700"/>
+            <line class="lane" x1="700" y1="50" x2="700" y2="700"/>
+
+            <line class="edge brand" x1="80" y1="84" x2="298" y2="84" marker-end="url(#pg)"/><text class="mono" x="190" y="78" text-anchor="middle">CreatePayment(order_id)</text>
+            <line class="edge brand" x1="300" y1="118" x2="518" y2="118" marker-end="url(#pg)"/><text x="410" y="112" text-anchor="middle"><tspan class="mono">GetOrder</tspan> · 带买家 id</text>
+            <line class="edge dash" x1="520" y1="152" x2="302" y2="152" marker-end="url(#pa)"/><text class="sub" x="410" y="146" text-anchor="middle">订单状态 · 应付金额 · 截止时间</text>
+            <rect class="box dash" x="180" y="164" width="240" height="46" rx="8"/><text x="300" y="183" text-anchor="middle">核对：待支付且未过截止</text><text class="sub" x="300" y="200" text-anchor="middle">按订单查支付单：新建 / 复用 / 重置已失败</text>
+            <line class="edge dash" x1="300" y1="236" x2="82" y2="236" marker-end="url(#pa)"/><text class="sub" x="190" y="230" text-anchor="middle">Payment · 待支付</text>
+
+            <line class="lane" x1="20" y1="258" x2="770" y2="258"/>
+            <text class="sub" x="390" y="276" text-anchor="middle">用户在模拟支付页点「成功」</text>
+
+            <line class="edge brand" x1="80" y1="304" x2="298" y2="304" marker-end="url(#pg)"/><text class="mono" x="190" y="298" text-anchor="middle">SimulatePayment(id, success)</text>
+            <rect class="box dash" x="180" y="316" width="240" height="32" rx="8"/><text x="300" y="337" text-anchor="middle"><tspan class="mono">MarkResult</tspan>：只改待支付</text>
+            <line class="edge brand" x1="300" y1="374" x2="518" y2="374" marker-end="url(#pg)"/><text class="mono" x="410" y="368" text-anchor="middle">MarkOrderPaid(order_id, payment_id)</text>
+            <rect class="box dash" x="400" y="386" width="240" height="32" rx="8"/><text x="520" y="407" text-anchor="middle">条件更新为已支付 + 写 <tspan class="mono">order.paid</tspan></text>
+            <line class="edge brand" x1="520" y1="444" x2="698" y2="444" marker-end="url(#pg)"/><text class="mono" x="610" y="438" text-anchor="middle">ConfirmReservation</text>
+            <line class="edge dash" x1="700" y1="476" x2="522" y2="476" marker-end="url(#pa)"/><text class="sub" x="610" y="470" text-anchor="middle">ok</text>
+            <line class="edge dash" x1="520" y1="508" x2="302" y2="508" marker-end="url(#pa)"/><text class="sub" x="410" y="502" text-anchor="middle">ok</text>
+            <rect class="box dash" x="180" y="520" width="240" height="32" rx="8"/><text x="300" y="541" text-anchor="middle"><tspan class="mono">MarkNotified</tspan>：notified = true</text>
+            <line class="edge dash" x1="300" y1="578" x2="82" y2="578" marker-end="url(#pa)"/><text class="sub" x="190" y="572" text-anchor="middle">Payment · 已成功</text>
+
+            <rect class="box warn" x="150" y="598" width="620" height="100" rx="8"/>
+            <rect class="box warn" x="150" y="598" width="176" height="24" rx="8"/><text x="238" y="615" text-anchor="middle">alt · MarkOrderPaid 失败</text>
+            <text x="166" y="646">ORDER_STATUS_CONFLICT → <tspan class="mono">MarkRefunded</tspan>：已退款、notified = true、写 <tspan class="mono">payment.refunded</tspan></text>
+            <line class="lane" x1="160" y1="660" x2="760" y2="660"/>
+            <text x="166" y="684">其它错误 → notified 仍为 false → <tspan class="mono">RetryLoop</tspan> 每分钟再发一次 <tspan class="mono">MarkOrderPaid</tspan></text>
+          </svg>
+        </div>
+        <figcaption><b>图 1 · 支付时序。</b>绿色实线是同步调用，虚线是返回。确认库存失败不影响 order 返回成功，那部分由订单扫描补。</figcaption>
+      </figure>
+
+      <div class="stage">
+        <div class="stage-h"><span class="step">1</span>建支付单 <code>CreatePayment</code></div>
+        <div class="stage-b"><dl class="fields">
+          <dt>取订单</dt><dd>调 order <code>GetOrder</code>，元数据带 <code>x-md-global-user-id</code>，order 只按本人查，非本人即找不到</dd>
+          <dt>核对</dt><dd>待支付，且 <code>now &lt; expires_at</code>；否则 409 <code>PAYMENT_ORDER_NOT_PAYABLE</code></dd>
+          <dt>复用</dt><dd><code>order_id</code> 唯一；并发新建撞唯一键就查回已有的那张</dd>
+          <dt>金额</dt><dd>新建和重置都取订单 <code>pay_amount</code></dd>
+        </dl></div>
+      </div>
+      <div class="stage">
+        <div class="stage-h"><span class="step">2</span>模拟回调 <code>SimulatePayment</code></div>
+        <div class="stage-b"><dl class="fields">
+          <dt>开关</dt><dd>关闭时返回 404 <code>PAYMENT_NOT_FOUND</code>，和不存在的支付单一样</dd>
+          <dt>归属</dt><dd>支付单不是本人的也返回 404</dd>
+          <dt>重复回调</dt><dd>不是待支付就原样返回当前状态，不报错</dd>
+          <dt>成功时</dt><dd>写 <code>paid_at</code> 和随机 <code>channel_trade_no</code>，只有这次真的改动了才去通知 order</dd>
+        </dl></div>
+      </div>
+      <div class="stage">
+        <div class="stage-h"><span class="step">3</span>对账 <code>Reconcile</code></div>
+        <div class="stage-b"><dl class="fields">
+          <dt>时间</dt><dd>每天本地时间 02:00，对 <code>now - 24h</code> 那一天，单次 1 分钟超时</dd>
+          <dt>两边取数</dt><dd>payment：已成功且 <code>paid_at</code> 落在当天；order：<code>ListPaidOrders</code> 取已支付 / 已发货 / 已完成</dd>
+          <dt>写入</dt><dd><code>SaveDiffs</code> 在一个事务里先删这一天再写，重跑结果一致</dd>
+        </dl></div>
+      </div>
+
+      <h3>支付单状态</h3>
+      <figure class="fig">
+        <div class="fig-scroll">
+          <svg viewBox="0 0 760 270" role="img" aria-label="支付单状态机">
+            <defs>
+              <marker id="qa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah brand"/></marker>
+              <marker id="qb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah bad"/></marker>
+              <marker id="qw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="ah warn"/></marker>
+            </defs>
+            <rect class="box info" x="30" y="100" width="130" height="56" rx="10"/><text x="95" y="124" text-anchor="middle">待支付</text><text class="sub mono" x="95" y="142" text-anchor="middle">status = 1</text>
+            <rect class="box brand" x="320" y="30" width="130" height="56" rx="10"/><text x="385" y="54" text-anchor="middle">已成功</text><text class="sub mono" x="385" y="72" text-anchor="middle">status = 2</text>
+            <rect class="box warn" x="320" y="170" width="130" height="56" rx="10"/><text x="385" y="194" text-anchor="middle">已失败</text><text class="sub mono" x="385" y="212" text-anchor="middle">status = 3</text>
+            <rect class="box bad end" x="600" y="30" width="130" height="56" rx="10"/><text x="665" y="54" text-anchor="middle">已退款</text><text class="sub mono" x="665" y="72" text-anchor="middle">status = 5</text>
+            <rect class="box dash" x="600" y="170" width="130" height="56" rx="10"/><text x="665" y="194" text-anchor="middle">已关闭</text><text class="sub" x="665" y="212" text-anchor="middle">4 · 已定义未写入</text>
+
+            <path class="edge brand" d="M160,116 L318,60" marker-end="url(#qa)"/>
+            <text x="228" y="72" text-anchor="middle">模拟成功</text>
+            <path class="edge warn" d="M160,140 L318,196" marker-end="url(#qw)"/>
+            <text x="228" y="196" text-anchor="middle">模拟失败</text>
+            <path class="edge warn dash" d="M320,214 C220,262 110,250 95,158" marker-end="url(#qw)"/>
+            <text class="sub" x="190" y="258" text-anchor="middle">再次 CreatePayment · ResetFailed</text>
+            <line class="edge bad" x1="450" y1="58" x2="598" y2="58" marker-end="url(#qb)"/>
+            <text x="524" y="48" text-anchor="middle">订单已冲突</text><text class="sub mono" x="524" y="78" text-anchor="middle">payment.refunded</text>
+            <text class="sub" x="385" y="106" text-anchor="middle">notified = false 时每分钟重试通知</text>
+          </svg>
+        </div>
+        <figcaption><b>图 2 · 支付单状态。</b>每个箭头都是 <code>WHERE status = 预期</code> 的条件更新。<code>StatusClosed</code> 只有常量，代码里没有任何写入路径。</figcaption>
+      </figure>
+    </section>
+
+    <!-- 04 -->
+    <section id="s4">
+      <h2 class="sec-h"><span class="no">04</span>接口与数据<a class="hash" href="#s4" aria-label="本节链接">#</a></h2>
+      <div class="tbl"><table>
+        <thead><tr><th>RPC</th><th>HTTP</th><th>鉴权</th></tr></thead>
+        <tbody>
+          <tr><td><code>CreatePayment</code></td><td><code>POST /v1/payments</code></td><td>买家</td></tr>
+          <tr><td><code>GetPayment</code></td><td><code>GET /v1/payments/{id}</code></td><td>买家，非本人返回 404</td></tr>
+          <tr><td><code>SimulatePayment</code></td><td><code>POST /v1/payments/{id}:simulate</code></td><td>买家，受模拟开关控制</td></tr>
+          <tr><td><code>ListReconcileDiffs</code></td><td><code>GET /v1/admin/payments/reconcile-diffs</code></td><td>后台 <code>order</code> / <code>super</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>表 <code>payments</code></h3>
+      <div class="tbl"><table>
+        <thead><tr><th>列</th><th>含义</th><th>索引 / 约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID v7</td><td>主键</td></tr>
+          <tr><td><code>order_id</code></td><td>一张订单只有一张支付单</td><td>唯一</td></tr>
+          <tr><td><code>user_id</code> / <code>amount</code></td><td>付款人 / 金额（分）</td><td><code>user_id</code> 普通索引</td></tr>
+          <tr><td><code>status</code> + <code>notified</code></td><td>状态与「是否已通知 order」</td><td><code>idx_status_notified</code></td></tr>
+          <tr><td><code>channel</code> / <code>channel_trade_no</code></td><td>固定 <code>mock</code> / 成功时随机生成</td><td>—</td></tr>
+          <tr><td><code>paid_at</code> / <code>refunded_at</code></td><td>成功时间 / 退款时间</td><td>对账按 <code>paid_at</code> 切日</td></tr>
+        </tbody>
+      </table></div>
+      <div class="cards">
+        <div class="card"><h4><code>reconcile_diffs</code></h4><p><code>day</code>（有索引）、<code>kind</code>、<code>order_id</code>、<code>payment_id</code>、<code>detail</code>；列表按 <code>created_at</code> 倒序，默认 20 最大 50。</p></div>
+        <div class="card"><h4><code>outbox_events</code></h4><p>只在 <code>MarkRefunded</code> 事务里写 <code>payment.refunded</code>，内容 <code>payment_id</code>、<code>order_id</code>、<code>user_id</code>。</p></div>
+      </div>
+      <h3>对账差异的四类 <code>kind</code></h3>
+      <div class="tbl"><table>
+        <thead><tr><th>kind</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>payment_without_order</code></td><td>支付单成功了，order 当天没有这张已付订单</td></tr>
+          <tr><td><code>order_without_payment</code></td><td>order 当天已付，payment 当天没有成功的支付单</td></tr>
+          <tr><td><code>payment_id</code></td><td>两边都有，但订单记的支付单 id 不同</td></tr>
+          <tr><td><code>amount</code></td><td>两边都有，金额不一致</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 05 -->
+    <section id="s5">
+      <h2 class="sec-h"><span class="no">05</span>关键规则与失败处理<a class="hash" href="#s5" aria-label="本节链接">#</a></h2>
+      <h3>建支付单判定</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>情况</th><th>返回</th></tr></thead>
+        <tbody>
+          <tr><td><code>order_id</code> 为空</td><td>400 <code>PAYMENT_INVALID_ARGUMENT</code></td></tr>
+          <tr><td>订单找不到（含非本人）</td><td>409 <code>PAYMENT_ORDER_NOT_PAYABLE</code></td></tr>
+          <tr><td>order 不可用</td><td>503 <code>PAYMENT_UPSTREAM_UNAVAILABLE</code></td></tr>
+          <tr><td>订单不是待支付，或已过截止</td><td>409 <code>PAYMENT_ORDER_NOT_PAYABLE</code></td></tr>
+          <tr><td>已有待支付的支付单</td><td>原样返回</td></tr>
+          <tr><td>已有已失败的支付单</td><td>重置为待支付，金额刷新</td></tr>
+          <tr><td>已有已成功 / 已退款的支付单</td><td>409 <code>PAYMENT_STATUS_CONFLICT</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>通知 order 的结果</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>MarkOrderPaid 返回</th><th>payment 的处理</th><th>之后</th></tr></thead>
+        <tbody>
+          <tr><td>成功</td><td><code>MarkNotified</code>，只改已成功且未通知的行</td><td>不再重试</td></tr>
+          <tr><td><code>ORDER_STATUS_CONFLICT</code></td><td><code>MarkRefunded</code>：已退款、<code>notified = true</code>、写事件</td><td>不再重试</td></tr>
+          <tr><td>其它任何错误</td><td>只记日志 <code>notify order paid</code></td><td>下一分钟重试</td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout tip"><span class="ic">✓</span><div><span class="t">重试多少次都只改一次订单</span>order 侧对同一支付单的重复通知在已支付、已发货、已完成时都直接成功，详见 06 篇的 <code>MarkOrderPaid</code> 判定表。</div></div>
+    </section>
+
+    <!-- 06 -->
+    <section id="s6">
+      <h2 class="sec-h"><span class="no">06</span>验证与测试<a class="hash" href="#s6" aria-label="本节链接">#</a></h2>
+      <p class="lead">biz 单测用假仓库和假 order 客户端；data 层目前没有集成测试。</p>
+      <ul class="checklist">
+        <li><input type="checkbox" id="c1"><label for="c1"><code>go test ./app/payment/...</code><small>biz/payment 与 server 两个包有测试</small></label></li>
+        <li><input type="checkbox" id="c2"><label for="c2"><code>TestCreateUsesOrderAmountAndReturnsPending</code><small>金额取订单，新单是待支付</small></label></li>
+        <li><input type="checkbox" id="c3"><label for="c3"><code>TestCreateRejectsUnpayableOrder</code><small>非本人、已支付、已过截止的订单都不能建单</small></label></li>
+        <li><input type="checkbox" id="c4"><label for="c4"><code>TestCreateResetsFailed</code><small>已失败的支付单重置后可再付</small></label></li>
+        <li><input type="checkbox" id="c5"><label for="c5"><code>TestSimulateSuccessFailDuplicateAndRefund</code><small>成功、失败、重复回调、订单冲突转退款</small></label></li>
+        <li><input type="checkbox" id="c6"><label for="c6"><code>TestSimulateDisabled</code><small>开关关闭时模拟回调返回找不到</small></label></li>
+        <li><input type="checkbox" id="c7"><label for="c7"><code>TestRetryNotifiesPendingSuccess</code><small>循环能补发未通知的成功单</small></label></li>
+        <li><input type="checkbox" id="c8"><label for="c8"><code>TestReconcileLeavesRowsUntouched</code><small>对账只记差异，不改支付单</small></label></li>
+        <li><input type="checkbox" id="c9"><label for="c9"><code>TestHTTPRejectsForgedIdentity</code><small>HTTP 端口不信伪造的身份头</small></label></li>
+        <li><input type="checkbox" id="c10"><label for="c10"><code>make e2e</code> → <code>TestCheckoutThroughGateway</code><small>经 gateway 下单、建支付单、模拟成功</small></label></li>
+      </ul>
+    </section>
+
+    <!-- 07 -->
+    <section id="s7">
+      <h2 class="sec-h"><span class="no">07</span>已知遗留<a class="hash" href="#s7" aria-label="本节链接">#</a></h2>
+      <div class="issues">
+        <div class="issue bad">
+          <h4>模拟开关不配置时默认开启 <span class="badge b-bad">安全</span></h4>
+          <dl class="fields"><dt>现象</dt><dd><code>SimulateEnabled</code> 是 <code>*bool</code>，为空时 <code>SimulateOn</code> 返回 true；<code>cfg</code> 为空也按开启</dd><dt>影响</dt><dd>部署时漏配这一项，任何登录用户都能把自己的支付单标成成功</dd></dl>
+        </div>
+        <div class="issue">
+          <h4><code>ORDER_NOT_FOUND</code> 被当成下游不可用 <span class="badge b-warn">重试</span></h4>
+          <dl class="fields"><dt>现象</dt><dd><code>orderClient.MarkOrderPaid</code> 除了状态冲突，其它一律映射成 <code>ErrPaymentUpstream</code></dd><dt>影响</dt><dd>订单确实不存在时 <code>notified</code> 永远是 false，每分钟重试、每分钟打错误日志</dd></dl>
+        </div>
+        <div class="issue">
+          <h4>对账跨零点会误报 <span class="badge b-warn">对账</span></h4>
+          <dl class="fields"><dt>现象</dt><dd>两边各按自己的 <code>paid_at</code> 切日；order 的 <code>paid_at</code> 是收到通知那一刻，晚于支付单</dd><dt>影响</dt><dd>零点前付款、零点后才通知到，两天各报一条差异</dd></dl>
+        </div>
+      </div>
+      <figure class="fig">
+        <div class="midnight" role="img" aria-label="跨零点误报示意">
+          <div class="mn-axis"><span></span><span>D 日（前一天）</span><span>D+1 日</span></div>
+          <div class="mn-row"><span class="mn-lab">payments.paid_at</span><div class="mn-track"><i class="mn-dot p" style="left:44%"></i><span class="mn-tag" style="right:58%">23:59:58</span></div></div>
+          <div class="mn-row"><span class="mn-lab">orders.paid_at</span><div class="mn-track"><i class="mn-dot o" style="left:56%"></i><span class="mn-tag" style="left:59%">00:00:03</span></div></div>
+        </div>
+        <figcaption><b>图 3 · 跨零点误报。</b>红色虚线是零点。D 日对账报 <code>payment_without_order</code>，D+1 日对账报 <code>order_without_payment</code>，其实是同一笔正常交易。</figcaption>
+      </figure>
+    </section>
+
+    <footer class="foot"><span>07 · 支付</span><span>依据 <code>app/payment</code>、<code>api/payment/v1</code> 与 <code>docs/tech-implementation.md</code> 第 10 章</span></footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var bar=document.querySelector('.progress');
+  var links=[].slice.call(document.querySelectorAll('.toc nav a[href^="#s"], .toc-m a'));
+  var secs=[].slice.call(document.querySelectorAll('main section[id]'));
+  var mob=document.querySelector('.toc-m');
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%';
+    var cur='';
+    secs.forEach(function(s){if(s.getBoundingClientRect().top<120)cur=s.id;});
+    links.forEach(function(a){a.classList.toggle('active',cur!==''&&a.getAttribute('href')==='#'+cur);});
+  }
+  if(mob){[].slice.call(mob.querySelectorAll('a')).forEach(function(a){a.addEventListener('click',function(){mob.open=false;});});}
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>

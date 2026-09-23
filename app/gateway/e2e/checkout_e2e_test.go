@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -24,12 +22,7 @@ import (
 
 const orderStatusPaid = 2
 
-func gateway() string {
-	if v := strings.TrimSpace(os.Getenv("E2E_GATEWAY")); v != "" {
-		return strings.TrimRight(v, "/")
-	}
-	return "http://127.0.0.1:8080"
-}
+const gatewayBase = "http://127.0.0.1:8080"
 
 type client struct {
 	t     *testing.T
@@ -55,7 +48,7 @@ func (c *client) send(method, path string, body proto.Message, out proto.Message
 		}
 		reader = bytes.NewReader(raw)
 	}
-	req, err := http.NewRequest(method, gateway()+path, reader)
+	req, err := http.NewRequest(method, gatewayBase+path, reader)
 	if err != nil {
 		c.t.Fatal(err)
 	}

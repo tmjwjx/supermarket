@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>supermarket 本轮变更说明</title>
+<style>
+:root{
+  --bg:#f7f6f2; --panel:#ffffff; --ink:#1f2328; --muted:#5b6470; --line:#e4e1d8;
+  --brand:#2f6f5e; --brand-soft:#e6f0ec;
+  --warn:#b7791f; --warn-soft:#fbf1e1;
+  --bad:#b83a3a; --bad-soft:#f8e6e6;
+  --info:#2b5c8a; --info-soft:#e5eef7;
+  --radius:10px;
+  --font:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --shadow:0 1px 2px rgba(31,35,40,.05),0 4px 14px rgba(31,35,40,.04);
+  --prose:720px; --wrap:1040px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#15181c; --panel:#1d2126; --ink:#e6e3dc; --muted:#9aa3ad; --line:#2f343b;
+    --brand:#6fbfa6; --brand-soft:#1f3530;
+    --warn:#e0a84a; --warn-soft:#3a2f1c;
+    --bad:#e27a7a; --bad-soft:#3b2324;
+    --info:#7fb1e0; --info-soft:#1f2d3b;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.8 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.86em;background:var(--brand-soft);color:var(--ink);padding:1px 6px;border-radius:5px;word-break:break-word}
+h1,h2,h3{line-height:1.35;margin:0}
+p{margin:0 0 .6em}
+
+/* 进度条与页头 */
+.progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--brand);z-index:50}
+.topbar{border-bottom:1px solid var(--line);background:var(--panel)}
+.topbar-in{max-width:var(--wrap);margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+.crumb{color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.next{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink);background:var(--bg)}
+.next:hover{border-color:var(--brand);color:var(--brand);text-decoration:none}
+
+/* 布局 */
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+.toc{display:none}
+.toc a{display:block;padding:5px 12px;border-left:2px solid var(--line);color:var(--muted);font-size:13.5px;line-height:1.5}
+.toc a:hover{color:var(--ink);text-decoration:none}
+.toc a.active{border-left-color:var(--brand);color:var(--brand);font-weight:600}
+.toc .toc-title{font-size:12px;letter-spacing:.08em;color:var(--muted);margin:0 0 8px 12px}
+.toc-mobile{margin:20px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.toc-mobile summary{cursor:pointer;padding:10px 16px;font-weight:600;font-size:14px}
+.toc-mobile nav{padding:0 8px 12px;columns:2;column-gap:8px}
+.toc-mobile nav a{display:block;padding:3px 8px;font-size:13.5px;color:var(--muted);break-inside:avoid}
+.toc-mobile nav a.active{color:var(--brand);font-weight:600}
+@media (min-width:1380px){
+  .toc{display:block;position:fixed;top:96px;left:calc(50% - var(--wrap)/2 - 210px);width:190px}
+  .toc-mobile{display:none}
+}
+
+/* 封面 */
+.hero{padding:44px 0 8px}
+.eyebrow{display:inline-block;font-size:12.5px;letter-spacing:.1em;color:var(--brand);background:var(--brand-soft);padding:2px 10px;border-radius:999px;margin-bottom:14px}
+.hero h1{font-size:34px;letter-spacing:.01em}
+.hero .meta{color:var(--muted);font-size:13.5px;margin-top:10px}
+.summary{margin:22px 0 0;padding:18px 22px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:var(--radius);box-shadow:var(--shadow);font-size:16.5px;max-width:var(--prose)}
+.summary b{color:var(--brand)}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:22px 0 0}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.metric .v{font-size:30px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--ink)}
+.metric .v small{font-size:14px;font-weight:600;color:var(--muted);margin-left:2px}
+.metric .k{font-size:13.5px;font-weight:600;margin-top:4px}
+.metric .d{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:2px}
+@media (max-width:860px){.metrics{grid-template-columns:repeat(2,1fr)}.metric:last-child{grid-column:span 2}}
+
+/* 章节 */
+section.sec{padding:52px 0 0}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+.sec-h .num{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:2px 8px;border-radius:6px}
+.sec-h h2{font-size:23px}
+.sec-h .hash{color:var(--line);font-weight:400;font-size:18px}
+.sec-h .hash:hover{color:var(--brand);text-decoration:none}
+.lead{color:var(--muted);max-width:var(--prose);margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.sub-h{font-size:15px;font-weight:700;margin:26px 0 10px;display:flex;align-items:center;gap:8px}
+.sub-h::before{content:"";width:4px;height:15px;border-radius:2px;background:var(--brand)}
+
+/* 徽章 */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1.6;padding:0 8px;border-radius:999px;border:1px solid transparent;white-space:nowrap;font-weight:600}
+.b-brand{background:var(--brand-soft);color:var(--brand)}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-line{border-color:var(--line);color:var(--muted);background:transparent}
+
+/* 体量条形图 */
+.bars{padding:18px 20px;margin-top:22px}
+.bars-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.bars-h b{font-size:15px}
+.bars-h span{font-size:12.5px;color:var(--muted)}
+.bar-row{display:grid;grid-template-columns:128px 1fr 118px;gap:12px;align-items:center;font-size:13.5px;padding:4px 0}
+.bar-row .lbl{font-weight:600}
+.bar-row .lbl small{display:block;font-weight:400;color:var(--muted);font-size:12px;line-height:1.3}
+.bar-track{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar-fill{height:100%;background:var(--brand);border-radius:6px;min-width:3px}
+.bar-fill.gen{background:repeating-linear-gradient(135deg,var(--brand) 0 6px,color-mix(in srgb,var(--brand) 55%,transparent) 6px 12px)}
+.bar-row .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar-row .val b{color:var(--ink)}
+@media (max-width:560px){.bar-row{grid-template-columns:92px 1fr;}.bar-row .val{grid-column:2;text-align:left;margin-top:-6px}}
+
+/* 架构图 */
+.figure{padding:14px;overflow-x:auto}
+.figure svg{display:block;width:100%;min-width:720px;height:auto}
+.svg-box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.svg-gw{fill:var(--brand-soft);stroke:var(--brand);stroke-width:1.5}
+.svg-store{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.svg-chip{fill:var(--panel);stroke:var(--line)}
+.svg-t{fill:var(--ink);font:600 15px var(--font)}
+.svg-s{fill:var(--muted);font:12.5px var(--font)}
+.svg-m{fill:var(--muted);font:12px var(--mono)}
+.svg-line{stroke:var(--muted);stroke-width:1.4;fill:none}
+.svg-pub{stroke:var(--info);stroke-width:2.4;fill:none}
+.svg-login{stroke:var(--brand);stroke-width:2.4;fill:none}
+.svg-admin{stroke:var(--warn);stroke-width:2.4;fill:none}
+.fill-info{fill:var(--info)} .fill-brand{fill:var(--brand)} .fill-warn{fill:var(--warn)} .fill-muted{fill:var(--muted)}
+.pill-pub{fill:var(--info-soft);stroke:var(--info)}
+.pill-login{fill:var(--panel);stroke:var(--brand)}
+.pill-admin{fill:var(--warn-soft);stroke:var(--warn)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.mini{padding:14px 18px}
+.mini h3{font-size:14.5px;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;line-height:1.6}
+.kv dt{font-weight:600;white-space:nowrap}
+.kv dd{margin:0;color:var(--muted)}
+
+/* 主链路 */
+.phase{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:stretch}
+.phase-tag{border-radius:var(--radius);display:flex;flex-direction:column;justify-content:center;align-items:center;font-weight:700;font-size:14px;padding:10px 4px;text-align:center}
+.phase-tag small{font-weight:400;font-size:11.5px;opacity:.85}
+.steps{display:flex;flex-wrap:wrap;gap:10px 30px;align-items:stretch}
+.step{position:relative;flex:1 1 190px;max-width:320px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow)}
+.step+.step::before{content:"→";position:absolute;left:-24px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700}
+.step .no{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:700;margin-right:6px;vertical-align:1px}
+.step h3{display:inline;font-size:14.5px}
+.step .who{margin:6px 0 4px;display:flex;gap:4px;flex-wrap:wrap}
+.step p{font-size:12.8px;color:var(--muted);line-height:1.6;margin:0}
+.down{margin:6px 0 6px 38px;color:var(--muted);font-weight:700;line-height:1}
+@media (max-width:640px){
+  .phase{grid-template-columns:1fr}
+  .phase-tag{flex-direction:row;gap:8px;justify-content:flex-start;padding:6px 12px}
+  .steps{flex-direction:column;gap:22px}
+  .step{max-width:none}
+  .step+.step::before{content:"↓";left:18px;top:-20px;transform:none}
+}
+.t-account{background:var(--info-soft);color:var(--info)}
+.t-shop{background:var(--brand-soft);color:var(--brand)}
+.t-order{background:var(--warn-soft);color:var(--warn)}
+.t-pay{background:var(--bad-soft);color:var(--bad)}
+.t-note{background:var(--bg);color:var(--muted);border:1px dashed var(--line)}
+
+/* 提示块 */
+.callout{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:14px 18px;border-radius:var(--radius);border-left:4px solid;margin-top:16px;font-size:14px}
+.callout .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff}
+.callout h4{margin:0 0 4px;font-size:14.5px}
+.callout p{margin:0;color:var(--ink)}
+.c-info{background:var(--info-soft);border-color:var(--info)} .c-info .ic{background:var(--info)}
+.c-tip{background:var(--brand-soft);border-color:var(--brand)} .c-tip .ic{background:var(--brand)}
+.c-warn{background:var(--warn-soft);border-color:var(--warn)} .c-warn .ic{background:var(--warn)}
+.c-bad{background:var(--bad-soft);border-color:var(--bad)} .c-bad .ic{background:var(--bad)}
+
+/* 模块卡片 */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:14px}
+.mcard{display:flex;flex-direction:column;padding:16px 16px 14px;scroll-margin-top:24px;transition:border-color .15s,box-shadow .15s}
+.mcard:hover,.mcard:target{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.mhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.mno{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--brand);border:1.5px solid var(--brand);border-radius:6px;padding:0 6px}
+.mhead h3{font-size:16px}
+.mcard>p{font-size:13.5px;color:var(--muted);line-height:1.65;flex:1}
+.kpis{display:flex;gap:8px;margin:6px 0 10px}
+.kpi{flex:1;background:var(--bg);border-radius:8px;padding:6px 8px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.35}
+.kpi b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:10px;font-size:13px}
+.mfoot .tags{display:flex;gap:4px;flex-wrap:wrap}
+.more{font-weight:600;white-space:nowrap}
+
+/* 时间线 */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:"";position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding:12px 16px;margin-bottom:10px}
+.tl-item::before{content:attr(data-n);position:absolute;left:-31px;top:14px;width:22px;height:22px;border-radius:50%;background:var(--panel);border:2px solid var(--brand);color:var(--brand);font-size:11px;font-weight:700;display:grid;place-items:center}
+.tl-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.tl-top h3{font-size:14.5px;font-weight:600;flex:1 1 260px}
+.tl-stat{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:8px}
+.tl-stat .bar-track{height:8px}
+.tl-stat span{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl-mods{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.tl-mods a{font-size:12px;font-weight:600;padding:0 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);line-height:1.7}
+.tl-mods a:hover{border-color:var(--brand);color:var(--brand);text-decoration:none}
+
+/* 验收清单 */
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.check-g{padding:14px 18px}
+.check-g h3{font-size:14.5px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.check-g ul{list-style:none;margin:0;padding:0}
+.check-g li{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:6px 0;border-top:1px dashed var(--line);font-size:13.5px;line-height:1.6}
+.check-g li:first-child{border-top:0}
+.check-g input{accent-color:var(--brand);width:15px;height:15px;margin:4px 0 0}
+.check-g li small{display:block;color:var(--muted);font-size:12.5px}
+
+/* 表格 */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.6}
+thead th{background:var(--brand-soft);color:var(--ink);text-align:left;font-weight:700;padding:10px 12px;white-space:nowrap;border-bottom:1px solid var(--line)}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--bg) 60%,transparent)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+td .badge{margin:1px 2px 1px 0}
+tr.grp td{background:var(--bg)!important;font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.06em;padding:6px 12px}
+.review td:nth-child(1){min-width:170px}
+.review td:nth-child(2){min-width:190px;color:var(--muted)}
+.review td:nth-child(3){min-width:220px}
+.cfg td:nth-child(1){white-space:nowrap}
+.cfg td:nth-child(2){min-width:150px}
+.idx{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:11px;font-weight:700;margin-right:6px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+
+/* 遗留 */
+.legacy{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+@media (max-width:860px){.legacy{grid-template-columns:1fr}}
+.lg{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.lg h4{margin:0 0 8px;font-size:14.5px;display:flex;gap:8px;align-items:flex-start}
+.lg h4 .idx{background:var(--warn-soft);color:var(--warn);flex:none;margin-top:2px}
+.lg dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;line-height:1.6}
+.lg dt{font-weight:600;color:var(--muted);white-space:nowrap}
+.lg dd{margin:0}
+
+footer{margin:56px 0 0;padding:20px 0 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.totop{position:fixed;right:18px;bottom:18px;width:38px;height:38px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+.totop:hover{color:var(--brand);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="crumb">supermarket / <b>变更说明</b></div>
+    <a class="next" href="01-platform.html">下一篇 · 01 工程底座与公共包 →</a>
+  </div>
+</header>
+
+<aside class="toc" aria-label="目录">
+  <div class="toc-title">目录</div>
+  <a href="#top">封面与体量</a>
+  <a href="#arch">01 整体架构</a>
+  <a href="#flow">02 下单主链路</a>
+  <a href="#modules">03 11 个模块</a>
+  <a href="#commits">04 提交记录</a>
+  <a href="#verify">05 验证结果</a>
+  <a href="#review">06 代码审查修复</a>
+  <a href="#config">07 运行配置</a>
+  <a href="#legacy">08 已知遗留</a>
+</aside>
+
+<main class="wrap">
+
+  <details class="toc-mobile">
+    <summary>目录</summary>
+    <nav>
+      <a href="#top">封面与体量</a>
+      <a href="#arch">01 整体架构</a>
+      <a href="#flow">02 下单主链路</a>
+      <a href="#modules">03 11 个模块</a>
+      <a href="#commits">04 提交记录</a>
+      <a href="#verify">05 验证结果</a>
+      <a href="#review">06 代码审查修复</a>
+      <a href="#config">07 运行配置</a>
+      <a href="#legacy">08 已知遗留</a>
+    </nav>
+  </details>
+
+  <!-- 封面 -->
+  <section class="hero" id="top" data-sec>
+    <span class="eyebrow">总览 · 00</span>
+    <h1>supermarket 本轮变更说明</h1>
+    <div class="meta">范围 <code>4f5feda..2f90ce3</code> · 9 次提交 · 2026-09-23</div>
+    <div class="summary">本轮把项目<b>从服务骨架推进到下单全链路可跑通</b>：从空库开始，注册、浏览、加购、下单、支付、收到站内信、后台看到订单，全部经 gateway 走通。</div>
+
+    <div class="metrics">
+      <div class="metric"><div class="v">9</div><div class="k">提交</div><div class="d">契约 → 底座 → 各服务 → 网关 → 前端 → 文档</div></div>
+      <div class="metric"><div class="v">363</div><div class="k">变更文件</div><div class="d"><code>git diff --stat</code> 实算</div></div>
+      <div class="metric"><div class="v">55,227</div><div class="k">新增行</div><div class="d">删除 375 行；过半是生成桩</div></div>
+      <div class="metric"><div class="v">8</div><div class="k">Go 服务</div><div class="d">gateway user product inventory order payment notification admin</div></div>
+      <div class="metric"><div class="v">2</div><div class="k">前端</div><div class="d">web 用户端 · admin-web 管理台</div></div>
+    </div>
+
+    <div class="card bars">
+      <div class="bars-h"><b>新增行去了哪里</b><span>按目录归类 · 斜纹 = 含生成代码</span></div>
+      <div class="bar-row"><div class="lbl">契约与生成桩<small>api/</small></div><div class="bar-track"><div class="bar-fill gen" style="width:51.2%"></div></div><div class="val"><b>28,279</b> · 51.2%</div></div>
+      <div class="bar-row"><div class="lbl">Go 服务<small>app/ 8 个</small></div><div class="bar-track"><div class="bar-fill" style="width:32.8%"></div></div><div class="val"><b>18,115</b> · 32.8%</div></div>
+      <div class="bar-row"><div class="lbl">前端<small>frontend/ 2 个</small></div><div class="bar-track"><div class="bar-fill" style="width:12%"></div></div><div class="val"><b>6,600</b> · 12.0%</div></div>
+      <div class="bar-row"><div class="lbl">文档<small>docs/</small></div><div class="bar-track"><div class="bar-fill" style="width:1.9%"></div></div><div class="val"><b>1,027</b> · 1.9%</div></div>
+      <div class="bar-row"><div class="lbl">公共包<small>pkg/ 5 个</small></div><div class="bar-track"><div class="bar-fill" style="width:1.8%"></div></div><div class="val"><b>980</b> · 1.8%</div></div>
+      <div class="bar-row"><div class="lbl">工程配置<small>CI · compose · Makefile</small></div><div class="bar-track"><div class="bar-fill" style="width:.4%"></div></div><div class="val"><b>226</b> · 0.4%</div></div>
+      <div class="callout c-info" style="margin-top:14px">
+        <div class="ic">i</div>
+        <div><h4>手写契约其实只有 1,162 行</h4><p><code>api/</code> 里 24,071 行是 <code>*.pb.go</code>，3,043 行是合并后的 <code>openapi.yaml</code>，都由 <code>make api</code> 生成。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 架构 -->
+  <section class="sec" id="arch" data-sec>
+    <div class="sec-h"><span class="num">01</span><h2>整体架构</h2><a class="hash" href="#arch">#</a></div>
+    <p class="lead">浏览器只打 gateway，gateway 按路由验令牌后用 gRPC 转给七个服务。每个服务只连自己的库；异步通知走 Kafka。</p>
+
+    <div class="card figure">
+      <svg viewBox="0 0 1000 640" role="img" aria-label="supermarket 整体架构图">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fill-muted"/></marker>
+          <marker id="ah-i" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="fill-info"/></marker>
+          <marker id="ah-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="fill-brand"/></marker>
+          <marker id="ah-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="fill-warn"/></marker>
+        </defs>
+
+        <!-- 浏览器 -->
+        <rect x="150" y="18" width="270" height="64" rx="10" class="svg-box"/>
+        <text x="285" y="45" text-anchor="middle" class="svg-t">浏览器 · web 用户端</text>
+        <text x="285" y="66" text-anchor="middle" class="svg-m">Vite :5174</text>
+        <rect x="580" y="18" width="270" height="64" rx="10" class="svg-box"/>
+        <text x="715" y="45" text-anchor="middle" class="svg-t">浏览器 · admin-web 管理台</text>
+        <text x="715" y="66" text-anchor="middle" class="svg-m">Vite :5173</text>
+
+        <!-- 三类请求 -->
+        <path d="M235 82 V150" class="svg-pub" marker-end="url(#ah-i)"/>
+        <path d="M335 82 V150" class="svg-login" marker-end="url(#ah-b)"/>
+        <path d="M665 82 V150" class="svg-pub" stroke-dasharray="5 4" marker-end="url(#ah-i)"/>
+        <path d="M765 82 V150" class="svg-admin" marker-end="url(#ah-w)"/>
+        <text x="243" y="120" class="svg-s">公开</text>
+        <text x="343" y="120" class="svg-s">登录</text>
+        <text x="673" y="112" class="svg-s">后台登录</text>
+        <text x="673" y="128" class="svg-s">（公开）</text>
+        <text x="773" y="120" class="svg-s">后台</text>
+        <text x="500" y="122" text-anchor="middle" class="svg-m">HTTP /v1/…</text>
+
+        <!-- gateway -->
+        <rect x="120" y="154" width="760" height="96" rx="12" class="svg-gw"/>
+        <text x="146" y="184" class="svg-t">gateway :8080</text>
+        <text x="146" y="206" class="svg-s">验令牌 · 写身份元数据 · 转发</text>
+        <text x="146" y="228" class="svg-s">86 条路由，7 个上游</text>
+        <rect x="400" y="176" width="140" height="52" rx="8" class="pill-pub"/>
+        <text x="470" y="198" text-anchor="middle" class="svg-t" style="font-size:14px">公开 11</text>
+        <text x="470" y="217" text-anchor="middle" class="svg-s">不看令牌</text>
+        <rect x="552" y="176" width="150" height="52" rx="8" class="pill-login"/>
+        <text x="627" y="198" text-anchor="middle" class="svg-t" style="font-size:14px">登录 27 · 可选 1</text>
+        <text x="627" y="217" text-anchor="middle" class="svg-s">买家令牌 → user-id</text>
+        <rect x="714" y="176" width="150" height="52" rx="8" class="pill-admin"/>
+        <text x="789" y="198" text-anchor="middle" class="svg-t" style="font-size:14px">后台 47</text>
+        <text x="789" y="217" text-anchor="middle" class="svg-s">aud=admin · 按角色</text>
+
+        <!-- gRPC 总线 -->
+        <path d="M500 250 V278" class="svg-line"/>
+        <path d="M110 278 H890" class="svg-line"/>
+        <text x="512" y="272" class="svg-m">gRPC</text>
+        <g class="svg-line">
+          <path d="M110 278 V300" marker-end="url(#ah)"/><path d="M240 278 V300" marker-end="url(#ah)"/><path d="M370 278 V300" marker-end="url(#ah)"/><path d="M500 278 V300" marker-end="url(#ah)"/><path d="M630 278 V300" marker-end="url(#ah)"/><path d="M760 278 V300" marker-end="url(#ah)"/><path d="M890 278 V300" marker-end="url(#ah)"/>
+        </g>
+
+        <!-- 七个服务 -->
+        <g>
+          <rect x="51" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="110" y="330" text-anchor="middle" class="svg-t">user</text>
+          <text x="110" y="352" text-anchor="middle" class="svg-m">:9000</text>
+          <rect x="181" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="240" y="330" text-anchor="middle" class="svg-t">product</text>
+          <text x="240" y="352" text-anchor="middle" class="svg-m">:9001</text>
+          <rect x="311" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="370" y="330" text-anchor="middle" class="svg-t">inventory</text>
+          <text x="370" y="352" text-anchor="middle" class="svg-m">:9002</text>
+          <rect x="441" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="500" y="330" text-anchor="middle" class="svg-t">order</text>
+          <text x="500" y="352" text-anchor="middle" class="svg-m">:9003</text>
+          <rect x="571" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="630" y="330" text-anchor="middle" class="svg-t">payment</text>
+          <text x="630" y="352" text-anchor="middle" class="svg-m">:9004</text>
+          <rect x="701" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="760" y="330" text-anchor="middle" class="svg-t">notification</text>
+          <text x="760" y="352" text-anchor="middle" class="svg-m">:9005</text>
+          <rect x="831" y="302" width="118" height="70" rx="10" class="svg-box"/>
+          <text x="890" y="330" text-anchor="middle" class="svg-t">admin</text>
+          <text x="890" y="352" text-anchor="middle" class="svg-m">:9006</text>
+        </g>
+
+        <!-- 存储总线 -->
+        <g class="svg-line" stroke-dasharray="3 3">
+          <path d="M110 372 V404"/><path d="M240 372 V404"/><path d="M370 372 V404"/><path d="M500 372 V404"/><path d="M630 372 V404"/><path d="M760 372 V404"/><path d="M890 372 V404"/>
+          <path d="M110 404 H890"/>
+        </g>
+        <text x="500" y="398" text-anchor="middle" class="svg-s" style="paint-order:stroke;stroke:var(--panel);stroke-width:6px">各自读写本库 · 缓存 · 事件</text>
+        <path d="M300 404 V428" class="svg-line" marker-end="url(#ah)"/>
+        <path d="M680 404 V428" class="svg-line" marker-end="url(#ah)"/>
+        <path d="M860 404 V428" class="svg-line" marker-end="url(#ah)"/>
+
+        <!-- MySQL -->
+        <rect x="51" y="430" width="520" height="126" rx="12" class="svg-store"/>
+        <text x="71" y="458" class="svg-t">MySQL 8 · :3306</text>
+        <text x="215" y="458" class="svg-s">按服务分库，make up 首次建好</text>
+        <g>
+          <rect x="71"  y="472" width="112" height="30" rx="6" class="svg-chip"/><text x="127" y="492" text-anchor="middle" class="svg-m">user</text>
+          <rect x="195" y="472" width="112" height="30" rx="6" class="svg-chip"/><text x="251" y="492" text-anchor="middle" class="svg-m">product</text>
+          <rect x="319" y="472" width="112" height="30" rx="6" class="svg-chip"/><text x="375" y="492" text-anchor="middle" class="svg-m">inventory</text>
+          <rect x="443" y="472" width="112" height="30" rx="6" class="svg-chip"/><text x="499" y="492" text-anchor="middle" class="svg-m">order</text>
+          <rect x="71"  y="512" width="112" height="30" rx="6" class="svg-chip"/><text x="127" y="532" text-anchor="middle" class="svg-m">payment</text>
+          <rect x="195" y="512" width="112" height="30" rx="6" class="svg-chip"/><text x="251" y="532" text-anchor="middle" class="svg-m">notification</text>
+          <rect x="319" y="512" width="112" height="30" rx="6" class="svg-chip"/><text x="375" y="532" text-anchor="middle" class="svg-m">admin</text>
+          <text x="499" y="532" text-anchor="middle" class="svg-s">共 7 个库</text>
+        </g>
+
+        <!-- Redis -->
+        <rect x="591" y="430" width="170" height="126" rx="12" class="svg-store"/>
+        <text x="611" y="458" class="svg-t">Redis 7</text>
+        <text x="611" y="478" class="svg-m">:6379</text>
+        <text x="611" y="504" class="svg-s">商品详情缓存</text>
+        <text x="611" y="524" class="svg-s">TTL 10 分钟</text>
+        <text x="611" y="544" class="svg-s">写后删键</text>
+
+        <!-- Kafka -->
+        <rect x="779" y="430" width="170" height="126" rx="12" class="svg-store"/>
+        <text x="799" y="458" class="svg-t">Kafka · KRaft</text>
+        <text x="799" y="478" class="svg-m">:9092</text>
+        <text x="799" y="504" class="svg-s">7 个主题</text>
+        <text x="799" y="524" class="svg-s">发件箱每秒投递</text>
+        <text x="799" y="544" class="svg-s">消费方按事件 id 去重</text>
+
+        <!-- 图例 -->
+        <g transform="translate(51 592)">
+          <path d="M0 8 H34" class="svg-pub"/><text x="42" y="13" class="svg-s">公开：注册登录、商品浏览、库存、后台登录</text>
+          <path d="M330 8 H364" class="svg-login"/><text x="372" y="13" class="svg-s">登录：买家令牌（jwt_secret）</text>
+          <path d="M630 8 H664" class="svg-admin"/><text x="672" y="13" class="svg-s">后台：运营令牌（admin_jwt_secret）</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="two">
+      <div class="card mini">
+        <h3><span class="badge b-brand">gRPC</span>服务间同步调用</h3>
+        <dl class="kv">
+          <dt>order →</dt><dd>product 取 SKU · inventory 预占 / 确认 / 释放 · user 取地址</dd>
+          <dt>payment →</dt><dd>order 取订单、通知已支付</dd>
+          <dt>product →</dt><dd>inventory 建库存 · order 核对评价 · user 取显示名</dd>
+        </dl>
+      </div>
+      <div class="card mini">
+        <h3><span class="badge b-warn">Kafka</span>异步事件（7 个主题）</h3>
+        <dl class="kv">
+          <dt>product.sku.created</dt><dd>→ inventory 建库存记录</dd>
+          <dt>order.completed</dt><dd>→ product 加销量、notification</dd>
+          <dt>order.* / payment.refunded</dt><dd>created · paid · cancelled · shipped → notification</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 主链路 -->
+  <section class="sec" id="flow" data-sec>
+    <div class="sec-h"><span class="num">02</span><h2>一次下单的主链路</h2><a class="hash" href="#flow">#</a></div>
+    <p class="lead">这就是 <code>make e2e</code> 走的那条路。同步调用保证当场知道结果，最后两步改成事件，失败不影响支付。</p>
+
+    <div class="phase">
+      <div class="phase-tag t-account">账户<small>公开</small></div>
+      <div class="steps">
+        <div class="step"><span class="no">1</span><h3>注册登录</h3><div class="who"><span class="badge b-info">user</span></div><p>bcrypt 存密码，登录签 7 天 HS256 买家令牌</p></div>
+      </div>
+    </div>
+    <div class="down">↓</div>
+    <div class="phase">
+      <div class="phase-tag t-shop">选购<small>公开 / 登录</small></div>
+      <div class="steps">
+        <div class="step"><span class="no">2</span><h3>浏览</h3><div class="who"><span class="badge b-info">product</span><span class="badge b-line">inventory</span></div><p>买家列表只看在售；详情页再查库存显示有货 / 仅剩 N 件</p></div>
+        <div class="step"><span class="no">3</span><h3>加购</h3><div class="who"><span class="badge b-brand">order · cart</span></div><p>先问 product 可不可卖；每行最多 99 件，最多 100 行</p></div>
+      </div>
+    </div>
+    <div class="down">↓</div>
+    <div class="phase">
+      <div class="phase-tag t-order">下单<small>登录</small></div>
+      <div class="steps">
+        <div class="step"><span class="no">4</span><h3>下单并预占库存</h3><div class="who"><span class="badge b-brand">order</span><span class="badge b-line">→ inventory</span></div><p>「用户 + 请求号」幂等；<code>ReserveStock</code> 占到支付截止（30 分钟）后再 5 分钟</p></div>
+      </div>
+    </div>
+    <div class="down">↓</div>
+    <div class="phase">
+      <div class="phase-tag t-pay">支付<small>登录</small></div>
+      <div class="steps">
+        <div class="step"><span class="no">5</span><h3>建支付单</h3><div class="who"><span class="badge b-bad">payment</span><span class="badge b-line">→ order</span></div><p>核对本人、待支付、未过期；金额取订单应付</p></div>
+        <div class="step"><span class="no">6</span><h3>模拟支付</h3><div class="who"><span class="badge b-bad">payment</span></div><p><code>:simulate</code> 条件更新，只有待支付能变成功</p></div>
+        <div class="step"><span class="no">7</span><h3>订单已支付 · 确认库存</h3><div class="who"><span class="badge b-brand">order</span><span class="badge b-line">→ inventory</span></div><p><code>MarkOrderPaid</code> 后 <code>ConfirmReservation</code>；失败每分钟补</p></div>
+      </div>
+    </div>
+    <div class="down">↓</div>
+    <div class="phase">
+      <div class="phase-tag t-note">通知<small>异步</small></div>
+      <div class="steps">
+        <div class="step"><span class="no">8</span><h3>发件箱事件</h3><div class="who"><span class="badge b-brand">order</span><span class="badge b-warn">Kafka</span></div><p>改状态与写 <code>outbox_events</code> 同一事务，每秒投递 <code>order.paid</code></p></div>
+        <div class="step"><span class="no">9</span><h3>站内信</h3><div class="who"><span class="badge b-line">notification</span></div><p>按事件 id 去重后写一条消息，web 顶部显示未读</p></div>
+      </div>
+    </div>
+
+    <div class="callout c-tip">
+      <div class="ic">✓</div>
+      <div><h4>任何一步失败都有兜底任务</h4><p>inventory 每分钟释放过期预占；order 每分钟关超时单、补释放和补确认；payment 每分钟重试通知订单，每天 02:00 对账。</p></div>
+    </div>
+  </section>
+
+  <!-- 03 模块 -->
+  <section class="sec" id="modules" data-sec>
+    <div class="sec-h"><span class="num">03</span><h2>11 个模块</h2><a class="hash" href="#modules">#</a></div>
+    <p class="lead">每个模块一篇详情页。卡片上的文件数和行数取自本轮 diff，RPC 数取自当前 proto。</p>
+
+    <div class="mgrid">
+      <article class="card mcard" id="m-01">
+        <div class="mhead"><span class="mno">01</span><h3>工程底座与公共包</h3></div>
+        <p>compose 起 MySQL、Redis、Kafka；公共包收拢鉴权、追踪、发件箱、密钥校验和测试库。</p>
+        <div class="kpis"><div class="kpi"><b>5</b>公共包</div><div class="kpi"><b>7</b>个库</div><div class="kpi"><b>4</b>CI 任务</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-line">pkg/</span><span class="badge b-line">deploy/</span></div><a class="more" href="01-platform.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-02">
+        <div class="mhead"><span class="mno">02</span><h3>gateway 与鉴权</h3></div>
+        <p>唯一入口，按公开、可选、登录、后台四种模式转发到 7 个上游，并写入身份元数据。</p>
+        <div class="kpis"><div class="kpi"><b>86</b>路由</div><div class="kpi"><b>47</b>后台路由</div><div class="kpi"><b>7</b>上游</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-info">两把密钥</span></div><a class="more" href="02-gateway.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-03">
+        <div class="mhead"><span class="mno">03</span><h3>用户与地址</h3></div>
+        <p>新增收货地址和 <code>/v1/users/me</code>；按 id 查资料只能查本人，否则 403。</p>
+        <div class="kpis"><div class="kpi"><b>10</b>RPC</div><div class="kpi"><b>20</b>条地址上限</div><div class="kpi"><b>+456</b>行</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-bad">USER_FORBIDDEN</span></div><a class="more" href="03-user.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-04">
+        <div class="mhead"><span class="mno">04</span><h3>商品</h3></div>
+        <p>品牌、分类、属性、SPU/SKU、审核上下架、推荐、收藏、浏览、评价，详情走 Redis 缓存。</p>
+        <div class="kpis"><div class="kpi"><b>54</b>RPC</div><div class="kpi"><b>57</b>文件</div><div class="kpi"><b>+7,619</b>行</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-brand">最大模块</span></div><a class="more" href="04-product.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-05">
+        <div class="mhead"><span class="mno">05</span><h3>库存</h3></div>
+        <p>预占、确认、释放三段式，条件更新防超卖，过期预占每分钟回收。</p>
+        <div class="kpis"><div class="kpi"><b>7</b>RPC</div><div class="kpi"><b>50→10</b>抢购零超卖</div><div class="kpi"><b>+1,330</b>行</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-brand">集成测试</span></div><a class="more" href="05-inventory.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-06">
+        <div class="mhead"><span class="mno">06</span><h3>购物车与订单</h3></div>
+        <p>购物车放在 order；下单按请求号幂等，未付款超时自动关单，发货后自动收货。</p>
+        <div class="kpis"><div class="kpi"><b>15</b>RPC</div><div class="kpi"><b>30</b>分钟关单</div><div class="kpi"><b>7</b>天收货</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-warn">3 条 CR 修复</span></div><a class="more" href="06-order.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-07">
+        <div class="mhead"><span class="mno">07</span><h3>支付</h3></div>
+        <p>模拟渠道：建支付单、模拟回调、通知订单，失败重试，每日对账，冲突时退款。</p>
+        <div class="kpis"><div class="kpi"><b>4</b>RPC</div><div class="kpi"><b>1</b>分钟重试</div><div class="kpi"><b>02:00</b>对账</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-line">mock</span></div><a class="more" href="07-payment.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-08">
+        <div class="mhead"><span class="mno">08</span><h3>通知与事件</h3></div>
+        <p>发件箱与业务同事务写入，每秒投递 Kafka；notification 消费后写成站内信。</p>
+        <div class="kpis"><div class="kpi"><b>7</b>主题</div><div class="kpi"><b>3</b>RPC</div><div class="kpi"><b>5</b>次连败跳过</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-warn">Kafka</span></div><a class="more" href="08-notification.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-09">
+        <div class="mhead"><span class="mno">09</span><h3>运营账号</h3></div>
+        <p>独立的 admin 服务，三种固定角色，签发 <code>aud=admin</code> 的后台令牌。</p>
+        <div class="kpis"><div class="kpi"><b>6</b>RPC</div><div class="kpi"><b>3</b>角色</div><div class="kpi"><b>12</b>小时令牌</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-line">make seed-admin</span></div><a class="more" href="09-admin.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-10">
+        <div class="mhead"><span class="mno">10</span><h3>用户端</h3></div>
+        <p>从首页、分类、搜索到购物车、结算、模拟支付、订单、评价、消息，买家全流程。</p>
+        <div class="kpis"><div class="kpi"><b>16</b>页面</div><div class="kpi"><b>39</b>文件</div><div class="kpi"><b>+3,294</b>行</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-line">:5174</span></div><a class="more" href="10-web.html">查看详情 →</a></div>
+      </article>
+      <article class="card mcard" id="m-11">
+        <div class="mhead"><span class="mno">11</span><h3>管理台</h3></div>
+        <p>商品四步编辑、审核、回收站、推荐位、库存、发货、对账和运营账号管理。</p>
+        <div class="kpis"><div class="kpi"><b>15</b>页面</div><div class="kpi"><b>28</b>文件</div><div class="kpi"><b>+3,306</b>行</div></div>
+        <div class="mfoot"><div class="tags"><span class="badge b-line">:5173</span></div><a class="more" href="11-admin-web.html">查看详情 →</a></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 04 提交 -->
+  <section class="sec" id="commits" data-sec>
+    <div class="sec-h"><span class="num">04</span><h2>提交记录</h2><a class="hash" href="#commits">#</a></div>
+    <p class="lead">按依赖顺序提交：先契约，再底座，再各服务，最后网关、前端和文档。条长按新增行数，相对最大的一次提交。</p>
+
+    <div class="tl">
+      <div class="card tl-item" data-n="1">
+        <div class="tl-top"><code>d70e79c</code><span class="badge b-info">feat(api)</span><h3>补齐商品库存订单支付运营通知契约</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill gen" style="width:100%"></div></div><span>76 文件 · +28,279</span></div>
+        <div class="tl-mods"><a href="#m-01">01 底座</a><a href="#m-03">03</a><a href="#m-04">04</a><a href="#m-05">05</a><a href="#m-06">06</a><a href="#m-07">07</a><a href="#m-08">08</a><a href="#m-09">09</a></div>
+      </div>
+      <div class="card tl-item" data-n="2">
+        <div class="tl-top"><code>bd19610</code><span class="badge b-line">chore</span><h3>公共鉴权追踪发件箱与本地依赖</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:4.3%"></div></div><span>16 文件 · +1,206</span></div>
+        <div class="tl-mods"><a href="#m-01">01 工程底座与公共包</a></div>
+      </div>
+      <div class="card tl-item" data-n="3">
+        <div class="tl-top"><code>06f237f</code><span class="badge b-brand">feat(user)</span><h3>收货地址与查资料只看本人</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:1.6%"></div></div><span>15 文件 · +456</span></div>
+        <div class="tl-mods"><a href="#m-03">03 用户与地址</a></div>
+      </div>
+      <div class="card tl-item" data-n="4">
+        <div class="tl-top"><code>99d87c3</code><span class="badge b-brand">feat(product,inventory)</span><h3>商品目录状态审核与库存预占</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:31.6%"></div></div><span>75 文件 · +8,949</span></div>
+        <div class="tl-mods"><a href="#m-04">04 商品</a><a href="#m-05">05 库存</a></div>
+      </div>
+      <div class="card tl-item" data-n="5">
+        <div class="tl-top"><code>1a34c47</code><span class="badge b-brand">feat(order,payment,notification,admin)</span><h3>下单支付通知与运营账号</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:23.3%"></div></div><span>83 文件 · +6,586</span></div>
+        <div class="tl-mods"><a href="#m-06">06 购物车与订单</a><a href="#m-07">07 支付</a><a href="#m-08">08 通知与事件</a><a href="#m-09">09 运营账号</a></div>
+      </div>
+      <div class="card tl-item" data-n="6">
+        <div class="tl-top"><code>cd0e8d0</code><span class="badge b-brand">feat(gateway)</span><h3>按公开登录后台三类路由转发全部服务</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:7.5%"></div></div><span>29 文件 · +2,124</span></div>
+        <div class="tl-mods"><a href="#m-02">02 gateway 与鉴权</a></div>
+      </div>
+      <div class="card tl-item" data-n="7">
+        <div class="tl-top"><code>e99cf99</code><span class="badge b-brand">feat(web)</span><h3>用户端浏览购物车下单支付与互动页面</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:11.6%"></div></div><span>39 文件 · +3,294</span></div>
+        <div class="tl-mods"><a href="#m-10">10 用户端</a></div>
+      </div>
+      <div class="card tl-item" data-n="8">
+        <div class="tl-top"><code>487714e</code><span class="badge b-brand">feat(admin-web)</span><h3>管理台商品库存订单与运营账号页面</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:11.7%"></div></div><span>28 文件 · +3,306</span></div>
+        <div class="tl-mods"><a href="#m-11">11 管理台</a></div>
+      </div>
+      <div class="card tl-item" data-n="9">
+        <div class="tl-top"><code>2f90ce3</code><span class="badge b-warn">docs</span><h3>商品设计与全项目技术实现文档</h3></div>
+        <div class="tl-stat"><div class="bar-track"><div class="bar-fill" style="width:3.6%"></div></div><span>2 文件 · +1,027</span></div>
+        <div class="tl-mods"><a href="#m-04">04 商品设计</a><a href="#modules">全项目实现</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 验证 -->
+  <section class="sec" id="verify" data-sec>
+    <div class="sec-h"><span class="num">05</span><h2>验证结果</h2><a class="hash" href="#verify">#</a></div>
+    <p class="lead">CI 的 4 个任务覆盖构建、契约、单测和集成测试。<code>go vet</code> 和 <code>make e2e</code> 在本机执行，全链路要先起全部服务。</p>
+
+    <div class="checks">
+      <div class="card check-g">
+        <h3>静态检查与契约 <span class="badge b-brand">4 / 4</span></h3>
+        <ul>
+          <li><input type="checkbox" checked disabled><span><code>go build ./...</code></span></li>
+          <li><input type="checkbox" checked disabled><span><code>go vet ./...</code></span></li>
+          <li><input type="checkbox" checked disabled><span><code>buf lint</code><small>STANDARD 规则</small></span></li>
+          <li><input type="checkbox" checked disabled><span><code>make api</code> 后无差异<small>生成文件与 proto 同步提交</small></span></li>
+        </ul>
+      </div>
+      <div class="card check-g">
+        <h3>单元测试 <span class="badge b-brand">3 / 3</span></h3>
+        <ul>
+          <li><input type="checkbox" checked disabled><span><code>go test ./...</code><small>26 个包通过，不连数据库</small></span></li>
+          <li><input type="checkbox" checked disabled><span>web：<code>npm test</code> 与 <code>npm run build</code></span></li>
+          <li><input type="checkbox" checked disabled><span>admin-web：<code>npm test</code> 与 <code>npm run build</code></span></li>
+        </ul>
+      </div>
+      <div class="card check-g">
+        <h3>集成、全链路与提交粒度 <span class="badge b-brand">3 / 3</span></h3>
+        <ul>
+          <li><input type="checkbox" checked disabled><span><code>make test-integration</code><small>50 协程抢 10 件：成功 10、不足 40，<code>reserved</code> = 10</small></span></li>
+          <li><input type="checkbox" checked disabled><span><code>make e2e</code><small>经 gateway 从注册一路走到收到站内信</small></span></li>
+          <li><input type="checkbox" checked disabled><span>9 次提交逐个检出都能单独编译</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 审查 -->
+  <section class="sec" id="review" data-sec>
+    <div class="sec-h"><span class="num">06</span><h2>代码审查修复</h2><a class="hash" href="#review">#</a></div>
+    <p class="lead">本轮代码审查确认 9 条必须修，全部已修进对应提交。</p>
+
+    <div class="tbl-wrap">
+      <table class="review">
+        <thead><tr><th>问题</th><th>后果</th><th>修法</th><th>模块</th></tr></thead>
+        <tbody>
+          <tr><td><span class="idx">1</span>建库存失败误报 503</td><td>商品已落库却报失败，易重复建</td><td>提交后补库存失败只记日志，上架前再补</td><td><a class="badge b-brand" href="#m-04">04</a></td></tr>
+          <tr><td><span class="idx">2</span>改规格读缓存旧状态</td><td>按过期状态放行，在售商品被改规格</td><td>以事务内锁住的库内状态判断</td><td><a class="badge b-brand" href="#m-04">04</a></td></tr>
+          <tr><td><span class="idx">3</span>Kafka 失败不重投</td><td>拉取位置已前进，失败事件直接丢</td><td>原地退避重试，连败 5 次跳过，只提交成功前缀</td><td><a class="badge b-brand" href="#m-01">01</a><a class="badge b-brand" href="#m-08">08</a></td></tr>
+          <tr><td><span class="idx">4</span>发货后重复已支付通知触发退款</td><td>订单已发货，重试通知得冲突 → 退款</td><td>同一支付单在已发货 / 已完成时按重复返回成功</td><td><a class="badge b-brand" href="#m-06">06</a><a class="badge b-brand" href="#m-07">07</a></td></tr>
+          <tr><td><span class="idx">5</span>库存确认冲突永远重试</td><td>预占已释放，扫描每分钟重试不止</td><td>冲突或预占缺失标记失败并告警，不再重试</td><td><a class="badge b-brand" href="#m-06">06</a></td></tr>
+          <tr><td><span class="idx">6</span>下单补偿用已取消 ctx</td><td>请求超时后释放立即失败，库存占到过期</td><td>脱离请求 ctx，另给 3 秒释放</td><td><a class="badge b-brand" href="#m-06">06</a></td></tr>
+          <tr><td><span class="idx">7</span>配置占位符读不到同名环境变量</td><td>只认 <code>KRATOS_</code> 前缀，设了密钥也不生效</td><td>配置只读 yaml，不再接环境源</td><td><a class="badge b-brand" href="#m-01">01</a></td></tr>
+          <tr><td><span class="idx">8</span>admin 种子默认弱口令</td><td>超级管理员带固定口令上线</td><td>口令取 <code>seed.init_password</code>，至少 8 位，目前留空</td><td><a class="badge b-brand" href="#m-09">09</a></td></tr>
+          <tr><td><span class="idx">9</span>前端登录跳回开放重定向</td><td>回跳参数可指向外站，被拿去钓鱼</td><td>只认解析后同源的路径，否则回默认页</td><td><a class="badge b-brand" href="#m-10">10</a><a class="badge b-brand" href="#m-11">11</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 配置 -->
+  <section class="sec" id="config" data-sec>
+    <div class="sec-h"><span class="num">07</span><h2>运行配置速览</h2><a class="hash" href="#config">#</a></div>
+    <p class="lead">库地址、Redis 地址和两把令牌密钥都直接写在各服务的 <code>configs/config.yaml</code>。</p>
+
+    <div class="tbl-wrap">
+      <table class="cfg">
+        <thead><tr><th>变量</th><th>默认</th><th>谁读</th><th>约束</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">密钥与账号</td></tr>
+          <tr><td><code>auth.jwt_secret</code></td><td><code>tmjwjx-user-jwt-secret</code></td><td>gateway 与除 admin 外 6 个服务的 <code>config.yaml</code></td><td><span class="badge b-bad">必须</span>非空，与下一把不同</td></tr>
+          <tr><td><code>auth.admin_jwt_secret</code></td><td><code>tmjwjx-admin-jwt-secret</code></td><td>gateway 与除 user 外 6 个服务的 <code>config.yaml</code></td><td><span class="badge b-bad">必须</span>非空，与上一把不同</td></tr>
+          <tr><td><code>seed.init_password</code></td><td>空，yaml 里还没写这个字段</td><td><code>make seed-admin</code> 读 admin 配置</td><td><span class="badge b-bad">必须</span>至少 8 位，空则退出</td></tr>
+          <tr class="grp"><td colspan="4">连接</td></tr>
+          <tr><td>各服务 <code>data.database.source</code></td><td><code>root:root@…:3306/&lt;库&gt;</code></td><td>各服务 <code>configs/dev.yaml</code></td><td>一个服务一个库，直接写值</td></tr>
+          <tr><td>product <code>data.redis.addr</code></td><td><code>redis:6379</code></td><td>product <code>configs/dev.yaml</code></td><td>容器内用服务名</td></tr>
+          <tr><td><code>kafka.brokers</code></td><td><code>kafka:29092</code></td><td>product、inventory、order、payment、notification 的 <code>dev.yaml</code></td><td>多个地址用英文逗号分开；<code>prod.yaml</code> 留空</td></tr>
+          <tr class="grp"><td colspan="4">本地依赖与测试</td></tr>
+          <tr><td>MySQL / Redis / Kafka 宿主机端口</td><td>3306 / 6379 / 9092</td><td><code>deploy/compose.yaml</code></td><td>写死，只绑 <code>127.0.0.1</code></td></tr>
+          <tr><td>集成测试 MySQL</td><td><code>root:root@tcp(127.0.0.1:3306)/</code></td><td><code>pkg/testdb</code></td><td>不带库名，自建测试库</td></tr>
+          <tr><td>e2e gateway</td><td><code>http://127.0.0.1:8080</code></td><td><code>app/gateway/e2e</code></td><td>服务全起且跑过种子</td></tr>
+          <tr><td>种子 product 地址</td><td><code>127.0.0.1:9001</code></td><td><code>make seed</code></td><td>也可用 <code>-product</code> 参数</td></tr>
+          <tr><td>种子 inventory 地址</td><td><code>127.0.0.1:9002</code></td><td><code>make seed</code></td><td>也可用 <code>-inventory</code> 参数</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chips">七个库名：<code>user</code><code>product</code><code>inventory</code><code>order</code><code>payment</code><code>notification</code><code>admin</code></div>
+
+    <div class="callout c-warn">
+      <div class="ic">!</div>
+      <div><h4>两把 JWT 密钥不合规，服务启动即退出</h4><p>任一为空或两把相同直接报错；仍是 <code>change-me-</code> 开头的本地缺省值只打警告，部署前必须换掉。</p></div>
+    </div>
+  </section>
+
+  <!-- 08 遗留 -->
+  <section class="sec" id="legacy" data-sec>
+    <div class="sec-h"><span class="num">08</span><h2>已知遗留</h2><a class="hash" href="#legacy">#</a></div>
+
+    <div class="callout c-bad">
+      <div class="ic">!</div>
+      <div><h4>下一轮最值得先做的三条</h4><p>三条都不影响本地跑通，但上线前必须处理。</p></div>
+    </div>
+    <div class="legacy">
+      <div class="lg">
+        <h4><span class="idx">1</span>gRPC 端口对外监听且信任元数据</h4>
+        <dl>
+          <dt>现状</dt><dd>七个服务 gRPC 绑 <code>0.0.0.0:900x</code>，身份直接取 <code>x-md-global-*</code></dd>
+          <dt>风险</dt><dd>能连上端口就能冒充任意买家或运营</dd>
+          <dt>方向</dt><dd>只监听内网，或加服务间认证</dd>
+        </dl>
+      </div>
+      <div class="lg">
+        <h4><span class="idx">2</span>库存预占与确认偶发死锁</h4>
+        <dl>
+          <dt>现状</dt><dd>预占先改 <code>stocks</code> 再写预占记录；确认先锁预占记录再改 <code>stocks</code></dd>
+          <dt>风险</dt><dd>同一 SKU 并发下单与支付时一方被 MySQL 回滚</dd>
+          <dt>方向</dt><dd>统一加锁顺序，或对死锁错误重试</dd>
+        </dl>
+      </div>
+      <div class="lg">
+        <h4><span class="idx">3</span>模拟支付开关不配置时默认开启</h4>
+        <dl>
+          <dt>现状</dt><dd><code>simulate_enabled</code> 缺省按开启处理</dd>
+          <dt>风险</dt><dd>线上漏配，登录用户可自己把订单「付掉」</dd>
+          <dt>方向</dt><dd>缺省改为关闭，本地配置显式打开</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>素材：git log / diff <code>4f5feda..2f90ce3</code>、<code>docs/tech-implementation.md</code>、README、各服务配置</span>
+    <a href="01-platform.html">下一篇 · 01 工程底座与公共包 →</a>
+  </div>
+</footer>
+
+<a class="totop" id="totop" href="#top" aria-label="回到顶部">↑</a>
+
+<script>
+(function(){
+  var secs=[].slice.call(document.querySelectorAll('[data-sec]'));
+  var links=[].slice.call(document.querySelectorAll('.toc a,.toc-mobile nav a'));
+  var bar=document.getElementById('progress'), top=document.getElementById('totop');
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-innerHeight;
+    bar.style.width=(max>0?scrollY/max*100:0)+'%';
+    top.classList.toggle('show',scrollY>600);
+    var cur=secs[0].id;
+    secs.forEach(function(s){ if(s.getBoundingClientRect().top<=120) cur=s.id; });
+    if(innerHeight+scrollY>=h.scrollHeight-4) cur=secs[secs.length-1].id;
+    links.forEach(function(a){ a.classList.toggle('active',a.getAttribute('href')==='#'+cur); });
+  }
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout_ms: 1000
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout_ms: 1000
+data:
+  database:
+    driver: mysql
+    source: "root:root@tcp(mysql:3306)/user?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4"
+    debug: true
+    auto_migrate: true
+auth:
+  jwt_secret: tmjwjx-user-jwt-secret
+  token_expire_ms: 604800000

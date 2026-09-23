@@ -16,7 +16,6 @@ import (
 	dataadmin "github.com/tmjwjx/supermarket/app/admin/internal/data/adminuser"
 
 	"github.com/go-kratos/kratos/v3/config"
-	"github.com/go-kratos/kratos/v3/config/env"
 	"github.com/go-kratos/kratos/v3/config/file"
 )
 
@@ -29,12 +28,7 @@ func init() {
 func main() {
 	flag.Parse()
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	password, err := initPassword(os.Getenv("ADMIN_INIT_PASSWORD"))
-	if err != nil {
-		logger.Error("admin seed aborted", "err", err)
-		os.Exit(1)
-	}
-	c := config.New(config.WithSource(file.NewSource(flagconf), env.NewSource()))
+	c := config.New(config.WithSource(file.NewSource(flagconf)))
 	defer c.Close()
 	if err := c.Load(); err != nil {
 		panic(err)
@@ -42,6 +36,11 @@ func main() {
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
+	}
+	password, err := initPassword(bc.Seed.InitPassword)
+	if err != nil {
+		logger.Error("admin seed aborted", "err", err)
+		os.Exit(1)
 	}
 	d, cleanup, err := data.NewData(&bc.Data)
 	if err != nil {
@@ -63,14 +62,14 @@ func main() {
 // minPasswordLen 是超级管理员初始口令的最短长度
 const minPasswordLen = 8
 
-// initPassword 要求显式给出初始口令 不再落到内置弱口令
+// initPassword 要求配置给出初始口令 空或短于 8 位则失败
 func initPassword(raw string) (string, error) {
 	password := strings.TrimSpace(raw)
 	if password == "" {
-		return "", errors.New("ADMIN_INIT_PASSWORD is required")
+		return "", errors.New("seed.init_password is required")
 	}
 	if utf8.RuneCountInString(password) < minPasswordLen {
-		return "", fmt.Errorf("ADMIN_INIT_PASSWORD must be at least %d characters", minPasswordLen)
+		return "", fmt.Errorf("seed.init_password must be at least %d characters", minPasswordLen)
 	}
 	return password, nil
 }

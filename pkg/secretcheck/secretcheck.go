@@ -12,7 +12,7 @@ import (
 // placeholderPrefix 是配置文件里本地缺省密钥的前缀 线上必须换掉
 const placeholderPrefix = "change-me-"
 
-// Key 是一把签名密钥 Name 用环境变量名方便定位
+// Key 是一把签名密钥 Name 用配置字段名方便定位
 type Key struct {
 	Name  string
 	Value string

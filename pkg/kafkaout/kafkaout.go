@@ -3,7 +3,6 @@ package kafkaout
 import (
 	"context"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -14,11 +13,28 @@ import (
 	"gorm.io/gorm"
 )
 
-// Brokers 从 KAFKA_BROKERS 读取地址 缺省本机 9092
+// seedBrokers 由 UseBrokers 在启动时写入 之后只读
+var seedBrokers []string
+
+// UseBrokers 把配置文件里的地址写进来 多个地址用英文逗号分开 空白表示未配置
+func UseBrokers(raw string) {
+	seedBrokers = splitBrokers(raw)
+}
+
+// Brokers 返回 UseBrokers 写入的地址 未配置时为空
 func Brokers() []string {
-	raw := strings.TrimSpace(os.Getenv("KAFKA_BROKERS"))
+	if len(seedBrokers) == 0 {
+		return nil
+	}
+	out := make([]string, len(seedBrokers))
+	copy(out, seedBrokers)
+	return out
+}
+
+func splitBrokers(raw string) []string {
+	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return []string{"127.0.0.1:9092"}
+		return nil
 	}
 	parts := strings.Split(raw, ",")
 	out := make([]string, 0, len(parts))
@@ -27,9 +43,6 @@ func Brokers() []string {
 		if part != "" {
 			out = append(out, part)
 		}
-	}
-	if len(out) == 0 {
-		return []string{"127.0.0.1:9092"}
 	}
 	return out
 }

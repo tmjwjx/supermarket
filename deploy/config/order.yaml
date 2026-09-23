@@ -1,0 +1,28 @@
+server:
+  http:
+    addr: 0.0.0.0:8003
+    timeout_ms: 5000
+  grpc:
+    addr: 0.0.0.0:9003
+    timeout_ms: 5000
+data:
+  database:
+    driver: mysql
+    source: "root:root@tcp(mysql:3306)/order?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4"
+    debug: true
+    auto_migrate: true
+client:
+  product:
+    addr: product:9001
+    timeout_ms: 1000
+  inventory:
+    addr: inventory:9002
+    timeout_ms: 1000
+  user:
+    addr: user:9000
+    timeout_ms: 1000
+auth:
+  jwt_secret: tmjwjx-user-jwt-secret
+  admin_jwt_secret: tmjwjx-admin-jwt-secret
+kafka:
+  brokers: kafka:29092

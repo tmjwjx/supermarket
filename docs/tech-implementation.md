@@ -67,11 +67,9 @@
 
 配置是手写结构体，放在各服务的 `internal/conf/conf.go`，不为配置写 proto。超时一律写毫秒数字段 `timeout_ms`，由结构体上的 `Timeout()` 方法换算，照 `app/user/internal/conf/conf.go`。
 
-密钥和连接串在 `configs/config.yaml` 里写成环境变量占位，冒号后面是本地默认值，比如 `${AUTH_JWT_SECRET:change-me-local-jwt-secret}`。真实密钥不进仓库。
+每个服务有两份配置：`configs/dev.yaml` 给本地容器，`configs/prod.yaml` 给服务器。镜像不打包配置，启动时把其中一份挂到 `/configs/app.yaml`。买家密钥是 `tmjwjx-user-jwt-secret`，运营密钥是 `tmjwjx-admin-jwt-secret`，写在 `dev.yaml`。`prod.yaml` 的地址和密钥等服务器接入后再填。每个服务一份自己的库名。
 
-每个服务的数据库连接串用各自的环境变量，避免连错库：`USER_DATABASE_SOURCE`、`PRODUCT_DATABASE_SOURCE`、`INVENTORY_DATABASE_SOURCE`、`ORDER_DATABASE_SOURCE`、`PAYMENT_DATABASE_SOURCE`、`NOTIFICATION_DATABASE_SOURCE`、`ADMIN_DATABASE_SOURCE`（新增）。user 现在用的是 `DATABASE_SOURCE`，要一起改名。
-
-服务要调别的服务时，在配置里加 `client.<服务>.addr` 和 `client.<服务>.timeout_ms`，写法照 `app/gateway/internal/conf/conf.go` 的 `Client`。地址是写死的本机端口，不用注册中心。
+服务要调别的服务时，在配置里加 `client.<服务>.addr` 和 `client.<服务>.timeout_ms`，写法照 `app/gateway/internal/conf/conf.go` 的 `Client`。开发环境写 Compose 里的服务名，不用注册中心。
 
 ### 2.4 标识、金额、时间
 
@@ -159,13 +157,13 @@ gateway 的路由分四种鉴权模式，每条路由写明用哪一种：
 
 ### 3.1 本地依赖
 
-仓库根目录新增 `deploy/compose.yaml`（新增），用 Docker Compose 起三样东西：MySQL 8、Redis 7，以及第 11 步才需要的 Kafka。MySQL 挂一个初始化脚本 `deploy/mysql/init.sql`（新增），第一次启动时建好 `user`、`product`、`inventory`、`order`、`payment`、`notification`、`admin` 七个库。数据放在命名卷里，重启不丢；要清空就删卷。
+仓库根目录新增 `deploy/compose.yaml`（新增），用 Docker Compose 起三样东西：MySQL 8、Redis 7，以及第 11 步才需要的 Kafka。这套服务是本机共用的，启动时不建业务库。本项目的七个库由 `deploy/mysql/init.sql`（新增）单独执行一次来建。数据放在命名卷里，重启不丢；要清空就删卷。
 
 Makefile 加两个目标：`make up` 拉起依赖，`make down` 停掉。
 
 ### 3.2 user 库改名
 
-user 现在连的是 `dev` 库，第 1 步改成 `user` 库，连接串的环境变量改成 `USER_DATABASE_SOURCE`。本地没有要保留的数据，改完重启 user 会在新库里重新建表，旧的注册账号需要重新注册。
+user 的连接串直接写在 `app/user/configs/dev.yaml`，指向 `user` 库。本地没有要保留的数据，改完重启 user 会在新库里重新建表，旧的注册账号需要重新注册。
 
 ### 3.3 持续集成
 
@@ -224,7 +222,7 @@ order 下单时通过内部 RPC `GetAddress` 按「用户 id＋地址 id」取�
 
 gateway 没有自己的数据，也不设 biz 和 data。每个上游一个转发器，放在 `app/gateway/internal/server/`：现有的 `userProxy`，新增 `productProxy`、`inventoryProxy`、`orderProxy`、`paymentProxy`、`notificationProxy`（新增）。再加一个 `adminProxy`（新增）转发后台登录。每个转发器的写法照 `userProxy.register`：绑定请求、标记操作名、经中间件调上游、原样返回结果。
 
-每个上游在 `app/gateway/internal/client/` 下有一个客户端构造函数，照 `NewUserClient`；地址写在 `app/gateway/configs/config.yaml` 的 `client` 下。
+每个上游在 `app/gateway/internal/client/` 下有一个客户端构造函数，照 `NewUserClient`；地址写在 `app/gateway/configs/dev.yaml` 的 `client` 下。
 
 鉴权模式做成四个包装函数，现有的 `requireToken` 改造成「登录」模式，另加「可选」和「后台」（新增）。
 
@@ -569,15 +567,15 @@ payment 调 order 的 `GetOrder` 取订单，核对三件事：订单属于当�
 
 入口是 `AdminUserService`（新增）：`Login`（用户名加密码）、`GetMe`，以及只给超级管理员的 `CreateAdminUser`、`ListAdminUsers`、`UpdateAdminUser`（改角色、停用）、`ResetAdminPassword`。登录的校验顺序和买家一样：用户名不存在和密码错误返回同一个错误，停用的账号拒绝登录。
 
-第一个超级管理员由新增命令 `app/admin/cmd/seed` 建，用户名 `admin`，密码取环境变量 `ADMIN_INIT_PASSWORD`。已经存在就跳过。
+第一个超级管理员由新增命令 `app/admin/cmd/seed` 建，用户名 `admin`，密码取配置 `seed.init_password`。这一项先留空，为空或短于 8 位时命令失败退出。已经存在就跳过。
 
 ### 11.2 后台令牌与 gateway 鉴权
 
-admin 登录成功后签一张 HS256 的 JWT，密钥是单独的 `ADMIN_JWT_SECRET`，和买家令牌的 `AUTH_JWT_SECRET` 不是同一把。载荷有 `sub`（运营账号 id）、`aud` 固定为 `admin`、`role`（角色）、`iat`、`exp`，有效期 12 小时。
+admin 登录成功后签一张 HS256 的 JWT，密钥是 admin 配置里的 `auth.jwt_secret`，和买家令牌用的那把 `auth.jwt_secret` 不是同一把。载荷有 `sub`（运营账号 id）、`aud` 固定为 `admin`、`role`（角色）、`iat`、`exp`，有效期 12 小时。
 
 两把密钥分开，两种令牌就天然不能混用：买家令牌拿到后台路由，用后台密钥验签不过；后台令牌拿到买家路由，用买家密钥也验签不过。
 
-gateway 新增一个后台验签器 `NewAdminVerifier`（新增），和现有的 `NewVerifier` 并列，读 `ADMIN_JWT_SECRET`。「后台」模式的处理顺序是：验签，检查 `aud` 是 `admin`，取出角色，再按路由表判断这个角色能不能访问这条路径，不能就返回 403 `GATEWAY_FORBIDDEN`（新增）。通过后把运营账号 id 和角色写进元数据，键名 `x-md-global-admin-id` 和 `x-md-global-admin-role`，再转发。
+gateway 新增一个后台验签器 `NewAdminVerifier`（新增），和现有的 `NewVerifier` 并列，读配置 `auth.admin_jwt_secret`。「后台」模式的处理顺序是：验签，检查 `aud` 是 `admin`，取出角色，再按路由表判断这个角色能不能访问这条路径，不能就返回 403 `GATEWAY_FORBIDDEN`（新增）。通过后把运营账号 id 和角色写进元数据，键名 `x-md-global-admin-id` 和 `x-md-global-admin-role`，再转发。
 
 路由和角色的对应写在 gateway 代码里，按路径前缀：`/v1/admin/brands`、`categories`、`attributes`、`products`、`recommendations`、`stocks` 给商品运营；`/v1/admin/orders`、`payments` 给订单客服；`/v1/admin/users` 只给超级管理员；超级管理员能访问全部。
 
@@ -704,7 +702,7 @@ gateway 新增一个后台验签器 `NewAdminVerifier`（新增），和现有�
 |---|---|---|
 | 运营账号放哪 | 单开 admin 服务 | 11 |
 | 购物车放哪 | 放在 order 里 | 8 |
-| user 的库 | 从 `dev` 改为 `user`，每个服务用自己的连接串环境变量 | 2.3、3.2 |
+| user 的库 | 从 `dev` 改为 `user`，每个服务在自己的 yaml 里写连接串 | 2.3、3.2 |
 | 传用户 id 的键名 | `x-md-global-user-id`；后台是 `x-md-global-admin-id` 和 `x-md-global-admin-role` | 2.8、11.2 |
 | 评价前核对订单项 | order 提供 `GetOrderItem` 和 `MarkOrderItemReviewed` | 9.6 |
 | 建库存 | inventory 提供 `CreateStock`，重复调用只建一条 | 7.2 |

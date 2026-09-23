@@ -44,9 +44,6 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	sqlDB.SetMaxOpenConns(20)
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	// Auto migration is a convenience for local development. In production,
-	// apply schema changes as a separate reviewed step instead.
-	// TODO: register one model list per resource as the domain grows.
 	if c.Database.AutoMigrate {
 		if err := db.AutoMigrate(&datauser.User{}, &datauser.Address{}); err != nil {
 			sqlDB.Close()
