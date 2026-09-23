@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/payment/v1;v1";
+
+enum ErrorReason {
+  PAYMENT_UNSPECIFIED = 0;
+  PAYMENT_NOT_FOUND = 1;
+  PAYMENT_INVALID_ARGUMENT = 2;
+  PAYMENT_STATUS_CONFLICT = 3;
+  PAYMENT_ORDER_NOT_PAYABLE = 4;
+}

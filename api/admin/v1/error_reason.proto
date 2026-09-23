@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package admin.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/admin/v1;v1";
+
+enum ErrorReason {
+  ADMIN_UNSPECIFIED = 0;
+  ADMIN_INVALID_CREDENTIALS = 1;
+  ADMIN_DISABLED = 2;
+  ADMIN_INVALID_ARGUMENT = 3;
+  ADMIN_FORBIDDEN = 4;
+}

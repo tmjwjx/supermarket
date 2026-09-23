@@ -484,6 +484,86 @@ func (x *GetUserResponse) GetUser() *User {
 	return nil
 }
 
+type GetMeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMeRequest) Reset() {
+	*x = GetMeRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeRequest) ProtoMessage() {}
+
+func (x *GetMeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeRequest.ProtoReflect.Descriptor instead.
+func (*GetMeRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{7}
+}
+
+type GetMeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMeResponse) Reset() {
+	*x = GetMeResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeResponse) ProtoMessage() {}
+
+func (x *GetMeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeResponse.ProtoReflect.Descriptor instead.
+func (*GetMeResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetMeResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
 var File_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_proto_rawDesc = "" +
@@ -518,16 +598,20 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\x0eGetUserRequest\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tB\x03\xe0A\x02R\x02id\"4\n" +
 	"\x0fGetUserResponse\x12!\n" +
+	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\"\x0e\n" +
+	"\fGetMeRequest\"2\n" +
+	"\rGetMeResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user*[\n" +
 	"\n" +
 	"UserStatus\x12\x1b\n" +
 	"\x17USER_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12USER_STATUS_ACTIVE\x10\x01\x12\x18\n" +
-	"\x14USER_STATUS_DISABLED\x10\x022\x97\x02\n" +
+	"\x14USER_STATUS_DISABLED\x10\x022\xe5\x02\n" +
 	"\vUserService\x12^\n" +
 	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/v1/users/register\x12R\n" +
 	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/users/login\x12T\n" +
-	"\aGetUser\x12\x17.user.v1.GetUserRequest\x1a\x18.user.v1.GetUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}B.Z,github.com/tmjwjx/supermarket/api/user/v1;v1b\x06proto3"
+	"\aGetUser\x12\x17.user.v1.GetUserRequest\x1a\x18.user.v1.GetUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12L\n" +
+	"\x05GetMe\x12\x15.user.v1.GetMeRequest\x1a\x16.user.v1.GetMeResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/v1/users/meB.Z,github.com/tmjwjx/supermarket/api/user/v1;v1b\x06proto3"
 
 var (
 	file_user_v1_user_proto_rawDescOnce sync.Once
@@ -542,7 +626,7 @@ func file_user_v1_user_proto_rawDescGZIP() []byte {
 }
 
 var file_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_user_v1_user_proto_goTypes = []any{
 	(UserStatus)(0),               // 0: user.v1.UserStatus
 	(*User)(nil),                  // 1: user.v1.User
@@ -552,26 +636,31 @@ var file_user_v1_user_proto_goTypes = []any{
 	(*LoginResponse)(nil),         // 5: user.v1.LoginResponse
 	(*GetUserRequest)(nil),        // 6: user.v1.GetUserRequest
 	(*GetUserResponse)(nil),       // 7: user.v1.GetUserResponse
-	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
+	(*GetMeRequest)(nil),          // 8: user.v1.GetMeRequest
+	(*GetMeResponse)(nil),         // 9: user.v1.GetMeResponse
+	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
 }
 var file_user_v1_user_proto_depIdxs = []int32{
-	0, // 0: user.v1.User.status:type_name -> user.v1.UserStatus
-	8, // 1: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	8, // 2: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	1, // 3: user.v1.RegisterResponse.user:type_name -> user.v1.User
-	1, // 4: user.v1.LoginResponse.user:type_name -> user.v1.User
-	1, // 5: user.v1.GetUserResponse.user:type_name -> user.v1.User
-	2, // 6: user.v1.UserService.Register:input_type -> user.v1.RegisterRequest
-	3, // 7: user.v1.UserService.Login:input_type -> user.v1.LoginRequest
-	6, // 8: user.v1.UserService.GetUser:input_type -> user.v1.GetUserRequest
-	4, // 9: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
-	5, // 10: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
-	7, // 11: user.v1.UserService.GetUser:output_type -> user.v1.GetUserResponse
-	9, // [9:12] is the sub-list for method output_type
-	6, // [6:9] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0,  // 0: user.v1.User.status:type_name -> user.v1.UserStatus
+	10, // 1: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	10, // 2: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 3: user.v1.RegisterResponse.user:type_name -> user.v1.User
+	1,  // 4: user.v1.LoginResponse.user:type_name -> user.v1.User
+	1,  // 5: user.v1.GetUserResponse.user:type_name -> user.v1.User
+	1,  // 6: user.v1.GetMeResponse.user:type_name -> user.v1.User
+	2,  // 7: user.v1.UserService.Register:input_type -> user.v1.RegisterRequest
+	3,  // 8: user.v1.UserService.Login:input_type -> user.v1.LoginRequest
+	6,  // 9: user.v1.UserService.GetUser:input_type -> user.v1.GetUserRequest
+	8,  // 10: user.v1.UserService.GetMe:input_type -> user.v1.GetMeRequest
+	4,  // 11: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
+	5,  // 12: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
+	7,  // 13: user.v1.UserService.GetUser:output_type -> user.v1.GetUserResponse
+	9,  // 14: user.v1.UserService.GetMe:output_type -> user.v1.GetMeResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_proto_init() }
@@ -585,7 +674,7 @@ func file_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_v1_user_proto_rawDesc), len(file_user_v1_user_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

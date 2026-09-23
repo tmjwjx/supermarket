@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service ReviewService {
+  rpc CreateReview(CreateReviewRequest) returns (CreateReviewResponse) {
+    option (google.api.http) = {
+      post: "/v1/reviews"
+      body: "*"
+    };
+  }
+  rpc ListProductReviews(ListProductReviewsRequest) returns (ListProductReviewsResponse) {
+    option (google.api.http) = {get: "/v1/products/{product_id}/reviews"};
+  }
+}
+
+message Review {
+  string id = 1;
+  string product_id = 2;
+  string order_item_id = 3;
+  int32 stars = 4;
+  string content = 5;
+  string display_name = 6;
+  bool anonymous = 7;
+  string specs_json = 8;
+}
+message CreateReviewRequest {
+  string order_item_id = 1;
+  string product_id = 2;
+  int32 stars = 3;
+  string content = 4;
+  bool anonymous = 5;
+}
+message CreateReviewResponse { Review review = 1; }
+message ListProductReviewsRequest {
+  string product_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+message ListProductReviewsResponse {
+  repeated Review reviews = 1;
+  string next_page_token = 2;
+}

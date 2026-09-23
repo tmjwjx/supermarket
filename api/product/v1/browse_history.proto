@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+import "product/v1/types.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service BrowseHistoryService {
+  rpc ListBrowseHistories(ListBrowseHistoriesRequest) returns (ListBrowseHistoriesResponse) {
+    option (google.api.http) = {get: "/v1/browse-histories"};
+  }
+  rpc ClearBrowseHistories(ClearBrowseHistoriesRequest) returns (ClearBrowseHistoriesResponse) {
+    option (google.api.http) = {delete: "/v1/browse-histories"};
+  }
+}
+
+message BrowseHistory {
+  string product_id = 1;
+  ProductCard product = 2;
+}
+message ListBrowseHistoriesRequest {}
+message ListBrowseHistoriesResponse { repeated BrowseHistory histories = 1; }
+message ClearBrowseHistoriesRequest {}
+message ClearBrowseHistoriesResponse {}

@@ -1,0 +1,306 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+import "product/v1/types.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {
+    option (google.api.http) = {post: "/v1/admin/products" body: "*"};
+  }
+  rpc PublishProduct(PublishProductRequest) returns (PublishProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:publish"
+      body: "*"
+    };
+  }
+  rpc UnpublishProduct(UnpublishProductRequest) returns (UnpublishProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:unpublish"
+      body: "*"
+    };
+  }
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {
+    option (google.api.http) = {get: "/v1/products"};
+  }
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse) {
+    option (google.api.http) = {get: "/v1/products/{id}"};
+  }
+  rpc GetProductDetail(GetProductDetailRequest) returns (GetProductDetailResponse) {
+    option (google.api.http) = {get: "/v1/products/{id}/detail"};
+  }
+  rpc SearchProducts(SearchProductsRequest) returns (SearchProductsResponse) {
+    option (google.api.http) = {get: "/v1/products:search"};
+  }
+  rpc BatchGetSkus(BatchGetSkusRequest) returns (BatchGetSkusResponse);
+  rpc CheckSellable(CheckSellableRequest) returns (CheckSellableResponse);
+  rpc IncreaseSales(IncreaseSalesRequest) returns (IncreaseSalesResponse);
+  rpc AdminListProducts(AdminListProductsRequest) returns (AdminListProductsResponse) {
+    option (google.api.http) = {get: "/v1/admin/products"};
+  }
+  rpc AdminGetProduct(AdminGetProductRequest) returns (AdminGetProductResponse) {
+    option (google.api.http) = {get: "/v1/admin/products/{id}"};
+  }
+  rpc SubmitProduct(SubmitProductRequest) returns (SubmitProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:submit"
+      body: "*"
+    };
+  }
+  rpc ApproveProduct(ApproveProductRequest) returns (ApproveProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:approve"
+      body: "*"
+    };
+  }
+  rpc RejectProduct(RejectProductRequest) returns (RejectProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:reject"
+      body: "*"
+    };
+  }
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {
+    option (google.api.http) = {delete: "/v1/admin/products/{id}"};
+  }
+  rpc RestoreProduct(RestoreProductRequest) returns (RestoreProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:restore"
+      body: "*"
+    };
+  }
+  rpc PurgeProduct(PurgeProductRequest) returns (PurgeProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{id}:purge"
+      body: "*"
+    };
+  }
+  rpc BatchPublishProducts(BatchPublishProductsRequest) returns (BatchPublishProductsResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products:batchPublish"
+      body: "*"
+    };
+  }
+  rpc BatchUnpublishProducts(BatchUnpublishProductsRequest) returns (BatchUnpublishProductsResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products:batchUnpublish"
+      body: "*"
+    };
+  }
+  rpc UpdateSkuPrice(UpdateSkuPriceRequest) returns (UpdateSkuPriceResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/products/{product_id}/skus/{sku_id}:price"
+      body: "*"
+    };
+  }
+  rpc ListDeletedProducts(ListDeletedProductsRequest) returns (ListDeletedProductsResponse) {
+    option (google.api.http) = {get: "/v1/admin/products:deleted"};
+  }
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {
+    option (google.api.http) = {put: "/v1/admin/products/{id}" body: "*"};
+  }
+  rpc ListProductAudits(ListProductAuditsRequest) returns (ListProductAuditsResponse) {
+    option (google.api.http) = {get: "/v1/admin/products/{product_id}/audits"};
+  }
+  rpc ListProductLogs(ListProductLogsRequest) returns (ListProductLogsResponse) {
+    option (google.api.http) = {get: "/v1/admin/product-logs"};
+  }
+}
+
+message Sku {
+  string id = 1;
+  string product_id = 2;
+  string specs_json = 3;
+  int64 price = 4;
+  int64 market_price = 5;
+  string image = 6;
+  string barcode = 7;
+  bool enabled = 8;
+}
+
+message Product {
+  string id = 1;
+  string category_id = 2;
+  string brand_id = 3;
+  string name = 4;
+  string subtitle = 5;
+  string keywords = 6;
+  string main_image = 7;
+  string unit = 8;
+  int32 weight_gram = 9;
+  int32 status = 10;
+  int64 min_price = 11;
+  int64 max_price = 12;
+  int64 sales_count = 13;
+  repeated Sku skus = 14;
+  repeated string images = 15;
+  string detail_html = 16;
+  repeated ProductParam params = 17;
+  repeated SpecOption spec_options = 18;
+}
+
+message SpecOption {
+  string name = 1;
+  repeated string values = 2;
+}
+
+message ProductParam {
+  string name = 1;
+  string value = 2;
+}
+
+message SkuInput {
+  string specs_json = 1;
+  int64 price = 2;
+  int64 market_price = 3;
+  string image = 4;
+  string barcode = 5;
+  bool enabled = 6;
+  string id = 7;
+}
+
+message CreateProductRequest {
+  string category_id = 1;
+  string brand_id = 2;
+  string name = 3;
+  string subtitle = 4;
+  string keywords = 5;
+  string unit = 6;
+  int32 weight_gram = 7;
+  repeated string images = 8;
+  string detail_html = 9;
+  repeated SkuInput skus = 10;
+  repeated ProductParam params = 11;
+}
+message CreateProductResponse { Product product = 1; }
+message PublishProductRequest { string id = 1; }
+message PublishProductResponse { Product product = 1; }
+message UnpublishProductRequest { string id = 1; }
+message UnpublishProductResponse { Product product = 1; }
+
+message ListProductsRequest {
+  string category_id = 1;
+  string brand_id = 2;
+  int64 min_price = 3;
+  int64 max_price = 4;
+  string order_by = 5;
+  int32 page_size = 6;
+  string page_token = 7;
+}
+message ListProductsResponse {
+  repeated ProductCard products = 1;
+  string next_page_token = 2;
+}
+message GetProductRequest { string id = 1; }
+message GetProductResponse { Product product = 1; }
+message GetProductDetailRequest { string id = 1; }
+message GetProductDetailResponse { string detail_html = 1; }
+message SearchProductsRequest {
+  string q = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+  string order_by = 4;
+}
+message SearchProductsResponse {
+  repeated ProductCard products = 1;
+  string next_page_token = 2;
+}
+
+message SkuSnapshot {
+  string sku_id = 1;
+  string product_id = 2;
+  string product_name = 3;
+  string specs_json = 4;
+  int64 price = 5;
+  string image = 6;
+  bool sellable = 7;
+}
+message BatchGetSkusRequest { repeated string sku_ids = 1; }
+message BatchGetSkusResponse { repeated SkuSnapshot skus = 1; }
+message CheckSellableRequest { repeated string sku_ids = 1; }
+message CheckSellableResponse { repeated SkuSnapshot skus = 1; }
+message IncreaseSalesRequest {
+  string product_id = 1;
+  int64 count = 2;
+  string order_id = 3;
+}
+message IncreaseSalesResponse {}
+message AdminListProductsRequest { int32 page_size = 1; string page_token = 2; }
+message AdminListProductsResponse {
+  repeated ProductCard products = 1;
+  string next_page_token = 2;
+}
+message AdminGetProductRequest { string id = 1; }
+message AdminGetProductResponse { Product product = 1; }
+message SubmitProductRequest { string id = 1; }
+message SubmitProductResponse { Product product = 1; }
+message ApproveProductRequest { string id = 1; }
+message ApproveProductResponse { Product product = 1; }
+message RejectProductRequest { string id = 1; string reason = 2; }
+message RejectProductResponse { Product product = 1; }
+message DeleteProductRequest { string id = 1; }
+message DeleteProductResponse {}
+message RestoreProductRequest { string id = 1; }
+message RestoreProductResponse { Product product = 1; }
+message PurgeProductRequest { string id = 1; }
+message PurgeProductResponse {}
+message BatchPublishProductsRequest { repeated string ids = 1; }
+message BatchFailure { string id = 1; string reason = 2; }
+message BatchPublishProductsResponse {
+  repeated string published = 1;
+  repeated BatchFailure failed = 2;
+}
+message BatchUnpublishProductsRequest { repeated string ids = 1; }
+message BatchUnpublishProductsResponse {
+  repeated string unpublished = 1;
+  repeated BatchFailure failed = 2;
+}
+message UpdateSkuPriceRequest {
+  string product_id = 1;
+  string sku_id = 2;
+  int64 price = 3;
+}
+message UpdateSkuPriceResponse { Product product = 1; }
+message ListDeletedProductsRequest { int32 page_size = 1; string page_token = 2; }
+message ListDeletedProductsResponse {
+  repeated ProductCard products = 1;
+  string next_page_token = 2;
+}
+message UpdateProductRequest {
+  string id = 1;
+  string category_id = 2;
+  string brand_id = 3;
+  string name = 4;
+  string subtitle = 5;
+  string keywords = 6;
+  string unit = 7;
+  int32 weight_gram = 8;
+  repeated string images = 9;
+  string detail_html = 10;
+  repeated SkuInput skus = 11;
+  repeated ProductParam params = 12;
+}
+message UpdateProductResponse { Product product = 1; }
+message ProductAudit {
+  string id = 1;
+  string product_id = 2;
+  string action = 3;
+  string operator = 4;
+  string reason = 5;
+  int64 created_at_unix = 6;
+}
+message ListProductAuditsRequest { string product_id = 1; int32 page_size = 2; string page_token = 3; }
+message ListProductAuditsResponse { repeated ProductAudit audits = 1; string next_page_token = 2; }
+message ProductLog {
+  string id = 1;
+  string product_id = 2;
+  string operator = 3;
+  string action = 4;
+  string before = 5;
+  string after = 6;
+  int64 created_at_unix = 7;
+}
+message ListProductLogsRequest { string product_id = 1; int32 page_size = 2; string page_token = 3; }
+message ListProductLogsResponse { repeated ProductLog logs = 1; string next_page_token = 2; }

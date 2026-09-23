@@ -30,6 +30,7 @@ const (
 	ErrorReason_USER_PHONE_ALREADY_EXISTS ErrorReason = 3
 	ErrorReason_USER_INVALID_CREDENTIALS  ErrorReason = 4
 	ErrorReason_USER_DISABLED             ErrorReason = 5
+	ErrorReason_USER_FORBIDDEN            ErrorReason = 6
 )
 
 // Enum value maps for ErrorReason.
@@ -41,6 +42,7 @@ var (
 		3: "USER_PHONE_ALREADY_EXISTS",
 		4: "USER_INVALID_CREDENTIALS",
 		5: "USER_DISABLED",
+		6: "USER_FORBIDDEN",
 	}
 	ErrorReason_value = map[string]int32{
 		"USER_UNSPECIFIED":          0,
@@ -49,6 +51,7 @@ var (
 		"USER_PHONE_ALREADY_EXISTS": 3,
 		"USER_INVALID_CREDENTIALS":  4,
 		"USER_DISABLED":             5,
+		"USER_FORBIDDEN":            6,
 	}
 )
 
@@ -83,14 +86,15 @@ var File_user_v1_error_reason_proto protoreflect.FileDescriptor
 
 const file_user_v1_error_reason_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/v1/error_reason.proto\x12\auser.v1*\xa2\x01\n" +
+	"\x1auser/v1/error_reason.proto\x12\auser.v1*\xb6\x01\n" +
 	"\vErrorReason\x12\x14\n" +
 	"\x10USER_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eUSER_NOT_FOUND\x10\x01\x12\x19\n" +
 	"\x15USER_INVALID_ARGUMENT\x10\x02\x12\x1d\n" +
 	"\x19USER_PHONE_ALREADY_EXISTS\x10\x03\x12\x1c\n" +
 	"\x18USER_INVALID_CREDENTIALS\x10\x04\x12\x11\n" +
-	"\rUSER_DISABLED\x10\x05B.Z,github.com/tmjwjx/supermarket/api/user/v1;v1b\x06proto3"
+	"\rUSER_DISABLED\x10\x05\x12\x12\n" +
+	"\x0eUSER_FORBIDDEN\x10\x06B.Z,github.com/tmjwjx/supermarket/api/user/v1;v1b\x06proto3"
 
 var (
 	file_user_v1_error_reason_proto_rawDescOnce sync.Once

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/inventory/v1;v1";
+
+service StockService {
+  rpc CreateStock(CreateStockRequest) returns (CreateStockResponse);
+  rpc AdjustStock(AdjustStockRequest) returns (AdjustStockResponse) {
+    option (google.api.http) = {post: "/v1/admin/stocks:adjust" body: "*"};
+  }
+  rpc GetStocks(GetStocksRequest) returns (GetStocksResponse) {
+    option (google.api.http) = {get: "/v1/stocks"};
+  }
+  rpc AdminGetStocks(AdminGetStocksRequest) returns (AdminGetStocksResponse) {
+    option (google.api.http) = {get: "/v1/admin/stocks"};
+  }
+  rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse);
+  rpc ConfirmReservation(ConfirmReservationRequest) returns (ConfirmReservationResponse);
+  rpc ReleaseReservation(ReleaseReservationRequest) returns (ReleaseReservationResponse);
+}
+
+message Stock {
+  string sku_id = 1;
+  int64 on_hand = 2;
+  int64 reserved = 3;
+  int64 available = 4;
+}
+message StockItem { string sku_id = 1; int64 quantity = 2; }
+message CreateStockRequest { string sku_id = 1; }
+message CreateStockResponse { Stock stock = 1; }
+message AdjustStockRequest { string sku_id = 1; int64 delta = 2; string reason = 3; }
+message AdjustStockResponse { Stock stock = 1; }
+message GetStocksRequest { repeated string sku_ids = 1; }
+message GetStocksResponse { repeated Stock stocks = 1; }
+message AdminGetStocksRequest { repeated string sku_ids = 1; }
+message AdminGetStocksResponse { repeated Stock stocks = 1; }
+message ReserveStockRequest {
+  string order_id = 1;
+  repeated StockItem items = 2;
+  int64 expire_unix = 3;
+}
+message ReserveStockResponse {}
+message ConfirmReservationRequest { string order_id = 1; }
+message ConfirmReservationResponse {}
+message ReleaseReservationRequest { string order_id = 1; }
+message ReleaseReservationResponse {}

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package order.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/order/v1;v1";
+
+enum ErrorReason {
+  ORDER_UNSPECIFIED = 0;
+  ORDER_NOT_FOUND = 1;
+  ORDER_INVALID_ARGUMENT = 2;
+  ORDER_STATUS_CONFLICT = 3;
+  ORDER_ITEM_NOT_SELLABLE = 4;
+  ORDER_STOCK_INSUFFICIENT = 5;
+  ORDER_ADDRESS_NOT_FOUND = 6;
+}

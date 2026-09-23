@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/payment/v1;v1";
+
+service PaymentService {
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse) {
+    option (google.api.http) = {post: "/v1/payments" body: "*"};
+  }
+  rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse) {
+    option (google.api.http) = {get: "/v1/payments/{id}"};
+  }
+  rpc SimulatePayment(SimulatePaymentRequest) returns (SimulatePaymentResponse) {
+    option (google.api.http) = {post: "/v1/payments/{id}:simulate" body: "*"};
+  }
+  rpc ListReconcileDiffs(ListReconcileDiffsRequest) returns (ListReconcileDiffsResponse) {
+    option (google.api.http) = {get: "/v1/admin/payments/reconcile-diffs"};
+  }
+}
+
+message Payment {
+  string id = 1;
+  string order_id = 2;
+  int64 amount = 3;
+  int32 status = 4;
+  string channel = 5;
+}
+message CreatePaymentRequest { string order_id = 1; }
+message CreatePaymentResponse { Payment payment = 1; }
+message GetPaymentRequest { string id = 1; }
+message GetPaymentResponse { Payment payment = 1; }
+message SimulatePaymentRequest { string id = 1; bool success = 2; }
+message SimulatePaymentResponse { Payment payment = 1; }
+message ReconcileDiff {
+  string id = 1;
+  string day = 2;
+  string kind = 3;
+  string order_id = 4;
+  string payment_id = 5;
+  string detail = 6;
+}
+message ListReconcileDiffsRequest { string day = 1; int32 page_size = 2; string page_token = 3; }
+message ListReconcileDiffsResponse { repeated ReconcileDiff diffs = 1; string next_page_token = 2; }

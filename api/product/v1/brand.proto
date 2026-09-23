@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service BrandService {
+  rpc CreateBrand(CreateBrandRequest) returns (CreateBrandResponse) {
+    option (google.api.http) = {post: "/v1/admin/brands" body: "*"};
+  }
+  rpc UpdateBrand(UpdateBrandRequest) returns (UpdateBrandResponse) {
+    option (google.api.http) = {patch: "/v1/admin/brands/{id}" body: "*"};
+  }
+  rpc DeleteBrand(DeleteBrandRequest) returns (DeleteBrandResponse) {
+    option (google.api.http) = {delete: "/v1/admin/brands/{id}"};
+  }
+  rpc ListBrands(ListBrandsRequest) returns (ListBrandsResponse) {
+    option (google.api.http) = {get: "/v1/brands"};
+  }
+  rpc AdminListBrands(AdminListBrandsRequest) returns (AdminListBrandsResponse) {
+    option (google.api.http) = {get: "/v1/admin/brands"};
+  }
+}
+
+message Brand {
+  string id = 1;
+  string name = 2;
+  string initial = 3;
+  string logo_url = 4;
+  string description = 5;
+  bool visible = 6;
+  int32 sort = 7;
+}
+
+message CreateBrandRequest {
+  string name = 1;
+  string initial = 2;
+  string logo_url = 3;
+  string description = 4;
+  bool visible = 5;
+  int32 sort = 6;
+}
+message CreateBrandResponse { Brand brand = 1; }
+message UpdateBrandRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string initial = 3;
+  optional string logo_url = 4;
+  optional string description = 5;
+  optional bool visible = 6;
+  optional int32 sort = 7;
+}
+message UpdateBrandResponse { Brand brand = 1; }
+message DeleteBrandRequest { string id = 1; }
+message DeleteBrandResponse {}
+message ListBrandsRequest {}
+message ListBrandsResponse { repeated Brand brands = 1; }
+message AdminListBrandsRequest {}
+message AdminListBrandsResponse { repeated Brand brands = 1; }

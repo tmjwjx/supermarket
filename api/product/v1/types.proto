@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package product.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+message ProductCard {
+  string id = 1;
+  string name = 2;
+  string main_image = 3;
+  int64 min_price = 4;
+  int64 market_price = 5;
+  int64 sales_count = 6;
+  int32 status = 7;
+}

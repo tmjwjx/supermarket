@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package order.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/order/v1;v1";
+
+service CartService {
+  rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse) {
+    option (google.api.http) = {post: "/v1/cart/items" body: "*"};
+  }
+  rpc UpdateCartItem(UpdateCartItemRequest) returns (UpdateCartItemResponse) {
+    option (google.api.http) = {patch: "/v1/cart/items/{sku_id}" body: "*"};
+  }
+  rpc ListCartItems(ListCartItemsRequest) returns (ListCartItemsResponse) {
+    option (google.api.http) = {get: "/v1/cart/items"};
+  }
+  rpc RemoveCartItems(RemoveCartItemsRequest) returns (RemoveCartItemsResponse) {
+    option (google.api.http) = {post: "/v1/cart/items:batchDelete" body: "*"};
+  }
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option (google.api.http) = {post: "/v1/orders" body: "*"};
+  }
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {
+    option (google.api.http) = {get: "/v1/orders"};
+  }
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {
+    option (google.api.http) = {get: "/v1/orders/{id}"};
+  }
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {
+    option (google.api.http) = {post: "/v1/orders/{id}:cancel" body: "*"};
+  }
+  rpc ConfirmOrder(ConfirmOrderRequest) returns (ConfirmOrderResponse) {
+    option (google.api.http) = {post: "/v1/orders/{id}:confirm" body: "*"};
+  }
+  rpc MarkOrderPaid(MarkOrderPaidRequest) returns (MarkOrderPaidResponse);
+  rpc GetOrderItem(GetOrderItemRequest) returns (GetOrderItemResponse);
+  rpc MarkOrderItemReviewed(MarkOrderItemReviewedRequest) returns (MarkOrderItemReviewedResponse);
+  rpc AdminListOrders(AdminListOrdersRequest) returns (AdminListOrdersResponse) {
+    option (google.api.http) = {get: "/v1/admin/orders"};
+  }
+  rpc AdminShipOrder(AdminShipOrderRequest) returns (AdminShipOrderResponse) {
+    option (google.api.http) = {post: "/v1/admin/orders/{id}:ship" body: "*"};
+  }
+  rpc ListPaidOrders(ListPaidOrdersRequest) returns (ListPaidOrdersResponse);
+}
+
+message CartItem {
+  string sku_id = 1;
+  int64 quantity = 2;
+  bool checked = 3;
+  string product_name = 4;
+  string specs_json = 5;
+  int64 price = 6;
+  string image = 7;
+  bool invalid = 8;
+  bool short_stock = 9;
+}
+message AddCartItemRequest { string sku_id = 1; int64 quantity = 2; }
+message AddCartItemResponse { CartItem item = 1; }
+message UpdateCartItemRequest { string sku_id = 1; int64 quantity = 2; bool checked = 3; }
+message UpdateCartItemResponse { CartItem item = 1; }
+message ListCartItemsRequest {}
+message ListCartItemsResponse { repeated CartItem items = 1; int64 checked_amount = 2; }
+message RemoveCartItemsRequest { repeated string sku_ids = 1; }
+message RemoveCartItemsResponse {}
+
+message OrderItem {
+  string id = 1;
+  string sku_id = 2;
+  string product_id = 3;
+  string product_name = 4;
+  string specs_json = 5;
+  string image = 6;
+  int64 price = 7;
+  int64 quantity = 8;
+  int64 amount = 9;
+  bool reviewed = 10;
+}
+message Order {
+  string id = 1;
+  string order_no = 2;
+  int32 status = 3;
+  int64 items_amount = 4;
+  int64 pay_amount = 5;
+  string receiver = 6;
+  string phone = 7;
+  string address = 8;
+  int64 expires_at_unix = 9;
+  repeated OrderItem items = 10;
+}
+message OrderLine { string sku_id = 1; int64 quantity = 2; }
+message CreateOrderRequest {
+  repeated OrderLine lines = 1;
+  string address_id = 2;
+  string remark = 3;
+  string request_id = 4;
+}
+message CreateOrderResponse { Order order = 1; }
+message ListOrdersRequest { int32 status = 1; int32 page_size = 2; string page_token = 3; }
+message ListOrdersResponse { repeated Order orders = 1; string next_page_token = 2; }
+message GetOrderRequest { string id = 1; }
+message GetOrderResponse { Order order = 1; }
+message CancelOrderRequest { string id = 1; }
+message CancelOrderResponse { Order order = 1; }
+message ConfirmOrderRequest { string id = 1; }
+message ConfirmOrderResponse { Order order = 1; }
+message MarkOrderPaidRequest { string order_id = 1; string payment_id = 2; }
+message MarkOrderPaidResponse {}
+message GetOrderItemRequest { string order_item_id = 1; string user_id = 2; }
+message GetOrderItemResponse {
+  string order_item_id = 1;
+  string product_id = 2;
+  string user_id = 3;
+  bool completed = 4;
+  bool reviewed = 5;
+  string specs_json = 6;
+}
+message MarkOrderItemReviewedRequest { string order_item_id = 1; }
+message MarkOrderItemReviewedResponse {}
+message AdminListOrdersRequest { int32 status = 1; int32 page_size = 2; string page_token = 3; }
+message AdminListOrdersResponse { repeated Order orders = 1; string next_page_token = 2; }
+message AdminShipOrderRequest { string id = 1; }
+message AdminShipOrderResponse { Order order = 1; }
+message ListPaidOrdersRequest { int64 paid_from_unix = 1; int64 paid_to_unix = 2; }
+message PaidOrderRef {
+  string id = 1;
+  string payment_id = 2;
+  int64 pay_amount = 3;
+}
+message ListPaidOrdersResponse { repeated PaidOrderRef orders = 1; }

@@ -6,3 +6,6 @@ deps:
 lint:
   use:
     - STANDARD
+  # 错误码按约定写成 <服务>_<原因> 不加枚举名前缀
+  except:
+    - ENUM_VALUE_PREFIX

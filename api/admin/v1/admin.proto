@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package admin.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/admin/v1;v1";
+
+service AdminUserService {
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {post: "/v1/admin/login" body: "*"};
+  }
+  rpc GetMe(GetMeRequest) returns (GetMeResponse) {
+    option (google.api.http) = {get: "/v1/admin/me"};
+  }
+  rpc CreateAdminUser(CreateAdminUserRequest) returns (CreateAdminUserResponse) {
+    option (google.api.http) = {post: "/v1/admin/users" body: "*"};
+  }
+  rpc ListAdminUsers(ListAdminUsersRequest) returns (ListAdminUsersResponse) {
+    option (google.api.http) = {get: "/v1/admin/users"};
+  }
+  rpc UpdateAdminUser(UpdateAdminUserRequest) returns (UpdateAdminUserResponse) {
+    option (google.api.http) = {patch: "/v1/admin/users/{id}" body: "*"};
+  }
+  rpc ResetAdminPassword(ResetAdminPasswordRequest) returns (ResetAdminPasswordResponse) {
+    option (google.api.http) = {post: "/v1/admin/users/{id}:resetPassword" body: "*"};
+  }
+}
+
+message AdminUser {
+  string id = 1;
+  string username = 2;
+  string display_name = 3;
+  string role = 4;
+  int32 status = 5;
+}
+message LoginRequest { string username = 1; string password = 2; }
+message LoginResponse { string access_token = 1; int64 expires_in_ms = 2; AdminUser user = 3; }
+message GetMeRequest {}
+message GetMeResponse { AdminUser user = 1; }
+message CreateAdminUserRequest { string username = 1; string password = 2; string display_name = 3; string role = 4; }
+message CreateAdminUserResponse { AdminUser user = 1; }
+message ListAdminUsersRequest {}
+message ListAdminUsersResponse { repeated AdminUser users = 1; }
+message UpdateAdminUserRequest { string id = 1; string role = 2; int32 status = 3; }
+message UpdateAdminUserResponse { AdminUser user = 1; }
+message ResetAdminPasswordRequest { string id = 1; string password = 2; }
+message ResetAdminPasswordResponse {}

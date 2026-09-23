@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/user/v1;v1";
+
+service AddressService {
+  rpc CreateAddress(CreateAddressRequest) returns (CreateAddressResponse) {
+    option (google.api.http) = {post: "/v1/addresses" body: "*"};
+  }
+  rpc ListAddresses(ListAddressesRequest) returns (ListAddressesResponse) {
+    option (google.api.http) = {get: "/v1/addresses"};
+  }
+  rpc DeleteAddress(DeleteAddressRequest) returns (DeleteAddressResponse) {
+    option (google.api.http) = {delete: "/v1/addresses/{id}"};
+  }
+  rpc UpdateAddress(UpdateAddressRequest) returns (UpdateAddressResponse) {
+    option (google.api.http) = {patch: "/v1/addresses/{id}" body: "*"};
+  }
+  rpc SetDefaultAddress(SetDefaultAddressRequest) returns (SetDefaultAddressResponse) {
+    option (google.api.http) = {post: "/v1/addresses/{id}:default" body: "*"};
+  }
+  rpc GetAddress(GetAddressRequest) returns (GetAddressResponse);
+}
+
+message Address {
+  string id = 1;
+  string receiver = 2;
+  string phone = 3;
+  string province = 4;
+  string city = 5;
+  string district = 6;
+  string detail = 7;
+  bool is_default = 8;
+}
+message CreateAddressRequest {
+  string receiver = 1;
+  string phone = 2;
+  string province = 3;
+  string city = 4;
+  string district = 5;
+  string detail = 6;
+}
+message CreateAddressResponse { Address address = 1; }
+message ListAddressesRequest {}
+message ListAddressesResponse { repeated Address addresses = 1; }
+message DeleteAddressRequest { string id = 1; }
+message DeleteAddressResponse {}
+message UpdateAddressRequest {
+  string id = 1;
+  string receiver = 2;
+  string phone = 3;
+  string province = 4;
+  string city = 5;
+  string district = 6;
+  string detail = 7;
+}
+message UpdateAddressResponse { Address address = 1; }
+message SetDefaultAddressRequest { string id = 1; }
+message SetDefaultAddressResponse { Address address = 1; }
+message GetAddressRequest { string id = 1; string user_id = 2; }
+message GetAddressResponse { Address address = 1; }

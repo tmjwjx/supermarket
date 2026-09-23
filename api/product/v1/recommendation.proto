@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+import "product/v1/types.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service RecommendationService {
+  rpc CreateRecommendation(CreateRecommendationRequest) returns (CreateRecommendationResponse) {
+    option (google.api.http) = {post: "/v1/admin/recommendations" body: "*"};
+  }
+  rpc ListRecommendations(ListRecommendationsRequest) returns (ListRecommendationsResponse) {
+    option (google.api.http) = {get: "/v1/recommendations"};
+  }
+  rpc AdminListRecommendations(AdminListRecommendationsRequest) returns (AdminListRecommendationsResponse) {
+    option (google.api.http) = {get: "/v1/admin/recommendations"};
+  }
+  rpc UpdateRecommendation(UpdateRecommendationRequest) returns (UpdateRecommendationResponse) {
+    option (google.api.http) = {patch: "/v1/admin/recommendations/{id}" body: "*"};
+  }
+  rpc DeleteRecommendation(DeleteRecommendationRequest) returns (DeleteRecommendationResponse) {
+    option (google.api.http) = {delete: "/v1/admin/recommendations/{id}"};
+  }
+}
+
+message Recommendation {
+  string id = 1;
+  string slot = 2;
+  string product_id = 3;
+  int32 sort = 4;
+  ProductCard product = 5;
+  int64 start_at_unix = 6;
+  int64 end_at_unix = 7;
+}
+
+message CreateRecommendationRequest {
+  string slot = 1;
+  string product_id = 2;
+  int32 sort = 3;
+  int64 start_at_unix = 4;
+  int64 end_at_unix = 5;
+}
+message CreateRecommendationResponse { Recommendation recommendation = 1; }
+message ListRecommendationsRequest { string slot = 1; }
+message ListRecommendationsResponse { repeated Recommendation recommendations = 1; }
+message AdminListRecommendationsRequest { string slot = 1; }
+message AdminListRecommendationsResponse { repeated Recommendation recommendations = 1; }
+message UpdateRecommendationRequest {
+  string id = 1;
+  optional string slot = 2;
+  optional string product_id = 3;
+  optional int32 sort = 4;
+  optional int64 start_at_unix = 5;
+  optional int64 end_at_unix = 6;
+}
+message UpdateRecommendationResponse { Recommendation recommendation = 1; }
+message DeleteRecommendationRequest { string id = 1; }
+message DeleteRecommendationResponse {}

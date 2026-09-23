@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package notification.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/notification/v1;v1";
+
+service NotificationService {
+  rpc Push(PushRequest) returns (PushResponse);
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse) {
+    option (google.api.http) = {get: "/v1/notifications"};
+  }
+  rpc MarkNotificationsRead(MarkNotificationsReadRequest) returns (MarkNotificationsReadResponse) {
+    option (google.api.http) = {post: "/v1/notifications:read" body: "*"};
+  }
+}
+
+message Notification {
+  string id = 1;
+  string title = 2;
+  string body = 3;
+  string order_id = 4;
+  bool read = 5;
+}
+message PushRequest { string user_id = 1; string title = 2; string body = 3; string order_id = 4; }
+message PushResponse {}
+message ListNotificationsRequest {}
+message ListNotificationsResponse { repeated Notification notifications = 1; int64 unread = 2; }
+message MarkNotificationsReadRequest { repeated string ids = 1; }
+message MarkNotificationsReadResponse {}

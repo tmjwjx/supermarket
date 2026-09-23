@@ -28,6 +28,12 @@ service UserService {
       get: "/v1/users/{id}"
     };
   }
+
+  rpc GetMe (GetMeRequest) returns (GetMeResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/me"
+    };
+  }
 }
 
 enum UserStatus {
@@ -74,5 +80,11 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
+  User user = 1;
+}
+
+message GetMeRequest {}
+
+message GetMeResponse {
   User user = 1;
 }

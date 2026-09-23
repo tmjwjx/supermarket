@@ -3,9 +3,1627 @@
 
 openapi: 3.0.3
 info:
-    title: UserService API
+    title: ""
     version: 0.0.1
 paths:
+    /v1/addresses:
+        get:
+            tags:
+                - AddressService
+            operationId: AddressService_ListAddresses
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.ListAddressesResponse'
+        post:
+            tags:
+                - AddressService
+            operationId: AddressService_CreateAddress
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.CreateAddressRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.CreateAddressResponse'
+    /v1/addresses/{id}:
+        delete:
+            tags:
+                - AddressService
+            operationId: AddressService_DeleteAddress
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.DeleteAddressResponse'
+        patch:
+            tags:
+                - AddressService
+            operationId: AddressService_UpdateAddress
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateAddressRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateAddressResponse'
+    /v1/addresses/{id}:default:
+        post:
+            tags:
+                - AddressService
+            operationId: AddressService_SetDefaultAddress
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.SetDefaultAddressRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.SetDefaultAddressResponse'
+    /v1/admin/attribute-templates:
+        get:
+            tags:
+                - AttributeService
+            operationId: AttributeService_ListAttributeTemplates
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListAttributeTemplatesResponse'
+        post:
+            tags:
+                - AttributeService
+            operationId: AttributeService_CreateAttributeTemplate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateAttributeTemplateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateAttributeTemplateResponse'
+    /v1/admin/attribute-templates/{id}:
+        delete:
+            tags:
+                - AttributeService
+            operationId: AttributeService_DeleteAttributeTemplate
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteAttributeTemplateResponse'
+    /v1/admin/attribute-templates/{templateId}/attributes:
+        get:
+            tags:
+                - AttributeService
+            operationId: AttributeService_ListAttributes
+            parameters:
+                - name: templateId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListAttributesResponse'
+        post:
+            tags:
+                - AttributeService
+            operationId: AttributeService_CreateAttribute
+            parameters:
+                - name: templateId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateAttributeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateAttributeResponse'
+    /v1/admin/attributes/{id}:
+        delete:
+            tags:
+                - AttributeService
+            operationId: AttributeService_DeleteAttribute
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteAttributeResponse'
+        patch:
+            tags:
+                - AttributeService
+            operationId: AttributeService_UpdateAttribute
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateAttributeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateAttributeResponse'
+    /v1/admin/brands:
+        get:
+            tags:
+                - BrandService
+            operationId: BrandService_AdminListBrands
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AdminListBrandsResponse'
+        post:
+            tags:
+                - BrandService
+            operationId: BrandService_CreateBrand
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateBrandRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateBrandResponse'
+    /v1/admin/brands/{id}:
+        delete:
+            tags:
+                - BrandService
+            operationId: BrandService_DeleteBrand
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteBrandResponse'
+        patch:
+            tags:
+                - BrandService
+            operationId: BrandService_UpdateBrand
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateBrandRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateBrandResponse'
+    /v1/admin/categories:
+        get:
+            tags:
+                - CategoryService
+            operationId: CategoryService_AdminListCategories
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AdminListCategoriesResponse'
+        post:
+            tags:
+                - CategoryService
+            operationId: CategoryService_CreateCategory
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateCategoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateCategoryResponse'
+    /v1/admin/categories/{id}:
+        delete:
+            tags:
+                - CategoryService
+            operationId: CategoryService_DeleteCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteCategoryResponse'
+        patch:
+            tags:
+                - CategoryService
+            operationId: CategoryService_UpdateCategory
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateCategoryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateCategoryResponse'
+    /v1/admin/login:
+        post:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.LoginResponse'
+    /v1/admin/me:
+        get:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_GetMe
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.GetMeResponse'
+    /v1/admin/orders:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_AdminListOrders
+            parameters:
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.AdminListOrdersResponse'
+    /v1/admin/orders/{id}:ship:
+        post:
+            tags:
+                - OrderService
+            operationId: OrderService_AdminShipOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.AdminShipOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.AdminShipOrderResponse'
+    /v1/admin/payments/reconcile-diffs:
+        get:
+            tags:
+                - PaymentService
+            operationId: PaymentService_ListReconcileDiffs
+            parameters:
+                - name: day
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/payment.v1.ListReconcileDiffsResponse'
+    /v1/admin/product-logs:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_ListProductLogs
+            parameters:
+                - name: productId
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListProductLogsResponse'
+    /v1/admin/products:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_AdminListProducts
+            parameters:
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AdminListProductsResponse'
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_CreateProduct
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateProductResponse'
+    /v1/admin/products/{id}:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_AdminGetProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AdminGetProductResponse'
+        put:
+            tags:
+                - ProductService
+            operationId: ProductService_UpdateProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateProductResponse'
+        delete:
+            tags:
+                - ProductService
+            operationId: ProductService_DeleteProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteProductResponse'
+    /v1/admin/products/{id}:approve:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_ApproveProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.ApproveProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ApproveProductResponse'
+    /v1/admin/products/{id}:publish:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_PublishProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.PublishProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.PublishProductResponse'
+    /v1/admin/products/{id}:purge:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_PurgeProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.PurgeProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.PurgeProductResponse'
+    /v1/admin/products/{id}:reject:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_RejectProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.RejectProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.RejectProductResponse'
+    /v1/admin/products/{id}:restore:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_RestoreProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.RestoreProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.RestoreProductResponse'
+    /v1/admin/products/{id}:submit:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_SubmitProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.SubmitProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.SubmitProductResponse'
+    /v1/admin/products/{id}:unpublish:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_UnpublishProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UnpublishProductRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UnpublishProductResponse'
+    /v1/admin/products/{productId}/audits:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_ListProductAudits
+            parameters:
+                - name: productId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListProductAuditsResponse'
+    /v1/admin/products/{productId}/skus/{skuId}:price:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_UpdateSkuPrice
+            parameters:
+                - name: productId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: skuId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateSkuPriceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateSkuPriceResponse'
+    /v1/admin/products:batchPublish:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_BatchPublishProducts
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.BatchPublishProductsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.BatchPublishProductsResponse'
+    /v1/admin/products:batchUnpublish:
+        post:
+            tags:
+                - ProductService
+            operationId: ProductService_BatchUnpublishProducts
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.BatchUnpublishProductsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.BatchUnpublishProductsResponse'
+    /v1/admin/products:deleted:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_ListDeletedProducts
+            parameters:
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListDeletedProductsResponse'
+    /v1/admin/recommendations:
+        get:
+            tags:
+                - RecommendationService
+            operationId: RecommendationService_AdminListRecommendations
+            parameters:
+                - name: slot
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AdminListRecommendationsResponse'
+        post:
+            tags:
+                - RecommendationService
+            operationId: RecommendationService_CreateRecommendation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateRecommendationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateRecommendationResponse'
+    /v1/admin/recommendations/{id}:
+        delete:
+            tags:
+                - RecommendationService
+            operationId: RecommendationService_DeleteRecommendation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.DeleteRecommendationResponse'
+        patch:
+            tags:
+                - RecommendationService
+            operationId: RecommendationService_UpdateRecommendation
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.UpdateRecommendationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.UpdateRecommendationResponse'
+    /v1/admin/stocks:
+        get:
+            tags:
+                - StockService
+            operationId: StockService_AdminGetStocks
+            parameters:
+                - name: skuIds
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/inventory.v1.AdminGetStocksResponse'
+    /v1/admin/stocks:adjust:
+        post:
+            tags:
+                - StockService
+            operationId: StockService_AdjustStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/inventory.v1.AdjustStockRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/inventory.v1.AdjustStockResponse'
+    /v1/admin/users:
+        get:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_ListAdminUsers
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ListAdminUsersResponse'
+        post:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_CreateAdminUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.CreateAdminUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.CreateAdminUserResponse'
+    /v1/admin/users/{id}:
+        patch:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_UpdateAdminUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.UpdateAdminUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.UpdateAdminUserResponse'
+    /v1/admin/users/{id}:resetPassword:
+        post:
+            tags:
+                - AdminUserService
+            operationId: AdminUserService_ResetAdminPassword
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/admin.v1.ResetAdminPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/admin.v1.ResetAdminPasswordResponse'
+    /v1/brands:
+        get:
+            tags:
+                - BrandService
+            operationId: BrandService_ListBrands
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListBrandsResponse'
+    /v1/browse-histories:
+        get:
+            tags:
+                - BrowseHistoryService
+            operationId: BrowseHistoryService_ListBrowseHistories
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListBrowseHistoriesResponse'
+        delete:
+            tags:
+                - BrowseHistoryService
+            operationId: BrowseHistoryService_ClearBrowseHistories
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ClearBrowseHistoriesResponse'
+    /v1/cart/items:
+        get:
+            tags:
+                - CartService
+            operationId: CartService_ListCartItems
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.ListCartItemsResponse'
+        post:
+            tags:
+                - CartService
+            operationId: CartService_AddCartItem
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.AddCartItemRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.AddCartItemResponse'
+    /v1/cart/items/{skuId}:
+        patch:
+            tags:
+                - CartService
+            operationId: CartService_UpdateCartItem
+            parameters:
+                - name: skuId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.UpdateCartItemRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.UpdateCartItemResponse'
+    /v1/cart/items:batchDelete:
+        post:
+            tags:
+                - CartService
+            operationId: CartService_RemoveCartItems
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.RemoveCartItemsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.RemoveCartItemsResponse'
+    /v1/categories:
+        get:
+            tags:
+                - CategoryService
+            operationId: CategoryService_ListCategories
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListCategoriesResponse'
+    /v1/favorites:
+        get:
+            tags:
+                - FavoriteService
+            operationId: FavoriteService_ListFavorites
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListFavoritesResponse'
+        post:
+            tags:
+                - FavoriteService
+            operationId: FavoriteService_AddFavorite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.AddFavoriteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.AddFavoriteResponse'
+    /v1/favorites/{productId}:
+        delete:
+            tags:
+                - FavoriteService
+            operationId: FavoriteService_RemoveFavorite
+            parameters:
+                - name: productId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.RemoveFavoriteResponse'
+    /v1/notifications:
+        get:
+            tags:
+                - NotificationService
+            operationId: NotificationService_ListNotifications
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/notification.v1.ListNotificationsResponse'
+    /v1/notifications:read:
+        post:
+            tags:
+                - NotificationService
+            operationId: NotificationService_MarkNotificationsRead
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/notification.v1.MarkNotificationsReadRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/notification.v1.MarkNotificationsReadResponse'
+    /v1/orders:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_ListOrders
+            parameters:
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.ListOrdersResponse'
+        post:
+            tags:
+                - OrderService
+            operationId: OrderService_CreateOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.CreateOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.CreateOrderResponse'
+    /v1/orders/{id}:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_GetOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.GetOrderResponse'
+    /v1/orders/{id}:cancel:
+        post:
+            tags:
+                - OrderService
+            operationId: OrderService_CancelOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.CancelOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.CancelOrderResponse'
+    /v1/orders/{id}:confirm:
+        post:
+            tags:
+                - OrderService
+            operationId: OrderService_ConfirmOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v1.ConfirmOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.ConfirmOrderResponse'
+    /v1/payments:
+        post:
+            tags:
+                - PaymentService
+            operationId: PaymentService_CreatePayment
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/payment.v1.CreatePaymentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/payment.v1.CreatePaymentResponse'
+    /v1/payments/{id}:
+        get:
+            tags:
+                - PaymentService
+            operationId: PaymentService_GetPayment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/payment.v1.GetPaymentResponse'
+    /v1/payments/{id}:simulate:
+        post:
+            tags:
+                - PaymentService
+            operationId: PaymentService_SimulatePayment
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/payment.v1.SimulatePaymentRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/payment.v1.SimulatePaymentResponse'
+    /v1/products:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_ListProducts
+            parameters:
+                - name: categoryId
+                  in: query
+                  schema:
+                    type: string
+                - name: brandId
+                  in: query
+                  schema:
+                    type: string
+                - name: minPrice
+                  in: query
+                  schema:
+                    type: string
+                - name: maxPrice
+                  in: query
+                  schema:
+                    type: string
+                - name: orderBy
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListProductsResponse'
+    /v1/products/{id}:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_GetProduct
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.GetProductResponse'
+    /v1/products/{id}/detail:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_GetProductDetail
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.GetProductDetailResponse'
+    /v1/products/{productId}/reviews:
+        get:
+            tags:
+                - ReviewService
+            operationId: ReviewService_ListProductReviews
+            parameters:
+                - name: productId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListProductReviewsResponse'
+    /v1/products:search:
+        get:
+            tags:
+                - ProductService
+            operationId: ProductService_SearchProducts
+            parameters:
+                - name: q
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+                - name: orderBy
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.SearchProductsResponse'
+    /v1/recommendations:
+        get:
+            tags:
+                - RecommendationService
+            operationId: RecommendationService_ListRecommendations
+            parameters:
+                - name: slot
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.ListRecommendationsResponse'
+    /v1/reviews:
+        post:
+            tags:
+                - ReviewService
+            operationId: ReviewService_CreateReview
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/product.v1.CreateReviewRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/product.v1.CreateReviewResponse'
+    /v1/stocks:
+        get:
+            tags:
+                - StockService
+            operationId: StockService_GetStocks
+            parameters:
+                - name: skuIds
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/inventory.v1.GetStocksResponse'
     /v1/users/login:
         post:
             tags:
@@ -24,6 +1642,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/user.v1.LoginResponse'
+    /v1/users/me:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetMe
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetMeResponse'
     /v1/users/register:
         post:
             tags:
@@ -62,11 +1692,1338 @@ paths:
                                 $ref: '#/components/schemas/user.v1.GetUserResponse'
 components:
     schemas:
+        admin.v1.AdminUser:
+            type: object
+            properties:
+                id:
+                    type: string
+                username:
+                    type: string
+                displayName:
+                    type: string
+                role:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        admin.v1.CreateAdminUserRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                displayName:
+                    type: string
+                role:
+                    type: string
+        admin.v1.CreateAdminUserResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/admin.v1.AdminUser'
+        admin.v1.GetMeResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/admin.v1.AdminUser'
+        admin.v1.ListAdminUsersResponse:
+            type: object
+            properties:
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/admin.v1.AdminUser'
+        admin.v1.LoginRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        admin.v1.LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                expiresInMs:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/admin.v1.AdminUser'
+        admin.v1.ResetAdminPasswordRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                password:
+                    type: string
+        admin.v1.ResetAdminPasswordResponse:
+            type: object
+            properties: {}
+        admin.v1.UpdateAdminUserRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                role:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        admin.v1.UpdateAdminUserResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/admin.v1.AdminUser'
+        inventory.v1.AdjustStockRequest:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                delta:
+                    type: string
+                reason:
+                    type: string
+        inventory.v1.AdjustStockResponse:
+            type: object
+            properties:
+                stock:
+                    $ref: '#/components/schemas/inventory.v1.Stock'
+        inventory.v1.AdminGetStocksResponse:
+            type: object
+            properties:
+                stocks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/inventory.v1.Stock'
+        inventory.v1.GetStocksResponse:
+            type: object
+            properties:
+                stocks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/inventory.v1.Stock'
+        inventory.v1.Stock:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                onHand:
+                    type: string
+                reserved:
+                    type: string
+                available:
+                    type: string
+        notification.v1.ListNotificationsResponse:
+            type: object
+            properties:
+                notifications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/notification.v1.Notification'
+                unread:
+                    type: string
+        notification.v1.MarkNotificationsReadRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: string
+        notification.v1.MarkNotificationsReadResponse:
+            type: object
+            properties: {}
+        notification.v1.Notification:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                body:
+                    type: string
+                orderId:
+                    type: string
+                read:
+                    type: boolean
+        order.v1.AddCartItemRequest:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                quantity:
+                    type: string
+        order.v1.AddCartItemResponse:
+            type: object
+            properties:
+                item:
+                    $ref: '#/components/schemas/order.v1.CartItem'
+        order.v1.AdminListOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.Order'
+                nextPageToken:
+                    type: string
+        order.v1.AdminShipOrderRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        order.v1.AdminShipOrderResponse:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.Order'
+        order.v1.CancelOrderRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        order.v1.CancelOrderResponse:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.Order'
+        order.v1.CartItem:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                quantity:
+                    type: string
+                checked:
+                    type: boolean
+                productName:
+                    type: string
+                specsJson:
+                    type: string
+                price:
+                    type: string
+                image:
+                    type: string
+                invalid:
+                    type: boolean
+                shortStock:
+                    type: boolean
+        order.v1.ConfirmOrderRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        order.v1.ConfirmOrderResponse:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.Order'
+        order.v1.CreateOrderRequest:
+            type: object
+            properties:
+                lines:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.OrderLine'
+                addressId:
+                    type: string
+                remark:
+                    type: string
+                requestId:
+                    type: string
+        order.v1.CreateOrderResponse:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.Order'
+        order.v1.GetOrderResponse:
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v1.Order'
+        order.v1.ListCartItemsResponse:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.CartItem'
+                checkedAmount:
+                    type: string
+        order.v1.ListOrdersResponse:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.Order'
+                nextPageToken:
+                    type: string
+        order.v1.Order:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderNo:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                itemsAmount:
+                    type: string
+                payAmount:
+                    type: string
+                receiver:
+                    type: string
+                phone:
+                    type: string
+                address:
+                    type: string
+                expiresAtUnix:
+                    type: string
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.OrderItem'
+        order.v1.OrderItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                skuId:
+                    type: string
+                productId:
+                    type: string
+                productName:
+                    type: string
+                specsJson:
+                    type: string
+                image:
+                    type: string
+                price:
+                    type: string
+                quantity:
+                    type: string
+                amount:
+                    type: string
+                reviewed:
+                    type: boolean
+        order.v1.OrderLine:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                quantity:
+                    type: string
+        order.v1.RemoveCartItemsRequest:
+            type: object
+            properties:
+                skuIds:
+                    type: array
+                    items:
+                        type: string
+        order.v1.RemoveCartItemsResponse:
+            type: object
+            properties: {}
+        order.v1.UpdateCartItemRequest:
+            type: object
+            properties:
+                skuId:
+                    type: string
+                quantity:
+                    type: string
+                checked:
+                    type: boolean
+        order.v1.UpdateCartItemResponse:
+            type: object
+            properties:
+                item:
+                    $ref: '#/components/schemas/order.v1.CartItem'
+        payment.v1.CreatePaymentRequest:
+            type: object
+            properties:
+                orderId:
+                    type: string
+        payment.v1.CreatePaymentResponse:
+            type: object
+            properties:
+                payment:
+                    $ref: '#/components/schemas/payment.v1.Payment'
+        payment.v1.GetPaymentResponse:
+            type: object
+            properties:
+                payment:
+                    $ref: '#/components/schemas/payment.v1.Payment'
+        payment.v1.ListReconcileDiffsResponse:
+            type: object
+            properties:
+                diffs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/payment.v1.ReconcileDiff'
+                nextPageToken:
+                    type: string
+        payment.v1.Payment:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderId:
+                    type: string
+                amount:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                channel:
+                    type: string
+        payment.v1.ReconcileDiff:
+            type: object
+            properties:
+                id:
+                    type: string
+                day:
+                    type: string
+                kind:
+                    type: string
+                orderId:
+                    type: string
+                paymentId:
+                    type: string
+                detail:
+                    type: string
+        payment.v1.SimulatePaymentRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                success:
+                    type: boolean
+        payment.v1.SimulatePaymentResponse:
+            type: object
+            properties:
+                payment:
+                    $ref: '#/components/schemas/payment.v1.Payment'
+        product.v1.AddFavoriteRequest:
+            type: object
+            properties:
+                productId:
+                    type: string
+        product.v1.AddFavoriteResponse:
+            type: object
+            properties: {}
+        product.v1.AdminGetProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.AdminListBrandsResponse:
+            type: object
+            properties:
+                brands:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Brand'
+        product.v1.AdminListCategoriesResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Category'
+        product.v1.AdminListProductsResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductCard'
+                nextPageToken:
+                    type: string
+        product.v1.AdminListRecommendationsResponse:
+            type: object
+            properties:
+                recommendations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Recommendation'
+        product.v1.ApproveProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.ApproveProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.Attribute:
+            type: object
+            properties:
+                id:
+                    type: string
+                templateId:
+                    type: string
+                name:
+                    type: string
+                kind:
+                    type: integer
+                    format: int32
+                options:
+                    type: array
+                    items:
+                        type: string
+                allowCustom:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        product.v1.AttributeTemplate:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+        product.v1.BatchFailure:
+            type: object
+            properties:
+                id:
+                    type: string
+                reason:
+                    type: string
+        product.v1.BatchPublishProductsRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: string
+        product.v1.BatchPublishProductsResponse:
+            type: object
+            properties:
+                published:
+                    type: array
+                    items:
+                        type: string
+                failed:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.BatchFailure'
+        product.v1.BatchUnpublishProductsRequest:
+            type: object
+            properties:
+                ids:
+                    type: array
+                    items:
+                        type: string
+        product.v1.BatchUnpublishProductsResponse:
+            type: object
+            properties:
+                unpublished:
+                    type: array
+                    items:
+                        type: string
+                failed:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.BatchFailure'
+        product.v1.Brand:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                initial:
+                    type: string
+                logoUrl:
+                    type: string
+                description:
+                    type: string
+                visible:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        product.v1.BrowseHistory:
+            type: object
+            properties:
+                productId:
+                    type: string
+                product:
+                    $ref: '#/components/schemas/product.v1.ProductCard'
+        product.v1.Category:
+            type: object
+            properties:
+                id:
+                    type: string
+                parentId:
+                    type: string
+                name:
+                    type: string
+                iconUrl:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                visible:
+                    type: boolean
+                attributeTemplateId:
+                    type: string
+                children:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Category'
+        product.v1.ClearBrowseHistoriesResponse:
+            type: object
+            properties: {}
+        product.v1.CreateAttributeRequest:
+            type: object
+            properties:
+                templateId:
+                    type: string
+                name:
+                    type: string
+                kind:
+                    type: integer
+                    format: int32
+                options:
+                    type: array
+                    items:
+                        type: string
+                allowCustom:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        product.v1.CreateAttributeResponse:
+            type: object
+            properties:
+                attribute:
+                    $ref: '#/components/schemas/product.v1.Attribute'
+        product.v1.CreateAttributeTemplateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+        product.v1.CreateAttributeTemplateResponse:
+            type: object
+            properties:
+                template:
+                    $ref: '#/components/schemas/product.v1.AttributeTemplate'
+        product.v1.CreateBrandRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                initial:
+                    type: string
+                logoUrl:
+                    type: string
+                description:
+                    type: string
+                visible:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        product.v1.CreateBrandResponse:
+            type: object
+            properties:
+                brand:
+                    $ref: '#/components/schemas/product.v1.Brand'
+        product.v1.CreateCategoryRequest:
+            type: object
+            properties:
+                parentId:
+                    type: string
+                name:
+                    type: string
+                iconUrl:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                visible:
+                    type: boolean
+                attributeTemplateId:
+                    type: string
+        product.v1.CreateCategoryResponse:
+            type: object
+            properties:
+                category:
+                    $ref: '#/components/schemas/product.v1.Category'
+        product.v1.CreateProductRequest:
+            type: object
+            properties:
+                categoryId:
+                    type: string
+                brandId:
+                    type: string
+                name:
+                    type: string
+                subtitle:
+                    type: string
+                keywords:
+                    type: string
+                unit:
+                    type: string
+                weightGram:
+                    type: integer
+                    format: int32
+                images:
+                    type: array
+                    items:
+                        type: string
+                detailHtml:
+                    type: string
+                skus:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.SkuInput'
+                params:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductParam'
+        product.v1.CreateProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.CreateRecommendationRequest:
+            type: object
+            properties:
+                slot:
+                    type: string
+                productId:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                startAtUnix:
+                    type: string
+                endAtUnix:
+                    type: string
+        product.v1.CreateRecommendationResponse:
+            type: object
+            properties:
+                recommendation:
+                    $ref: '#/components/schemas/product.v1.Recommendation'
+        product.v1.CreateReviewRequest:
+            type: object
+            properties:
+                orderItemId:
+                    type: string
+                productId:
+                    type: string
+                stars:
+                    type: integer
+                    format: int32
+                content:
+                    type: string
+                anonymous:
+                    type: boolean
+        product.v1.CreateReviewResponse:
+            type: object
+            properties:
+                review:
+                    $ref: '#/components/schemas/product.v1.Review'
+        product.v1.DeleteAttributeResponse:
+            type: object
+            properties: {}
+        product.v1.DeleteAttributeTemplateResponse:
+            type: object
+            properties: {}
+        product.v1.DeleteBrandResponse:
+            type: object
+            properties: {}
+        product.v1.DeleteCategoryResponse:
+            type: object
+            properties: {}
+        product.v1.DeleteProductResponse:
+            type: object
+            properties: {}
+        product.v1.DeleteRecommendationResponse:
+            type: object
+            properties: {}
+        product.v1.Favorite:
+            type: object
+            properties:
+                productId:
+                    type: string
+                product:
+                    $ref: '#/components/schemas/product.v1.ProductCard'
+                invalid:
+                    type: boolean
+        product.v1.GetProductDetailResponse:
+            type: object
+            properties:
+                detailHtml:
+                    type: string
+        product.v1.GetProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.ListAttributeTemplatesResponse:
+            type: object
+            properties:
+                templates:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.AttributeTemplate'
+        product.v1.ListAttributesResponse:
+            type: object
+            properties:
+                attributes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Attribute'
+        product.v1.ListBrandsResponse:
+            type: object
+            properties:
+                brands:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Brand'
+        product.v1.ListBrowseHistoriesResponse:
+            type: object
+            properties:
+                histories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.BrowseHistory'
+        product.v1.ListCategoriesResponse:
+            type: object
+            properties:
+                categories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Category'
+        product.v1.ListDeletedProductsResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductCard'
+                nextPageToken:
+                    type: string
+        product.v1.ListFavoritesResponse:
+            type: object
+            properties:
+                favorites:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Favorite'
+        product.v1.ListProductAuditsResponse:
+            type: object
+            properties:
+                audits:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductAudit'
+                nextPageToken:
+                    type: string
+        product.v1.ListProductLogsResponse:
+            type: object
+            properties:
+                logs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductLog'
+                nextPageToken:
+                    type: string
+        product.v1.ListProductReviewsResponse:
+            type: object
+            properties:
+                reviews:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Review'
+                nextPageToken:
+                    type: string
+        product.v1.ListProductsResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductCard'
+                nextPageToken:
+                    type: string
+        product.v1.ListRecommendationsResponse:
+            type: object
+            properties:
+                recommendations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Recommendation'
+        product.v1.Product:
+            type: object
+            properties:
+                id:
+                    type: string
+                categoryId:
+                    type: string
+                brandId:
+                    type: string
+                name:
+                    type: string
+                subtitle:
+                    type: string
+                keywords:
+                    type: string
+                mainImage:
+                    type: string
+                unit:
+                    type: string
+                weightGram:
+                    type: integer
+                    format: int32
+                status:
+                    type: integer
+                    format: int32
+                minPrice:
+                    type: string
+                maxPrice:
+                    type: string
+                salesCount:
+                    type: string
+                skus:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.Sku'
+                images:
+                    type: array
+                    items:
+                        type: string
+                detailHtml:
+                    type: string
+                params:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductParam'
+                specOptions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.SpecOption'
+        product.v1.ProductAudit:
+            type: object
+            properties:
+                id:
+                    type: string
+                productId:
+                    type: string
+                action:
+                    type: string
+                operator:
+                    type: string
+                reason:
+                    type: string
+                createdAtUnix:
+                    type: string
+        product.v1.ProductCard:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                mainImage:
+                    type: string
+                minPrice:
+                    type: string
+                marketPrice:
+                    type: string
+                salesCount:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+        product.v1.ProductLog:
+            type: object
+            properties:
+                id:
+                    type: string
+                productId:
+                    type: string
+                operator:
+                    type: string
+                action:
+                    type: string
+                before:
+                    type: string
+                after:
+                    type: string
+                createdAtUnix:
+                    type: string
+        product.v1.ProductParam:
+            type: object
+            properties:
+                name:
+                    type: string
+                value:
+                    type: string
+        product.v1.PublishProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.PublishProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.PurgeProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.PurgeProductResponse:
+            type: object
+            properties: {}
+        product.v1.Recommendation:
+            type: object
+            properties:
+                id:
+                    type: string
+                slot:
+                    type: string
+                productId:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                product:
+                    $ref: '#/components/schemas/product.v1.ProductCard'
+                startAtUnix:
+                    type: string
+                endAtUnix:
+                    type: string
+        product.v1.RejectProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                reason:
+                    type: string
+        product.v1.RejectProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.RemoveFavoriteResponse:
+            type: object
+            properties: {}
+        product.v1.RestoreProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.RestoreProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.Review:
+            type: object
+            properties:
+                id:
+                    type: string
+                productId:
+                    type: string
+                orderItemId:
+                    type: string
+                stars:
+                    type: integer
+                    format: int32
+                content:
+                    type: string
+                displayName:
+                    type: string
+                anonymous:
+                    type: boolean
+                specsJson:
+                    type: string
+        product.v1.SearchProductsResponse:
+            type: object
+            properties:
+                products:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductCard'
+                nextPageToken:
+                    type: string
+        product.v1.Sku:
+            type: object
+            properties:
+                id:
+                    type: string
+                productId:
+                    type: string
+                specsJson:
+                    type: string
+                price:
+                    type: string
+                marketPrice:
+                    type: string
+                image:
+                    type: string
+                barcode:
+                    type: string
+                enabled:
+                    type: boolean
+        product.v1.SkuInput:
+            type: object
+            properties:
+                specsJson:
+                    type: string
+                price:
+                    type: string
+                marketPrice:
+                    type: string
+                image:
+                    type: string
+                barcode:
+                    type: string
+                enabled:
+                    type: boolean
+                id:
+                    type: string
+        product.v1.SpecOption:
+            type: object
+            properties:
+                name:
+                    type: string
+                values:
+                    type: array
+                    items:
+                        type: string
+        product.v1.SubmitProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.SubmitProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.UnpublishProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        product.v1.UnpublishProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.UpdateAttributeRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                kind:
+                    type: integer
+                    format: int32
+                options:
+                    type: array
+                    items:
+                        type: string
+                allowCustom:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+                clearOptions:
+                    type: boolean
+        product.v1.UpdateAttributeResponse:
+            type: object
+            properties:
+                attribute:
+                    $ref: '#/components/schemas/product.v1.Attribute'
+        product.v1.UpdateBrandRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                initial:
+                    type: string
+                logoUrl:
+                    type: string
+                description:
+                    type: string
+                visible:
+                    type: boolean
+                sort:
+                    type: integer
+                    format: int32
+        product.v1.UpdateBrandResponse:
+            type: object
+            properties:
+                brand:
+                    $ref: '#/components/schemas/product.v1.Brand'
+        product.v1.UpdateCategoryRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                iconUrl:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                visible:
+                    type: boolean
+                attributeTemplateId:
+                    type: string
+        product.v1.UpdateCategoryResponse:
+            type: object
+            properties:
+                category:
+                    $ref: '#/components/schemas/product.v1.Category'
+        product.v1.UpdateProductRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                categoryId:
+                    type: string
+                brandId:
+                    type: string
+                name:
+                    type: string
+                subtitle:
+                    type: string
+                keywords:
+                    type: string
+                unit:
+                    type: string
+                weightGram:
+                    type: integer
+                    format: int32
+                images:
+                    type: array
+                    items:
+                        type: string
+                detailHtml:
+                    type: string
+                skus:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.SkuInput'
+                params:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/product.v1.ProductParam'
+        product.v1.UpdateProductResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        product.v1.UpdateRecommendationRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                slot:
+                    type: string
+                productId:
+                    type: string
+                sort:
+                    type: integer
+                    format: int32
+                startAtUnix:
+                    type: string
+                endAtUnix:
+                    type: string
+        product.v1.UpdateRecommendationResponse:
+            type: object
+            properties:
+                recommendation:
+                    $ref: '#/components/schemas/product.v1.Recommendation'
+        product.v1.UpdateSkuPriceRequest:
+            type: object
+            properties:
+                productId:
+                    type: string
+                skuId:
+                    type: string
+                price:
+                    type: string
+        product.v1.UpdateSkuPriceResponse:
+            type: object
+            properties:
+                product:
+                    $ref: '#/components/schemas/product.v1.Product'
+        user.v1.Address:
+            type: object
+            properties:
+                id:
+                    type: string
+                receiver:
+                    type: string
+                phone:
+                    type: string
+                province:
+                    type: string
+                city:
+                    type: string
+                district:
+                    type: string
+                detail:
+                    type: string
+                isDefault:
+                    type: boolean
+        user.v1.CreateAddressRequest:
+            type: object
+            properties:
+                receiver:
+                    type: string
+                phone:
+                    type: string
+                province:
+                    type: string
+                city:
+                    type: string
+                district:
+                    type: string
+                detail:
+                    type: string
+        user.v1.CreateAddressResponse:
+            type: object
+            properties:
+                address:
+                    $ref: '#/components/schemas/user.v1.Address'
+        user.v1.DeleteAddressResponse:
+            type: object
+            properties: {}
+        user.v1.GetMeResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/user.v1.User'
         user.v1.GetUserResponse:
             type: object
             properties:
                 user:
                     $ref: '#/components/schemas/user.v1.User'
+        user.v1.ListAddressesResponse:
+            type: object
+            properties:
+                addresses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/user.v1.Address'
         user.v1.LoginRequest:
             required:
                 - phone
@@ -107,6 +3064,38 @@ components:
                     type: string
                 user:
                     $ref: '#/components/schemas/user.v1.User'
+        user.v1.SetDefaultAddressRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+        user.v1.SetDefaultAddressResponse:
+            type: object
+            properties:
+                address:
+                    $ref: '#/components/schemas/user.v1.Address'
+        user.v1.UpdateAddressRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                receiver:
+                    type: string
+                phone:
+                    type: string
+                province:
+                    type: string
+                city:
+                    type: string
+                district:
+                    type: string
+                detail:
+                    type: string
+        user.v1.UpdateAddressResponse:
+            type: object
+            properties:
+                address:
+                    $ref: '#/components/schemas/user.v1.Address'
         user.v1.User:
             type: object
             properties:
@@ -128,4 +3117,19 @@ components:
                     type: string
                     format: date-time
 tags:
+    - name: AddressService
+    - name: AdminUserService
+    - name: AttributeService
+    - name: BrandService
+    - name: BrowseHistoryService
+    - name: CartService
+    - name: CategoryService
+    - name: FavoriteService
+    - name: NotificationService
+    - name: OrderService
+    - name: PaymentService
+    - name: ProductService
+    - name: RecommendationService
+    - name: ReviewService
+    - name: StockService
     - name: UserService

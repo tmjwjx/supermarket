@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+import "product/v1/types.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service FavoriteService {
+  rpc AddFavorite(AddFavoriteRequest) returns (AddFavoriteResponse) {
+    option (google.api.http) = {
+      post: "/v1/favorites"
+      body: "*"
+    };
+  }
+  rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse) {
+    option (google.api.http) = {delete: "/v1/favorites/{product_id}"};
+  }
+  rpc ListFavorites(ListFavoritesRequest) returns (ListFavoritesResponse) {
+    option (google.api.http) = {get: "/v1/favorites"};
+  }
+}
+
+message Favorite {
+  string product_id = 1;
+  ProductCard product = 2;
+  bool invalid = 3;
+}
+message AddFavoriteRequest { string product_id = 1; }
+message AddFavoriteResponse {}
+message RemoveFavoriteRequest { string product_id = 1; }
+message RemoveFavoriteResponse {}
+message ListFavoritesRequest {}
+message ListFavoritesResponse { repeated Favorite favorites = 1; }

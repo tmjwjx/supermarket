@@ -17,11 +17,13 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
+const OperationUserServiceGetMe = "/user.v1.UserService/GetMe"
 const OperationUserServiceGetUser = "/user.v1.UserService/GetUser"
 const OperationUserServiceLogin = "/user.v1.UserService/Login"
 const OperationUserServiceRegister = "/user.v1.UserService/Register"
 
 type UserServiceHTTPServer interface {
+	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
@@ -32,6 +34,7 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.Handle("POST", "/v1/users/register", _UserService_Register0_HTTP_Handler(srv))
 	r.Handle("POST", "/v1/users/login", _UserService_Login0_HTTP_Handler(srv))
 	r.Handle("GET", "/v1/users/{id}", _UserService_GetUser0_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/users/me", _UserService_GetMe0_HTTP_Handler(srv))
 }
 
 func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -94,7 +97,27 @@ func _UserService_GetUser0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http
 	}
 }
 
+func _UserService_GetMe0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetMe)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMe(ctx, req.(*GetMeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
+	GetMe(ctx context.Context, req *GetMeRequest, opts ...http.CallOption) (rsp *GetMeResponse, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserResponse, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *RegisterResponse, err error)
@@ -106,6 +129,22 @@ type UserServiceHTTPClientImpl struct {
 
 func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 	return &UserServiceHTTPClientImpl{client}
+}
+
+func (c *UserServiceHTTPClientImpl) GetMe(ctx context.Context, in *GetMeRequest, opts ...http.CallOption) (*GetMeResponse, error) {
+	var out GetMeResponse
+	pattern := "/v1/users/me"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationUserServiceGetMe),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserResponse, error) {

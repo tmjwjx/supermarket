@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/tmjwjx/supermarket/api/product/v1;v1";
+
+service AttributeService {
+  rpc CreateAttributeTemplate(CreateAttributeTemplateRequest) returns (CreateAttributeTemplateResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/attribute-templates"
+      body: "*"
+    };
+  }
+  rpc DeleteAttributeTemplate(DeleteAttributeTemplateRequest) returns (DeleteAttributeTemplateResponse) {
+    option (google.api.http) = {delete: "/v1/admin/attribute-templates/{id}"};
+  }
+  rpc ListAttributeTemplates(ListAttributeTemplatesRequest) returns (ListAttributeTemplatesResponse) {
+    option (google.api.http) = {get: "/v1/admin/attribute-templates"};
+  }
+  rpc CreateAttribute(CreateAttributeRequest) returns (CreateAttributeResponse) {
+    option (google.api.http) = {
+      post: "/v1/admin/attribute-templates/{template_id}/attributes"
+      body: "*"
+    };
+  }
+  rpc UpdateAttribute(UpdateAttributeRequest) returns (UpdateAttributeResponse) {
+    option (google.api.http) = {patch: "/v1/admin/attributes/{id}" body: "*"};
+  }
+  rpc DeleteAttribute(DeleteAttributeRequest) returns (DeleteAttributeResponse) {
+    option (google.api.http) = {delete: "/v1/admin/attributes/{id}"};
+  }
+  rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse) {
+    option (google.api.http) = {get: "/v1/admin/attribute-templates/{template_id}/attributes"};
+  }
+}
+
+message AttributeTemplate {
+  string id = 1;
+  string name = 2;
+}
+
+message Attribute {
+  string id = 1;
+  string template_id = 2;
+  string name = 3;
+  int32 kind = 4;
+  repeated string options = 5;
+  bool allow_custom = 6;
+  int32 sort = 7;
+}
+
+message CreateAttributeTemplateRequest { string name = 1; }
+message CreateAttributeTemplateResponse { AttributeTemplate template = 1; }
+message DeleteAttributeTemplateRequest { string id = 1; }
+message DeleteAttributeTemplateResponse {}
+message ListAttributeTemplatesRequest {}
+message ListAttributeTemplatesResponse { repeated AttributeTemplate templates = 1; }
+
+message CreateAttributeRequest {
+  string template_id = 1;
+  string name = 2;
+  int32 kind = 3;
+  repeated string options = 4;
+  bool allow_custom = 5;
+  int32 sort = 6;
+}
+message CreateAttributeResponse { Attribute attribute = 1; }
+message UpdateAttributeRequest {
+  string id = 1;
+  optional string name = 2;
+  optional int32 kind = 3;
+  repeated string options = 4;
+  optional bool allow_custom = 5;
+  optional int32 sort = 6;
+  bool clear_options = 7;
+}
+message UpdateAttributeResponse { Attribute attribute = 1; }
+message DeleteAttributeRequest { string id = 1; }
+message DeleteAttributeResponse {}
+message ListAttributesRequest { string template_id = 1; }
+message ListAttributesResponse { repeated Attribute attributes = 1; }

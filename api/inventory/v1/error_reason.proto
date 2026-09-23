@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+option go_package = "github.com/tmjwjx/supermarket/api/inventory/v1;v1";
+
+enum ErrorReason {
+  INVENTORY_UNSPECIFIED = 0;
+  STOCK_NOT_FOUND = 1;
+  STOCK_INSUFFICIENT = 2;
+  STOCK_INVALID_ARGUMENT = 3;
+  RESERVATION_NOT_FOUND = 4;
+  RESERVATION_STATUS_CONFLICT = 5;
+}
