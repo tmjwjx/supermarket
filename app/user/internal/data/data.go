@@ -15,7 +15,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewDB, datauser.NewUserRepo)
+var ProviderSet = wire.NewSet(NewData, NewDB, datauser.NewUserRepo, datauser.NewAddressRepo)
 
 // NewDB 把共享连接交给资源仓库；仓库包不能引回 data，否则和 ProviderSet 循环引用。
 func NewDB(d *Data) *gorm.DB { return d.db }
@@ -48,7 +48,7 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	// apply schema changes as a separate reviewed step instead.
 	// TODO: register one model list per resource as the domain grows.
 	if c.Database.AutoMigrate {
-		if err := db.AutoMigrate(&datauser.User{}); err != nil {
+		if err := db.AutoMigrate(&datauser.User{}, &datauser.Address{}); err != nil {
 			sqlDB.Close()
 			return nil, nil, err
 		}

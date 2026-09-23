@@ -22,6 +22,7 @@ var (
 	ErrUserPhoneAlreadyExists = kerrors.Conflict(v1.ErrorReason_USER_PHONE_ALREADY_EXISTS.String(), "phone already exists")
 	ErrUserInvalidCredentials = kerrors.Unauthorized(v1.ErrorReason_USER_INVALID_CREDENTIALS.String(), "invalid credentials")
 	ErrUserDisabled           = kerrors.Forbidden(v1.ErrorReason_USER_DISABLED.String(), "user disabled")
+	ErrUserForbidden          = kerrors.Forbidden(v1.ErrorReason_USER_FORBIDDEN.String(), "forbidden")
 )
 
 // 大陆 11 位手机号：1 开头后跟 10 位数字

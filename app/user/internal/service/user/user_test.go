@@ -9,6 +9,7 @@ import (
 	bizuser "github.com/tmjwjx/supermarket/app/user/internal/biz/user"
 
 	kratoserrors "github.com/go-kratos/kratos/v3/errors"
+	kmetadata "github.com/go-kratos/kratos/v3/metadata"
 	"github.com/google/uuid"
 )
 
@@ -104,7 +105,7 @@ func TestUserServiceRegisterLoginGetUser(t *testing.T) {
 		t.Fatalf("Login() user = %+v", loggedIn.GetUser())
 	}
 
-	got, err := svc.GetUser(ctx, &v1.GetUserRequest{Id: user.ID.String()})
+	got, err := svc.GetUser(asCaller(ctx, user.ID), &v1.GetUserRequest{Id: user.ID.String()})
 	if err != nil {
 		t.Fatalf("GetUser() error = %v", err)
 	}
@@ -137,6 +138,12 @@ func TestUserServiceLoginBadPassword(t *testing.T) {
 	}
 }
 
+func asCaller(ctx context.Context, id uuid.UUID) context.Context {
+	return kmetadata.NewServerContext(ctx, kmetadata.New(map[string][]string{
+		"x-md-global-user-id": {id.String()},
+	}))
+}
+
 func TestUserServiceGetUserNotFound(t *testing.T) {
 	ctx := context.Background()
 	svc := &UserService{uc: &fakeUserUsecase{
@@ -144,7 +151,8 @@ func TestUserServiceGetUserNotFound(t *testing.T) {
 			return nil, bizuser.ErrUserNotFound
 		},
 	}}
-	if _, err := svc.GetUser(ctx, &v1.GetUserRequest{Id: uuid.Must(uuid.NewV7()).String()}); !kratoserrors.IsNotFound(err) {
+	missing := uuid.Must(uuid.NewV7())
+	if _, err := svc.GetUser(asCaller(ctx, missing), &v1.GetUserRequest{Id: missing.String()}); !kratoserrors.IsNotFound(err) {
 		t.Fatalf("GetUser(missing) error = %v, want not found", err)
 	}
 }

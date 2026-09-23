@@ -8,7 +8,7 @@ server:
 data:
   database:
     driver: mysql
-    source: ${DATABASE_SOURCE:root:root@tcp(127.0.0.1:3306)/dev?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4}
+    source: ${USER_DATABASE_SOURCE:root:root@tcp(127.0.0.1:3306)/user?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4}
     # Development conveniences. Keep both false in production and apply schema
     # changes as a separate reviewed step.
     debug: true

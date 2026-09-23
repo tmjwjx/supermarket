@@ -7,6 +7,7 @@ import (
 	v1 "github.com/tmjwjx/supermarket/api/user/v1"
 	bizuser "github.com/tmjwjx/supermarket/app/user/internal/biz/user"
 
+	kmetadata "github.com/go-kratos/kratos/v3/metadata"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -77,11 +78,38 @@ func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.
 	if err != nil {
 		return nil, err
 	}
+	caller, err := callerID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if caller != id {
+		return nil, bizuser.ErrUserForbidden
+	}
 	user, err := s.uc.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return &v1.GetUserResponse{User: convertUserReply(user)}, nil
+}
+
+func (s *UserService) GetMe(ctx context.Context, _ *v1.GetMeRequest) (*v1.GetMeResponse, error) {
+	caller, err := callerID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.uc.GetUser(ctx, caller)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.GetMeResponse{User: convertUserReply(user)}, nil
+}
+
+func callerID(ctx context.Context) (uuid.UUID, error) {
+	md, ok := kmetadata.FromServerContext(ctx)
+	if !ok {
+		return uuid.Nil, bizuser.ErrUserInvalidCredentials
+	}
+	return parseUserID(md.Get("x-md-global-user-id"))
 }
 
 // 解析用户 id

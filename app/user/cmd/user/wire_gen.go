@@ -33,8 +33,11 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	userRepo := user.NewUserRepo(db)
 	userUsecase := user2.NewUserUsecase(userRepo, auth)
 	userService := user3.NewUserService(userUsecase)
-	grpcServer := server.NewGRPCServer(confServer, userService)
-	httpServer := server.NewHTTPServer(confServer, userService)
+	addressRepo := user.NewAddressRepo(db)
+	addressUsecase := user2.NewAddressUsecase(addressRepo)
+	addressService := user3.NewAddressService(addressUsecase)
+	grpcServer := server.NewGRPCServer(confServer, userService, addressService)
+	httpServer := server.NewHTTPServer(confServer, auth, userService, addressService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
