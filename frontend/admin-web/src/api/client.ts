@@ -1,10 +1,14 @@
-// 只请求 gateway 开发时 Vite 把 /v1 代理到 127.0.0.1:8080
+import { clearSession, loadToken } from '../session/index.ts'
+
 const apiBase = import.meta.env.VITE_API_BASE ?? ''
 
-export async function send(path: string, init: RequestInit): Promise<unknown> {
+export async function send(path: string, init: RequestInit = {}): Promise<unknown> {
+  const headers = new Headers(init.headers)
+  const token = loadToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
   let res: Response
   try {
-    res = await fetch(`${apiBase}${path}`, init)
+    res = await fetch(`${apiBase}${path}`, { ...init, headers })
   } catch {
     throw new Error('连不上网关')
   }
@@ -15,6 +19,13 @@ export async function send(path: string, init: RequestInit): Promise<unknown> {
       body = JSON.parse(text) as unknown
     } catch {
       body = text
+    }
+  }
+  if (res.status === 401) {
+    clearSession()
+    if (window.location.pathname !== '/login') {
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.assign(`/login?from=${encodeURIComponent(next)}`)
     }
   }
   if (!res.ok) throw new Error(messageOf(body, res.status))

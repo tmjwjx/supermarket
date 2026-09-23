@@ -7,6 +7,8 @@ body {
 
 nav {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 1rem;
   padding: 0.75rem 1.25rem;
   background: #fff;
@@ -22,8 +24,12 @@ nav a.active {
   font-weight: 700;
 }
 
+nav button {
+  margin-top: 0;
+}
+
 main {
-  max-width: 24rem;
+  max-width: 76rem;
   margin: 1.5rem auto;
   padding: 1.25rem;
   background: #fff;
@@ -31,8 +37,13 @@ main {
 }
 
 h1 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
   font-size: 1.25rem;
+}
+
+h2 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
 }
 
 label {
@@ -41,23 +52,178 @@ label {
   font-size: 0.9rem;
 }
 
-input {
+input,
+select,
+textarea {
   display: block;
   width: 100%;
   box-sizing: border-box;
   margin-top: 0.25rem;
-  padding: 0.45rem 0.5rem;
+  padding: 0.4rem 0.5rem;
   font: inherit;
+}
+
+input[type='checkbox'] {
+  display: inline-block;
+  width: auto;
+  margin: 0 0.35rem 0 0;
+  vertical-align: middle;
+}
+
+textarea {
+  min-height: 10rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
 }
 
 button {
   margin-top: 1rem;
-  padding: 0.45rem 0.9rem;
+  padding: 0.4rem 0.8rem;
   font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button.danger {
+  color: #b91c1c;
 }
 
 .message {
   margin-top: 1rem;
+}
+
+.message.error {
+  color: #b91c1c;
+}
+
+.hint {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.warn {
+  padding: 0.5rem 0.75rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.row > label {
+  flex: 1 1 10rem;
+}
+
+.row > label.check {
+  flex: 0 0 auto;
+}
+
+.row button,
+td button,
+.actions button {
+  margin-top: 0.25rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.actions input {
+  display: inline-block;
+  width: 10rem;
+  margin-top: 0.25rem;
+}
+
+table {
+  width: 100%;
+  margin-top: 0.75rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+td input,
+td select {
+  margin-top: 0;
+}
+
+tr.child td:first-child {
+  padding-left: 1.75rem;
+}
+
+tr.muted {
+  color: #9ca3af;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0 0.4rem;
+  border-radius: 0.25rem;
+  background: #e5e7eb;
+  font-size: 0.8rem;
+}
+
+.tag.on {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag.off {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.steps {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.steps button {
+  margin-top: 0;
+}
+
+.steps button.current {
+  font-weight: 700;
+  border-color: #1d4ed8;
+}
+
+fieldset {
+  margin: 0.75rem 0 0;
+  border: 1px solid #e5e7eb;
+}
+
+fieldset:disabled {
+  opacity: 0.6;
+}
+
+iframe.preview {
+  width: 100%;
+  height: 16rem;
+  margin-top: 0.5rem;
+  border: 1px solid #e5e7eb;
 }
 
 pre {
