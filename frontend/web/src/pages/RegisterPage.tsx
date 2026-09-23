@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { readAccessToken, readUserId, register } from '../api/user.ts'
-import { saveToken, saveUserId } from '../session/index.ts'
+import { safeFrom, saveToken, saveUserId } from '../session/index.ts'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [nickname, setNickname] = useState('')
@@ -21,7 +22,7 @@ export default function RegisterPage() {
       saveUserId(readUserId(body))
       if (token) {
         saveToken(token)
-        navigate('/me')
+        navigate(safeFrom(params.get('from')))
         return
       }
       setMessage('注册成功')

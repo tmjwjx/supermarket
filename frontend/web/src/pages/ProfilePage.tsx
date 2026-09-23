@@ -1,80 +1,52 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getUser, readProfile, type Profile } from '../api/user.ts'
-import { clearSession, loadToken, loadUserId, saveUserId } from '../session/index.ts'
+import { listAddresses, readAddresses, setDefaultAddress, type Address } from '../api/address.ts'
+import { getMe, readProfile, type Profile } from '../api/user.ts'
+import { clearSession } from '../session/index.ts'
 
 export default function ProfilePage() {
-  const [id, setId] = useState(() => loadUserId())
-  const [loggedIn, setLoggedIn] = useState(() => loadToken() !== '')
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [addresses, setAddresses] = useState<Address[]>([])
   const [message, setMessage] = useState('')
   const [failed, setFailed] = useState(false)
 
-  const loadMine = useCallback(async (userId: string) => {
-    const token = loadToken()
-    setLoggedIn(token !== '')
-    setMessage('')
-    setFailed(false)
-    if (!token) {
-      setProfile(null)
-      setFailed(true)
-      setMessage('请先登录')
-      return
-    }
-    if (!userId) {
-      setProfile(null)
-      setFailed(true)
-      setMessage('登录或注册后会带上会员编号')
-      return
-    }
-    try {
-      const body = await getUser(userId, token)
-      const next = readProfile(body)
-      if (!next) {
-        setProfile(null)
+  useEffect(() => {
+    let gone = false
+    getMe()
+      .then((body) => {
+        if (gone) return
+        const next = readProfile(body)
+        if (!next) {
+          setFailed(true)
+          setMessage('没有读到资料')
+          return
+        }
+        setProfile(next)
+        listAddresses()
+          .then((body) => {
+            if (!gone) setAddresses(readAddresses(body))
+          })
+          .catch(() => {})
+      })
+      .catch((err: unknown) => {
+        if (gone) return
         setFailed(true)
-        setMessage('没有读到资料')
-        return
-      }
-      setProfile(next)
-      if (next.id) saveUserId(next.id)
-    } catch (err) {
-      setProfile(null)
-      setFailed(true)
-      setMessage(err instanceof Error ? err.message : '查询失败')
+        setMessage(err instanceof Error ? err.message : '查询失败')
+      })
+    return () => {
+      gone = true
     }
   }, [])
 
-  useEffect(() => {
-    const userId = loadUserId()
-    if (userId && loadToken()) void loadMine(userId)
-  }, [loadMine])
-
-  function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    void loadMine(id.trim())
-  }
-
   function onSignOut() {
     clearSession()
-    setLoggedIn(false)
-    setProfile(null)
-    setId('')
-    setFailed(false)
-    setMessage('已退出')
+    window.location.assign('/login')
   }
 
   return (
-    <form className="slip" onSubmit={onSubmit}>
+    <section className="slip">
       <h1>我的资料</h1>
-      <p className="lead">{loggedIn ? '这是你在店里的会员资料' : '登录后查看自己的资料'}</p>
-      <label>
-        会员编号
-        <input value={id} onChange={(e) => setId(e.target.value)} name="id" autoComplete="off" required />
-      </label>
-      <button className="primary" type="submit">
-        查看我的资料
-      </button>
+      <p className="lead">这是你在店里的会员资料</p>
       {profile ? (
         <dl className="card">
           {profile.avatarUrl ? <img className="avatar" src={profile.avatarUrl} alt="头像" /> : null}
@@ -98,8 +70,40 @@ export default function ProfilePage() {
           ) : null}
         </dl>
       ) : null}
+      {addresses.length ? (
+        <ul>
+          {addresses.map((item) => (
+            <li key={item.id}>
+              {item.receiver} {item.phone} {item.province}{item.city}{item.district}{item.detail}
+              {item.isDefault ? ' 默认' : ''}
+              {item.isDefault ? null : (
+                <button
+                  className="quiet"
+                  type="button"
+                  onClick={() => {
+                    setDefaultAddress(item.id)
+                      .then(() => listAddresses())
+                      .then((body) => setAddresses(readAddresses(body)))
+                      .catch((err: unknown) => {
+                        setFailed(true)
+                        setMessage(err instanceof Error ? err.message : '没设成默认')
+                      })
+                  }}
+                >
+                  设为默认
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {profile ? (
+        <p className="switch">
+          <Link to="/addresses">管理收货地址</Link>
+        </p>
+      ) : null}
       {message ? <p className={failed ? 'note bad' : 'note'}>{message}</p> : null}
-      {loggedIn ? (
+      {profile ? (
         <button className="quiet" type="button" onClick={onSignOut}>
           退出
         </button>
@@ -108,6 +112,6 @@ export default function ProfilePage() {
           <Link to="/login">去登录</Link>
         </p>
       )}
-    </form>
+    </section>
   )
 }

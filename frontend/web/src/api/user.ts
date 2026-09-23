@@ -59,10 +59,12 @@ export function login(input: { phone: string; password: string }) {
   })
 }
 
-export function getUser(id: string, token: string) {
-  const headers: Record<string, string> = {}
-  if (token) headers.Authorization = `Bearer ${token}`
-  return send(`/v1/users/${encodeURIComponent(id)}`, { headers })
+export function getMe() {
+  return send('/v1/users/me', {})
+}
+
+export function getUser(id: string) {
+  return send(`/v1/users/${encodeURIComponent(id)}`, {})
 }
 
 function unwrapUser(body: unknown): Record<string, unknown> | null {

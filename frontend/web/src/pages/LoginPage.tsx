@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { login, readAccessToken, readUserId } from '../api/user.ts'
-import { saveToken, saveUserId } from '../session/index.ts'
+import { safeFrom, saveToken, saveUserId } from '../session/index.ts'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -24,7 +25,7 @@ export default function LoginPage() {
       }
       saveToken(token)
       saveUserId(readUserId(body))
-      navigate('/me')
+      navigate(safeFrom(params.get('from')))
     } catch (err) {
       setFailed(true)
       setMessage(err instanceof Error ? err.message : '登录失败')
