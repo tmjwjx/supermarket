@@ -8,8 +8,12 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
+	stock2 "github.com/tmjwjx/supermarket/app/inventory/internal/biz/stock"
 	"github.com/tmjwjx/supermarket/app/inventory/internal/conf"
+	"github.com/tmjwjx/supermarket/app/inventory/internal/data"
+	"github.com/tmjwjx/supermarket/app/inventory/internal/data/stock"
 	"github.com/tmjwjx/supermarket/app/inventory/internal/server"
+	stock3 "github.com/tmjwjx/supermarket/app/inventory/internal/service/stock"
 	"log/slog"
 )
 
@@ -19,10 +23,23 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, logger *slog.Logger) (*kratos.App, func(), error) {
-	grpcServer := server.NewGRPCServer(confServer)
-	httpServer := server.NewHTTPServer(confServer)
-	app := newApp(logger, grpcServer, httpServer)
+func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	db := data.NewDB(dataData)
+	stockRepo := stock.NewStockRepo(db)
+	stockUsecase := stock2.NewStockUsecase(stockRepo)
+	stockService := stock3.NewStockService(stockUsecase)
+	grpcServer := server.NewGRPCServer(confServer, stockService)
+	httpServer := server.NewHTTPServer(confServer, auth, stockService)
+	sweeper, cleanup2 := stock2.NewSweeper(stockUsecase)
+	streams, cleanup3 := stock2.NewStreams(stockUsecase)
+	app := newApp(logger, grpcServer, httpServer, sweeper, streams)
 	return app, func() {
+		cleanup3()
+		cleanup2()
+		cleanup()
 	}, nil
 }

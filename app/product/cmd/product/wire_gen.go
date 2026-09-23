@@ -8,8 +8,36 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
+	"github.com/tmjwjx/supermarket/app/product/internal/biz"
+	attribute2 "github.com/tmjwjx/supermarket/app/product/internal/biz/attribute"
+	brand2 "github.com/tmjwjx/supermarket/app/product/internal/biz/brand"
+	browse2 "github.com/tmjwjx/supermarket/app/product/internal/biz/browse"
+	category2 "github.com/tmjwjx/supermarket/app/product/internal/biz/category"
+	favorite2 "github.com/tmjwjx/supermarket/app/product/internal/biz/favorite"
+	product3 "github.com/tmjwjx/supermarket/app/product/internal/biz/product"
+	recommendation2 "github.com/tmjwjx/supermarket/app/product/internal/biz/recommendation"
+	review2 "github.com/tmjwjx/supermarket/app/product/internal/biz/review"
+	"github.com/tmjwjx/supermarket/app/product/internal/client"
 	"github.com/tmjwjx/supermarket/app/product/internal/conf"
+	"github.com/tmjwjx/supermarket/app/product/internal/data"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/attribute"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/brand"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/browse"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/category"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/favorite"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/product"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/recommendation"
+	"github.com/tmjwjx/supermarket/app/product/internal/data/review"
 	"github.com/tmjwjx/supermarket/app/product/internal/server"
+	attribute3 "github.com/tmjwjx/supermarket/app/product/internal/service/attribute"
+	brand3 "github.com/tmjwjx/supermarket/app/product/internal/service/brand"
+	browse3 "github.com/tmjwjx/supermarket/app/product/internal/service/browse"
+	category3 "github.com/tmjwjx/supermarket/app/product/internal/service/category"
+	favorite3 "github.com/tmjwjx/supermarket/app/product/internal/service/favorite"
+	product2 "github.com/tmjwjx/supermarket/app/product/internal/service/product"
+	recommendation3 "github.com/tmjwjx/supermarket/app/product/internal/service/recommendation"
+	review3 "github.com/tmjwjx/supermarket/app/product/internal/service/review"
+	"github.com/tmjwjx/supermarket/pkg/kafkaout"
 	"log/slog"
 )
 
@@ -19,10 +47,70 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, logger *slog.Logger) (*kratos.App, func(), error) {
-	grpcServer := server.NewGRPCServer(confServer)
-	httpServer := server.NewHTTPServer(confServer)
-	app := newApp(logger, grpcServer, httpServer)
+func wireApp(confServer *conf.Server, confData *conf.Data, confClient *conf.Client, auth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	db := data.NewDB(dataData)
+	brandRepo := brand.NewBrandRepo(db)
+	brandUsecase := brand2.NewBrandUsecase(brandRepo)
+	brandService := brand3.NewBrandService(brandUsecase)
+	categoryRepo := category.NewCategoryRepo(db)
+	categoryUsecase := category2.NewCategoryUsecase(categoryRepo)
+	categoryService := category3.NewCategoryService(categoryUsecase)
+	redisClient := data.NewRedis(dataData)
+	productRepo := product.NewProductRepo(db, redisClient)
+	brandReader := biz.ProvideBrandReader(brandRepo)
+	categoryLookup := biz.ProvideCategoryLookup(categoryRepo)
+	browseRepo := browse.NewBrowseRepo(db)
+	browseTouch := biz.ProvideBrowseTouch(browseRepo)
+	templateRepo := attribute.NewTemplateRepo(db)
+	templateReader := biz.ProvideTemplateReader(templateRepo)
+	stockGate, cleanup2, err := client.NewStockGate(confClient)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	productUsecase := biz.ProvideProductUsecase(productRepo, brandReader, categoryLookup, browseTouch, templateReader, stockGate)
+	productService := product2.NewProductService(productUsecase)
+	recommendationRepo := recommendation.NewRecommendationRepo(db)
+	recommendationUsecase := recommendation2.NewRecommendationUsecase(recommendationRepo)
+	recommendationService := recommendation3.NewRecommendationService(recommendationUsecase)
+	favoriteRepo := favorite.NewFavoriteRepo(db)
+	favoriteUsecase := favorite2.NewFavoriteUsecase(favoriteRepo)
+	favoriteService := favorite3.NewFavoriteService(favoriteUsecase)
+	browseUsecase := browse2.NewBrowseUsecase(browseRepo)
+	browseHistoryService := browse3.NewBrowseHistoryService(browseUsecase)
+	reviewRepo := review.NewReviewRepo(db)
+	orderChecker, cleanup3, err := client.NewOrderChecker(confClient)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	profileReader, cleanup4, err := client.NewProfileReader(confClient)
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	reviewUsecase := review2.NewReviewUsecase(reviewRepo, orderChecker, profileReader)
+	reviewService := review3.NewReviewService(reviewUsecase)
+	categoryBind := biz.ProvideCategoryBind(categoryRepo)
+	attributeUsecase := attribute2.NewAttributeUsecase(templateRepo, categoryBind)
+	attributeService := attribute3.NewAttributeService(attributeUsecase)
+	grpcServer := server.NewGRPCServer(confServer, brandService, categoryService, productService, recommendationService, favoriteService, browseHistoryService, reviewService, attributeService)
+	httpServer := server.NewHTTPServer(confServer, auth, brandService, categoryService, productService, recommendationService, favoriteService, browseHistoryService, reviewService, attributeService)
+	store := kafkaout.NewStore(db)
+	streams, cleanup5 := product3.NewStreams(store, productUsecase)
+	app := newApp(logger, grpcServer, httpServer, streams)
 	return app, func() {
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
 	}, nil
 }
