@@ -5,7 +5,10 @@ import (
 	"log/slog"
 	"os"
 
+	bizpayment "github.com/tmjwjx/supermarket/app/payment/internal/biz/payment"
 	"github.com/tmjwjx/supermarket/app/payment/internal/conf"
+	"github.com/tmjwjx/supermarket/pkg/secretcheck"
+	"github.com/tmjwjx/supermarket/pkg/trace"
 
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3"
@@ -31,7 +34,7 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server, _ *bizpayment.RetryLoop, _ *bizpayment.ReconcileLoop, _ *bizpayment.Streams) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -47,6 +50,7 @@ func newApp(logger *slog.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 
 func main() {
 	flag.Parse()
+	defer trace.Setup()()
 	logger := log.NewLogger(
 		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			AddSource: true,
@@ -62,7 +66,7 @@ func main() {
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
-			env.NewSource("KRATOS"),
+			env.NewSource(),
 		),
 	)
 	defer c.Close()
@@ -75,8 +79,15 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+	if err := secretcheck.Check(
+		secretcheck.Key{Name: "AUTH_JWT_SECRET", Value: bc.Auth.JWTSecret},
+		secretcheck.Key{Name: "ADMIN_JWT_SECRET", Value: bc.Auth.AdminJWTSecret},
+	); err != nil {
+		log.Error("invalid jwt secrets", "err", err)
+		os.Exit(1)
+	}
 
-	app, cleanup, err := wireApp(&bc.Server, logger)
+	app, cleanup, err := wireApp(&bc.Server, &bc.Data, &bc.Client, &bc.Payment, &bc.Auth, logger)
 	if err != nil {
 		panic(err)
 	}

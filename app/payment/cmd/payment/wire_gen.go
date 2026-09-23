@@ -8,8 +8,14 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
+	payment2 "github.com/tmjwjx/supermarket/app/payment/internal/biz/payment"
+	"github.com/tmjwjx/supermarket/app/payment/internal/client"
 	"github.com/tmjwjx/supermarket/app/payment/internal/conf"
+	"github.com/tmjwjx/supermarket/app/payment/internal/data"
+	"github.com/tmjwjx/supermarket/app/payment/internal/data/payment"
 	"github.com/tmjwjx/supermarket/app/payment/internal/server"
+	payment3 "github.com/tmjwjx/supermarket/app/payment/internal/service/payment"
+	"github.com/tmjwjx/supermarket/pkg/kafkaout"
 	"log/slog"
 )
 
@@ -19,10 +25,32 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, logger *slog.Logger) (*kratos.App, func(), error) {
-	grpcServer := server.NewGRPCServer(confServer)
-	httpServer := server.NewHTTPServer(confServer)
-	app := newApp(logger, grpcServer, httpServer)
+func wireApp(confServer *conf.Server, confData *conf.Data, confClient *conf.Client, confPayment *conf.Payment, auth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	db := data.NewDB(dataData)
+	paymentRepo := payment.NewPaymentRepo(db)
+	orderClient, cleanup2, err := client.NewOrderClient(confClient)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	paymentUsecase := payment2.NewPaymentUsecase(paymentRepo, orderClient, confPayment, logger)
+	paymentService := payment3.NewPaymentService(paymentUsecase)
+	grpcServer := server.NewGRPCServer(confServer, paymentService)
+	httpServer := server.NewHTTPServer(confServer, auth, paymentService)
+	retryLoop, cleanup3 := payment2.NewRetryLoop(paymentUsecase, logger)
+	reconcileLoop, cleanup4 := payment2.NewReconcileLoop(paymentUsecase, logger)
+	store := kafkaout.NewStore(db)
+	streams, cleanup5 := payment2.NewStreams(store)
+	app := newApp(logger, grpcServer, httpServer, retryLoop, reconcileLoop, streams)
 	return app, func() {
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
 	}, nil
 }

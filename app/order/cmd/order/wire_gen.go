@@ -8,8 +8,18 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
+	"github.com/tmjwjx/supermarket/app/order/internal/biz"
+	cart2 "github.com/tmjwjx/supermarket/app/order/internal/biz/cart"
+	order2 "github.com/tmjwjx/supermarket/app/order/internal/biz/order"
+	"github.com/tmjwjx/supermarket/app/order/internal/client"
 	"github.com/tmjwjx/supermarket/app/order/internal/conf"
+	"github.com/tmjwjx/supermarket/app/order/internal/data"
+	"github.com/tmjwjx/supermarket/app/order/internal/data/cart"
+	"github.com/tmjwjx/supermarket/app/order/internal/data/order"
 	"github.com/tmjwjx/supermarket/app/order/internal/server"
+	cart3 "github.com/tmjwjx/supermarket/app/order/internal/service/cart"
+	order3 "github.com/tmjwjx/supermarket/app/order/internal/service/order"
+	"github.com/tmjwjx/supermarket/pkg/kafkaout"
 	"log/slog"
 )
 
@@ -19,10 +29,54 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, logger *slog.Logger) (*kratos.App, func(), error) {
-	grpcServer := server.NewGRPCServer(confServer)
-	httpServer := server.NewHTTPServer(confServer)
-	app := newApp(logger, grpcServer, httpServer)
+func wireApp(confServer *conf.Server, confData *conf.Data, confClient *conf.Client, auth *conf.Auth, logger *slog.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	db := data.NewDB(dataData)
+	cartRepo := cart.NewCartRepo(db)
+	productAPI, cleanup2, err := client.NewProductAPI(confClient)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	productGateway := client.NewCartProducts(productAPI)
+	inventoryAPI, cleanup3, err := client.NewInventoryAPI(confClient)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	stockGateway := client.NewCartStock(inventoryAPI)
+	cartUsecase := cart2.NewCartUsecase(cartRepo, productGateway, stockGateway)
+	cartService := cart3.NewCartService(cartUsecase)
+	orderRepo := order.NewOrderRepo(db)
+	catalog := client.NewOrderCatalog(productAPI)
+	stocker := client.NewOrderStock(inventoryAPI)
+	userAPI, cleanup4, err := client.NewUserAPI(confClient)
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	addresses := client.NewAddresses(userAPI)
+	cartCleaner := biz.NewCartCleaner(cartRepo)
+	orderUsecase := order2.NewOrderUsecase(orderRepo, catalog, stocker, addresses, cartCleaner)
+	orderService := order3.NewOrderService(orderUsecase)
+	grpcServer := server.NewGRPCServer(confServer, cartService, orderService)
+	httpServer := server.NewHTTPServer(confServer, auth, cartService, orderService)
+	sweeper, cleanup5 := order2.NewSweeper(orderUsecase)
+	store := kafkaout.NewStore(db)
+	streams, cleanup6 := order2.NewStreams(store)
+	app := newApp(logger, grpcServer, httpServer, sweeper, streams)
 	return app, func() {
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
 	}, nil
 }

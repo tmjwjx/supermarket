@@ -1,0 +1,16 @@
+server:
+  http:
+    addr: 0.0.0.0:8005
+    timeout_ms: 1000
+  grpc:
+    addr: 0.0.0.0:9005
+    timeout_ms: 1000
+data:
+  database:
+    driver: mysql
+    source: ${NOTIFICATION_DATABASE_SOURCE:root:root@tcp(127.0.0.1:3306)/notification?timeout=5s&parseTime=True&loc=Local&charset=utf8mb4}
+    debug: true
+    auto_migrate: true
+auth:
+  jwt_secret: ${AUTH_JWT_SECRET:change-me-local-jwt-secret}
+  admin_jwt_secret: ${ADMIN_JWT_SECRET:change-me-admin-jwt-secret}
